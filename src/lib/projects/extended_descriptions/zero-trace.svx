@@ -1,0 +1,51 @@
+# The Problem It Solves
+
+Decentralized communities face major issues when funding public goods:
+
+- **Whale Dominance**  
+  Token-based voting lets large holders control outcomes, drowning out small but genuine contributors.
+
+- **No Privacy**  
+  Votes and funding actions are publicly visible on-chain, exposing voter behavior and discouraging honest participation.
+
+- **Sybil Attacks**  
+  Anyone can create multiple wallets to gain unfair influence, breaking the idea of democratic decision-making.
+
+- **Poor Funding Signals**  
+  Communities lack a reliable way to identify projects with real grassroots support instead of concentrated backing.
+
+**ZeroTrace solves this by combining:**
+
+- **Quadratic Funding**: So many small contributions outweigh a few large ones.
+- **Zero-Knowledge Proofs**: To enable anonymous but verifiable voting.
+- **Sybil Resistance**: To enforce one-person-one-vote without revealing identity.
+
+**Result:**
+- Fair influence for every participant  
+- Fully private and unlinkable votes  
+- Funding goes to projects with real community support  
+
+---
+
+# Challenges We Ran Into
+
+- **Privacy vs Verifiability**  
+  Making votes anonymous while still preventing double voting required careful nullifier and ZK-proof handling.
+
+- **Sybil Resistance Without Identity Leakage**  
+  Ensuring one-human-one-vote without storing or exposing any Aadhaar or personal data on-chain.
+
+- **Quadratic Voting Complexity**  
+  Quadratic cost calculations are non-linear and gas-sensitive, requiring optimized smart contract and off-chain design.
+
+- **Preventing Spam Projects**  
+  Permissionless submissions needed stake-based rules, cooldowns, and caps without discouraging real builders.
+
+- **User Experience with ZK Tech**  
+  Hiding complex cryptography behind a simple “connect → vote” flow was a major UX challenge.
+
+- **Minimizing Centralization**  
+  Admin controls were necessary, but they had to be transparent, limited, and auditable on-chain.
+
+**In short:**  
+The hardest part wasn’t any single feature—it was making cryptography, economics, and usability work together in a system that is **private, fair, and practical**.
