@@ -18,7 +18,9 @@ import {
 	siPostgresql,
 	siCloudinary,
 	siTailwindcss,
-	siGooglegemini
+	siGooglegemini,
+	siWagmi,
+	siIpfs
 } from 'simple-icons';
 import type { Project } from './types';
 
@@ -195,6 +197,28 @@ export const projects: Project[] = [
 			},
 			{
 				githubUsername: 'kryyo1441'
+			}
+		]
+	},
+	{
+		featured: false,
+		id: 'zero-trace',
+		title: 'ZeroTrace',
+		hackathonId: 'genesis-2026',
+		videoLink: 'https://youtu.be/IQi4S4Cq8Fs',
+		deployedLink: 'https://zerotrace-seven.vercel.app',
+		githubLink: 'https://github.com/jaykerkar0405/ZeroTrace',
+		shortDescription: 'Decentralized quadratic funding, anon sybil-safe voting',
+		techStack: [siSolidity, siEthereum, siNextdotjs, siTypescript, siTailwindcss, siShadcnui, siWagmi, siIpfs],
+		teamMembers: [
+			{
+				githubUsername: 'jaykerkar0405'
+			},
+			{
+				githubUsername: 'Chirag8405'
+			},
+			{
+				githubUsername: 'chaitanyakelkar27'
 			}
 		]
 	}
