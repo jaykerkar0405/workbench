@@ -2,6 +2,10 @@ import { error } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { projects } from '$lib/projects';
 
+export function entries() {
+	return projects.map((project) => ({ id: project.id }));
+}
+
 export const load: PageLoad = async ({ params, data }) => {
 	const project = projects.find((p) => p.id === params.id);
 
