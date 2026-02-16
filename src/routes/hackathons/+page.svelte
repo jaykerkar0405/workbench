@@ -15,7 +15,7 @@
 	<meta name="description" content="My hackathon participations and achievements" />
 </svelte:head>
 
-{#if mounted}
+{#key mounted}
 	<main class="mx-auto max-w-7xl px-6 py-12 md:px-16 xl:px-6">
 		<div class="mb-12" in:fly={{ y: -20, duration: 600, delay: 0 }}>
 			<h1 class="mb-4 text-4xl font-bold tracking-tight">Hackathons</h1>
@@ -33,4 +33,4 @@
 			</Card>
 		</div>
 	</main>
-{/if}
+{/key}
