@@ -20,7 +20,7 @@
 
 <div class="container mx-auto max-w-7xl px-4 py-12">
 	{#if featuredProjects.length > 0}
-		{#if mounted}
+		{#key mounted}
 			<div in:fly={{ y: -20, duration: 600, delay: 0 }}>
 				<section class="mb-16">
 					<h2 class="mb-8 text-[1.6875rem] font-bold md:text-3xl">Featured Projects</h2>
@@ -32,11 +32,11 @@
 					</div>
 				</section>
 			</div>
-		{/if}
+		{/key}
 	{/if}
 
 	{#if otherProjects.length > 0}
-		{#if mounted}
+		{#key mounted}
 			<div in:fly={{ y: -20, duration: 600, delay: 150 }}>
 				<section class="mb-16">
 					<h2 class="mb-8 text-[1.6875rem] font-bold md:text-3xl">Other Projects</h2>
@@ -48,6 +48,6 @@
 					</div>
 				</section>
 			</div>
-		{/if}
+		{/key}
 	{/if}
 </div>

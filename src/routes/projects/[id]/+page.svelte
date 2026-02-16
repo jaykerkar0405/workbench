@@ -95,7 +95,7 @@
 	<meta name="description" content={project.shortDescription} />
 </svelte:head>
 
-{#if mounted}
+{#key mounted}
 	<div class="container mx-auto max-w-7xl px-4 py-12">
 		<div class="mb-8" in:fly={{ y: -20, duration: 600, delay: 0 }}>
 			<div class="flex flex-wrap items-start justify-between gap-4">
@@ -321,7 +321,7 @@
 			</div>
 		</div>
 	</div>
-{/if}
+{/key}
 
 {#if selectedImageIndex !== null}
 	<div
