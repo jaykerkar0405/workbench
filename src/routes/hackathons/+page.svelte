@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { hackathons } from '$lib/hackathons';
+	import HackathonCard from '$lib/components/hackathon-card.svelte';
 
 	let mounted = $state(false);
 
@@ -11,26 +12,21 @@
 </script>
 
 <svelte:head>
-	<title>Hackathons | Jay Kerkar</title>
-	<meta name="description" content="My hackathon participations and achievements" />
+	<title>Hackathons | Jay Kerkar | Full-Stack Developer - Web, Mobile & Web3 Solutions</title>
 </svelte:head>
 
-{#key mounted}
-	<main class="mx-auto max-w-7xl px-6 py-12 md:px-16 xl:px-6">
-		<div class="mb-12" in:fly={{ y: -20, duration: 600, delay: 0 }}>
-			<h1 class="mb-4 text-4xl font-bold tracking-tight">Hackathons</h1>
-			<p class="text-lg text-muted-foreground">My journey through various hackathons and competitive coding events</p>
-		</div>
+<div class="container mx-auto max-w-7xl px-4 py-12">
+	{#key mounted}
+		<div in:fly={{ y: -20, duration: 600, delay: 0 }}>
+			<section class="mb-16">
+				<h2 class="mb-8 text-[1.6875rem] font-bold md:text-3xl">Hackathons</h2>
 
-		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" in:fly={{ y: -20, duration: 600, delay: 150 }}>
-			<Card>
-				<CardHeader>
-					<CardTitle>Hackathon Coming Soon</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<p class="text-muted-foreground">Check back soon for hackathon updates</p>
-				</CardContent>
-			</Card>
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{#each hackathons as hackathon (hackathon.id)}
+						<HackathonCard {hackathon} />
+					{/each}
+				</div>
+			</section>
 		</div>
-	</main>
-{/key}
+	{/key}
+</div>
