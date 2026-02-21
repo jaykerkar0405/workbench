@@ -11,6 +11,9 @@ const config = {
 				if (path.match(/\/projects\/[^/]+\/screenshot-\d+\.png$/)) {
 					return;
 				}
+				if (path.startsWith('/hackathons/')) {
+					return;
+				}
 				throw new Error(message);
 			}
 		}
