@@ -3,9 +3,14 @@
 	import type { Project } from '$lib/projects/types';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
+	import { hackathons } from '$lib/hackathons';
 	import { ExternalLink, Github, Zap, ArrowRight } from 'lucide-svelte';
 
 	let { project }: { project: Project } = $props();
+
+	const hackathon = $derived(
+		project.hackathonId ? (hackathons.find((h) => h.id === project.hackathonId) ?? null) : null
+	);
 
 	const brandColor = (hex: string) => {
 		const normalized = hex.toLowerCase();
@@ -83,7 +88,7 @@
 				<a href="/hackathons/{project.hackathonId}" data-sveltekit-noscroll>
 					<Button variant="outline" class="gap-2">
 						<Zap class="size-4" />
-						Built at hackathon
+						{hackathon ? `Built at ${hackathon.title}` : 'Built at hackathon'}
 					</Button>
 				</a>
 			{/if}
