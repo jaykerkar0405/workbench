@@ -1,8 +1,10 @@
 import {
 	siZod,
 	siVite,
+	siIpfs,
 	siReact,
 	siNumpy,
+	siWagmi,
 	siPython,
 	siPrisma,
 	siOpencv,
@@ -18,9 +20,7 @@ import {
 	siPostgresql,
 	siCloudinary,
 	siTailwindcss,
-	siGooglegemini,
-	siWagmi,
-	siIpfs
+	siGooglegemini
 } from 'simple-icons';
 import type { Project } from './types';
 
