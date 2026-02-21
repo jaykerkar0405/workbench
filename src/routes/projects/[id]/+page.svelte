@@ -14,9 +14,11 @@
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
+	import { hackathons } from '$lib/hackathons';
 	import { Button } from '$lib/components/ui/button';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Carousel from '$lib/components/ui/carousel';
+	import HackathonCard from '$lib/components/hackathon-card.svelte';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	let { data } = $props();
@@ -26,6 +28,9 @@
 	const screenshots = $derived(data.screenshots || []);
 	const teamMembersData = $derived(data.teamMembersData || []);
 	const ExtendedDescription = $derived(data.ExtendedDescription);
+	const hackathon = $derived(
+		project.hackathonId ? (hackathons.find((h) => h.id === project.hackathonId) ?? null) : null
+	);
 
 	let fullHeight = $state(0);
 	let mounted = $state(false);
@@ -117,7 +122,7 @@
 						<a href="/hackathons/{project.hackathonId}" class="lg:hidden">
 							<Button variant="outline" class="gap-2">
 								<Zap class="size-4" />
-								Built at hackathon
+								{hackathon ? `Built at ${hackathon.title}` : 'Built at hackathon'}
 							</Button>
 						</a>
 					{/if}
@@ -246,6 +251,12 @@
 						</div>
 					</CardContent>
 				</Card>
+
+				{#if hackathon}
+					<div class="hidden lg:block">
+						<HackathonCard {hackathon} />
+					</div>
+				{/if}
 
 				<Card>
 					<CardHeader>
