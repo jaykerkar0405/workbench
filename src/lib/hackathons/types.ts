@@ -7,11 +7,11 @@ export interface Prize {
 
 export interface Hackathon {
 	id: string;
-	date: string;
 	title: string;
 	prize?: Prize;
 	website: string;
 	location: string;
-	duration: string;
+	duration: number;
+	timestamp: string;
 	organizer: string;
 }
