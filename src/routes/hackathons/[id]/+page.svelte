@@ -5,7 +5,7 @@
 	import type { Hackathon } from '$lib/hackathons/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Users, MapPin, Calendar, Clock, Building2, Trophy, ExternalLink } from 'lucide-svelte';
+	import { Users, MapPin, Calendar, Clock, Building2, Trophy, ExternalLink, ChevronUp } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -14,10 +14,35 @@
 	const images = $derived(data.images || []);
 	const teamMembersData = $derived(data.teamMembersData || []);
 
+	let fullHeight = $state(0);
 	let mounted = $state(false);
+	let leftColHeight = $state(0);
+	let isExpanded = $state(false);
+	let needsExpansion = $state(false);
+	let leftColRef: HTMLDivElement | undefined = $state();
+	let imagesInnerRef: HTMLDivElement | undefined = $state();
 
 	onMount(() => {
 		mounted = true;
+	});
+
+	$effect(() => {
+		if (leftColRef && imagesInnerRef) {
+			const leftCol = leftColRef;
+			const imagesInner = imagesInnerRef;
+			const checkHeight = () => {
+				const lHeight = leftCol.offsetHeight - 9.3;
+				const iHeight = imagesInner.scrollHeight;
+				leftColHeight = lHeight;
+				fullHeight = iHeight;
+				needsExpansion = iHeight > lHeight;
+			};
+			checkHeight();
+			const ro = new ResizeObserver(checkHeight);
+			ro.observe(leftCol);
+			ro.observe(imagesInner);
+			return () => ro.disconnect();
+		}
 	});
 
 	const formatDateRange = (timestamp: string, duration: number): string => {
@@ -101,7 +126,7 @@
 		</div>
 
 		<div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-			<div class="flex flex-col gap-5" in:fly={{ y: -20, duration: 600, delay: 300 }}>
+			<div bind:this={leftColRef} class="flex flex-col gap-5" in:fly={{ y: -20, duration: 600, delay: 300 }}>
 				{#if project}
 					<ProjectCard {project} />
 				{/if}
@@ -138,12 +163,43 @@
 
 			{#if images.length > 0}
 				<div class="lg:col-span-2" in:fly={{ y: -20, duration: 600, delay: 450 }}>
-					<div class="columns-2 gap-3">
-						{#each images as image, i (i)}
-							<div class="mb-3 break-inside-avoid overflow-hidden rounded-xl border border-border">
-								<img src={image} alt="{hackathon.title} Image {i + 1}" class="h-auto w-full" />
+					<div class="relative">
+						<div
+							style:max-height={isExpanded ? `${fullHeight}px` : `${leftColHeight}px`}
+							class="overflow-hidden rounded-xl transition-all duration-700 ease-in-out"
+						>
+							<div bind:this={imagesInnerRef} class="columns-2 gap-3">
+								{#each images as image, i (i)}
+									<div class="mb-3 break-inside-avoid overflow-hidden rounded-xl border border-border">
+										<img src={image} alt="{hackathon.title} Image {i + 1}" class="h-auto w-full" />
+									</div>
+								{/each}
 							</div>
-						{/each}
+						</div>
+
+						{#if needsExpansion && !isExpanded}
+							<div
+								class="pointer-events-none absolute inset-x-0 -bottom-1 h-32 rounded-xl bg-linear-to-t from-background via-background/95 to-transparent backdrop-blur-[px] transition-opacity duration-700"
+							></div>
+						{/if}
+
+						{#if needsExpansion}
+							<div class="flex justify-center {isExpanded ? 'pt-4 pb-4' : 'absolute inset-x-0 bottom-1.5'}">
+								<Button
+									variant="default"
+									onclick={() => (isExpanded = !isExpanded)}
+									class="relative z-10 gap-2 shadow-lg backdrop-blur-sm transition-all duration-300"
+								>
+									{isExpanded ? 'Show Less' : 'See More'}
+									<div
+										class="transition-transform duration-300"
+										style:transform={isExpanded ? 'rotate(0deg)' : 'rotate(180deg)'}
+									>
+										<ChevronUp class="size-4" />
+									</div>
+								</Button>
+							</div>
+						{/if}
 					</div>
 				</div>
 			{/if}
