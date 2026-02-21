@@ -12,6 +12,18 @@ export const hackathons: Hackathon[] = [
 		prize: {
 			label: 'GitHub Track Winner'
 		}
+	},
+	{
+		duration: 504,
+		location: 'Online',
+		id: 'ethonline-2025',
+		organizer: 'ETHGlobal',
+		title: 'ETHOnline 2025',
+		timestamp: '2025-10-10',
+		website: 'https://ethglobal.com/events/ethonline2025',
+		prize: {
+			rank: '1st'
+		}
 	}
 ];
 

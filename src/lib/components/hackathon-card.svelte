@@ -12,7 +12,7 @@
 		const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
 		const fmt = (d: Date, opts: Intl.DateTimeFormatOptions) => d.toLocaleDateString('en-US', opts);
 		if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-			return `${fmt(start, { month: 'short', day: 'numeric' })}–${fmt(end, { day: 'numeric' })}, ${start.getFullYear()}`;
+			return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { day: 'numeric' })}, ${start.getFullYear()}`;
 		}
 		return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { month: 'short', day: 'numeric' })}, ${end.getFullYear()}`;
 	};
