@@ -6,6 +6,10 @@
 
 	let mounted = $state(false);
 
+	const sorted = $derived(
+		[...hackathons].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+	);
+
 	onMount(() => {
 		mounted = true;
 	});
@@ -22,7 +26,7 @@
 				<h2 class="mb-8 text-[1.6875rem] font-bold md:text-3xl">Hackathons</h2>
 
 				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{#each hackathons as hackathon (hackathon.id)}
+					{#each sorted as hackathon (hackathon.id)}
 						<HackathonCard {hackathon} />
 					{/each}
 				</div>

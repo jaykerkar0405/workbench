@@ -7,6 +7,18 @@
 
 	let { hackathon }: { hackathon: Hackathon } = $props();
 
+	const formatDateRange = (timestamp: string, duration: number): string => {
+		const start = new Date(timestamp + 'T00:00:00');
+		const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
+		const fmt = (d: Date, opts: Intl.DateTimeFormatOptions) => d.toLocaleDateString('en-US', opts);
+		if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+			return `${fmt(start, { month: 'short', day: 'numeric' })}–${fmt(end, { day: 'numeric' })}, ${start.getFullYear()}`;
+		}
+		return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { month: 'short', day: 'numeric' })}, ${end.getFullYear()}`;
+	};
+
+	const dateRange = $derived(formatDateRange(hackathon.timestamp, hackathon.duration));
+
 	const prizeLabel = (h: Hackathon): string | null => {
 		if (!h.prize) return null;
 		if (h.prize.rank) {
@@ -38,7 +50,7 @@
 						</span>
 						<span class="flex items-center gap-1">
 							<Calendar class="size-3.5 shrink-0" />
-							{hackathon.date}
+							{dateRange}
 						</span>
 					</div>
 				</div>
@@ -54,7 +66,7 @@
 		<div class="flex flex-col gap-2 rounded-xl border border-border bg-secondary/30 px-4 py-3">
 			<span class="flex items-center gap-2 text-sm text-muted-foreground">
 				<Clock class="size-4 shrink-0" />
-				{hackathon.duration}
+				{hackathon.duration} Hours
 			</span>
 			<span class="flex items-center gap-2 text-sm text-muted-foreground">
 				<Building2 class="size-4 shrink-0" />
