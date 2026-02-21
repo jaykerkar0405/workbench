@@ -1,16 +1,25 @@
-import type { PageLoad } from './$types';
+import { error } from '@sveltejs/kit';
 import { projects } from '$lib/projects';
+import type { PageLoad } from './$types';
+import { hackathons } from '$lib/hackathons';
 
 export function entries() {
-	const hackathonIds = projects
-		.filter((p) => p.hackathonId)
-		.map((p) => p.hackathonId as string)
-		.filter((id, index, self) => self.indexOf(id) === index);
-	return hackathonIds.map((id) => ({ id }));
+	return hackathons.map((h) => ({ id: h.id }));
 }
 
-export const load: PageLoad = ({ params }) => {
+export const load: PageLoad = ({ params, data }) => {
+	const hackathon = hackathons.find((h) => h.id === params.id);
+
+	if (!hackathon) {
+		throw error(404, 'Hackathon not found');
+	}
+
+	const project = projects.find((p) => p.hackathonId === params.id) ?? null;
+
 	return {
-		id: params.id
+		hackathon,
+		project,
+		images: data.images,
+		teamMembersData: data.teamMembersData
 	};
 };
