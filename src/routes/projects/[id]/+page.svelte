@@ -41,6 +41,16 @@
 	let descColRef: HTMLDivElement | undefined = $state();
 	let leftColRef: HTMLDivElement | undefined = $state();
 
+	let loadedFlags = $state<boolean[]>([]);
+
+	$effect(() => {
+		loadedFlags = screenshots.map(() => false);
+	});
+
+	function onScreenshotLoad(i: number) {
+		loadedFlags = loadedFlags.map((v, idx) => (idx === i ? true : v));
+	}
+
 	const openImageModal = (index: number) => {
 		selectedImageIndex = index;
 	};
@@ -168,11 +178,21 @@
 							<Carousel.Item class="basis-full pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3">
 								<Card class="cursor-pointer overflow-hidden py-0" onclick={() => openImageModal(i)}>
 									<CardContent class="p-0">
-										<img
-											src={screenshot}
-											alt="{project.title} Screenshot {i + 1}"
-											class="aspect-video w-full rounded-lg object-cover transition-transform hover:scale-105"
-										/>
+										<div class="relative">
+											{#if !loadedFlags[i]}
+												<div class="aspect-video w-full animate-pulse rounded-lg bg-muted"></div>
+											{/if}
+											<img
+												src={screenshot}
+												onload={() => onScreenshotLoad(i)}
+												alt="{project.title} Screenshot {i + 1}"
+												class="aspect-video w-full rounded-lg object-cover transition-transform hover:scale-105 {loadedFlags[
+													i
+												]
+													? ''
+													: 'sr-only'}"
+											/>
+										</div>
 									</CardContent>
 								</Card>
 							</Carousel.Item>
@@ -336,22 +356,22 @@
 
 {#if selectedImageIndex !== null}
 	<div
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+		role="button"
+		tabindex="-1"
 		onclick={closeImageModal}
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
 		onkeydown={(e) => {
 			if (e.key === 'Escape') closeImageModal();
 			if (e.key === 'ArrowLeft') navigateImage('prev');
 			if (e.key === 'ArrowRight') navigateImage('next');
 		}}
-		role="button"
-		tabindex="-1"
 	>
 		<button
 			aria-label="Close"
 			onclick={closeImageModal}
-			class="absolute top-4 right-4 z-10 rounded-full border border-white/30 bg-black/60 p-2 shadow-lg backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80"
+			class="absolute top-4 right-4 z-10 cursor-pointer rounded-full border border-white/30 bg-black/60 p-2 shadow-lg backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80"
 		>
-			<X class="size-6 text-white" />
+			<X class="size-5 text-white" />
 		</button>
 
 		{#if screenshots.length > 1}
@@ -363,7 +383,7 @@
 				aria-label="Previous image"
 				class="absolute left-4 z-10 rounded-full border border-white/30 bg-black/60 p-3 shadow-lg backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80"
 			>
-				<ChevronLeft class="size-6 cursor-pointer text-white" />
+				<ChevronLeft class="size-5 cursor-pointer text-white" />
 			</button>
 
 			<button
@@ -374,7 +394,7 @@
 				aria-label="Next image"
 				class="absolute right-4 z-10 rounded-full border border-white/30 bg-black/60 p-3 shadow-lg backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80"
 			>
-				<ChevronRight class="size-6 cursor-pointer text-white" />
+				<ChevronRight class="size-5 cursor-pointer text-white" />
 			</button>
 		{/if}
 
