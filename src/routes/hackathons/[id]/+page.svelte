@@ -5,7 +5,7 @@
 	import type { Hackathon } from '$lib/hackathons/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Users, MapPin, Calendar, Clock, Building2, Trophy, ExternalLink, ChevronUp } from 'lucide-svelte';
+	import { Users, MapPin, Calendar, Clock, Building2, Trophy, ExternalLink, ChevronUp, X } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -21,6 +21,34 @@
 	let needsExpansion = $state(false);
 	let leftColRef: HTMLDivElement | undefined = $state();
 	let imagesInnerRef: HTMLDivElement | undefined = $state();
+
+	let loadedFlags = $state<boolean[]>([]);
+
+	$effect(() => {
+		loadedFlags = images.map(() => false);
+	});
+
+	function onImageLoad(i: number) {
+		loadedFlags = loadedFlags.map((v, idx) => (idx === i ? true : v));
+	}
+
+	let lightboxSrc = $state<string | null>(null);
+	let lightboxAlt = $state('');
+
+	function openLightbox(src: string, alt: string) {
+		lightboxSrc = src;
+		lightboxAlt = alt;
+		document.body.style.overflow = 'hidden';
+	}
+
+	function closeLightbox() {
+		lightboxSrc = null;
+		document.body.style.overflow = '';
+	}
+
+	function handleWindowKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') closeLightbox();
+	}
 
 	onMount(() => {
 		mounted = true;
@@ -73,6 +101,37 @@
 	<title>{hackathon.title} | Hackathons | Jay Kerkar</title>
 	<meta name="description" content="{hackathon.title} by {hackathon.organizer} in {hackathon.location}" />
 </svelte:head>
+
+<svelte:window onkeydown={handleWindowKeydown} />
+
+{#if lightboxSrc}
+	<div
+		role="dialog"
+		tabindex="-1"
+		aria-modal="true"
+		onclick={closeLightbox}
+		aria-label="Image fullscreen view"
+		onkeydown={(e) => e.key === 'Escape' && closeLightbox()}
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+	>
+		<button
+			type="button"
+			onclick={closeLightbox}
+			aria-label="Close fullscreen"
+			class="absolute top-4 right-4 cursor-pointer rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
+		>
+			<X class="size-5" />
+		</button>
+		<div
+			role="presentation"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+			class="flex items-center justify-center"
+		>
+			<img src={lightboxSrc} alt={lightboxAlt} class="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl" />
+		</div>
+	</div>
+{/if}
 
 {#key mounted}
 	<div class="container mx-auto max-w-7xl px-4 py-12">
@@ -171,7 +230,26 @@
 							<div bind:this={imagesInnerRef} class="columns-2 gap-3">
 								{#each images as image, i (i)}
 									<div class="mb-3 break-inside-avoid overflow-hidden rounded-xl border border-border">
-										<img src={image} alt="{hackathon.title} Image {i + 1}" class="h-auto w-full" />
+										<div class="relative">
+											{#if !loadedFlags[i]}
+												<div class="animate-pulse bg-muted" style="aspect-ratio: 4/3;"></div>
+											{/if}
+											<button
+												type="button"
+												aria-label="View image {i + 1} fullscreen"
+												onclick={() => openLightbox(image, `${hackathon.title} Image ${i + 1}`)}
+												class="block w-full cursor-zoom-in border-0 bg-transparent p-0 {loadedFlags[i]
+													? ''
+													: 'sr-only'}"
+											>
+												<img
+													src={image}
+													class="h-auto w-full"
+													onload={() => onImageLoad(i)}
+													alt="{hackathon.title} Image {i + 1}"
+												/>
+											</button>
+										</div>
 									</div>
 								{/each}
 							</div>
