@@ -36,6 +36,18 @@ export const hackathons: Hackathon[] = [
 		prize: {
 			rank: '1st'
 		}
+	},
+	{
+		duration: 24,
+		id: 'eth-india-villa',
+		organizer: 'Devfolio',
+		title: 'ETHIndiaVilla',
+		timestamp: '2025-11-30',
+		location: 'Bengaluru, India',
+		website: 'https://ethindia-villa.devfolio.co',
+		prize: {
+			label: 'Project Submission Prize'
+		}
 	}
 ];
 
