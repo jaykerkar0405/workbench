@@ -14,6 +14,18 @@ export const hackathons: Hackathon[] = [
 		}
 	},
 	{
+		duration: 24,
+		id: 'hackx3.0',
+		organizer: 'NMIMS',
+		title: 'HackX 3.0',
+		timestamp: '2025-02-22',
+		location: 'Navi Mumbai, India',
+		website: 'https://unstop.com/hackathons/hackx-30-nmims-navi-mumbai-1374904',
+		prize: {
+			rank: '2nd'
+		}
+	},
+	{
 		duration: 504,
 		location: 'Online',
 		id: 'ethonline-2025',
