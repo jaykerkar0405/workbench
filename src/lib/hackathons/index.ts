@@ -38,7 +38,7 @@ export const hackathons: Hackathon[] = [
 		}
 	},
 	{
-		duration: 24,
+		duration: 36,
 		id: 'need-for-code-4.0',
 		timestamp: '2025-08-05',
 		location: 'Mumbai, India',
