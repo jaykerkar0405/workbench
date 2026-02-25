@@ -39,6 +39,15 @@ export const hackathons: Hackathon[] = [
 	},
 	{
 		duration: 24,
+		id: 'need-for-code-4.0',
+		timestamp: '2025-08-05',
+		location: 'Mumbai, India',
+		title: 'Need For Code 4.0',
+		organizer: 'TSEC CodeTantra',
+		website: 'https://unstop.com/hackathons/need-for-code-40-tsec-codetantra-1522228'
+	},
+	{
+		duration: 24,
 		id: 'eth-india-villa',
 		organizer: 'Devfolio',
 		title: 'ETHIndiaVilla',
