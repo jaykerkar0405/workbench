@@ -152,7 +152,7 @@ export const projects: Project[] = [
 		title: 'CodeCollab',
 		hackathonId: 'need-for-code-4.0',
 		deployedLink: 'https://codecollab-mu.vercel.app',
-		githubLink: 'https://github.com/Crew-object-Object/NFC4_-object-Object-',
+		githubLink: 'https://github.com/Crew-object-Object/CodeCollab',
 		shortDescription: 'Collaborative coding interviews with AI-powered insights',
 		techStack: [siPrisma, siSvelte, siShadcnui, siMediapipe, siTypescript, siPostgresql, siTailwindcss],
 		teamMembers: [
