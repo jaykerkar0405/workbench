@@ -57,6 +57,18 @@ export const hackathons: Hackathon[] = [
 		prize: {
 			label: 'Project Submission Prize'
 		}
+	},
+	{
+		duration: 24,
+		id: 'hackx4.0',
+		organizer: 'NMIMS',
+		title: 'HackX 4.0',
+		timestamp: '2026-02-28',
+		location: 'Navi Mumbai, India',
+		website: 'https://unstop.com/hackathons/hackx-40-nmims-navi-mumbai-1621356',
+		prize: {
+			rank: '2nd'
+		}
 	}
 ];
 
