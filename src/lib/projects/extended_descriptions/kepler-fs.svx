@@ -1,0 +1,71 @@
+# The Problem It Solves
+
+Traditional distributed storage systems often depend on a central coordinator or master node. This introduces a single point of failure, scaling bottlenecks, and complex failover mechanisms. Even when replication exists, control-plane centralization limits resilience and increases operational complexity.
+
+KeplerFS addresses this by implementing a fully leaderless, peer-to-peer architecture where every node runs the same binary and can simultaneously act as:
+
+- HTTP gateway (client interface)
+- Gossip peer (membership and failure detection)
+- Chunk store (data persistence)
+
+Key problems it solves:
+
+- Eliminates single points of failure by removing master nodes
+- Enables horizontal scaling with deterministic chunk placement via a consistent hash ring
+- Ensures automatic failure detection using SWIM-inspired gossip
+- Provides crash-safe replication with a persistent SQLite-backed replication queue
+- Supports configurable durability (quorum or async) per write request
+
+The result is a resilient, masterless distributed file system capable of surviving node failures, restarts, and dynamic membership changes without external orchestration.
+
+---
+
+# Challenges We Ran Into
+
+### 1. Cross-Network Redistribution Issues
+
+When testing across multiple physical devices on different networks, we encountered redistribution inconsistencies.
+
+Although the consistent hash ring correctly determined chunk ownership, actual chunk transfers failed due to address reachability mismatches between nodes. Nodes were discoverable logically but not always reachable at the transport layer.
+
+This led to:
+
+- Partial replication
+- Delayed rebalancing
+- Incorrect assumptions about chunk ownership
+
+We resolved this by clearly separating node identity from transport address and standardizing advertised addresses across the cluster.
+
+---
+
+### 2. Chaos Simulation (Killing Three Nodes)
+
+We conducted a chaos simulation where three nodes were forcefully terminated and later revived.
+
+Challenges included:
+
+- Resuming replication from the persistent replication queue
+- Preventing duplicate chunk transfers during recovery
+- Correctly transitioning peer states (suspect → dead → alive)
+- Triggering safe and minimal re-replication without causing bandwidth spikes
+
+Ensuring the system converged back to a healthy state without manual intervention required careful coordination between gossip membership updates and the replication pipeline.
+
+---
+
+### 3. Tailscale and Docker IP Conflicts
+
+For cross-device communication, we initially used Tailscale to enable secure overlay networking. Nodes communicated using Tailscale-assigned IP addresses.
+
+When switching back to Docker-based local networking, we encountered conflicts between:
+
+- Tailscale-assigned IP addresses
+- Docker internal container IP addresses
+
+This caused:
+
+- Nodes advertising unreachable addresses
+- Inconsistent chunk distribution
+- Failed inter-node transfers
+
+The issue stemmed from mixing network layers without normalizing the advertised address configuration. We resolved this by enforcing explicit address configuration per deployment mode and ensuring that nodes only advertised routable addresses within the active network environment.

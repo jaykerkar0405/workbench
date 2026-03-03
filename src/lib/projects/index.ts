@@ -1,5 +1,6 @@
 import {
 	siZod,
+	siBun,
 	siVite,
 	siIpfs,
 	siReact,
@@ -7,15 +8,18 @@ import {
 	siWagmi,
 	siPython,
 	siPrisma,
+	siSqlite,
 	siOpencv,
 	siWebrtc,
 	siSvelte,
+	siDocker,
 	siFirebase,
 	siSolidity,
 	siShadcnui,
 	siEthereum,
 	siNextdotjs,
 	siMediapipe,
+	siTailscale,
 	siTypescript,
 	siPostgresql,
 	siCloudinary,
@@ -219,6 +223,30 @@ export const projects: Project[] = [
 			},
 			{
 				githubUsername: 'chaitanyakelkar27'
+			}
+		]
+	},
+	{
+		id: 'kepler-fs',
+		featured: false,
+		title: 'KeplerFS',
+		hackathonId: 'hackx4.0',
+		videoLink: 'https://youtu.be/7j_X3THDOJQ',
+		shortDescription: 'Leaderless distributed peer-to-peer FS',
+		githubLink: 'https://github.com/Crew-object-Object/KeplerFS',
+		techStack: [siSvelte, siBun, siTypescript, siTailwindcss, siShadcnui, siSqlite, siDocker, siTailscale],
+		teamMembers: [
+			{
+				githubUsername: 'jaykerkar0405'
+			},
+			{
+				githubUsername: 'WhyAsh5114'
+			},
+			{
+				githubUsername: 'sundaram123krishnan'
+			},
+			{
+				githubUsername: 'kryyo1441'
 			}
 		]
 	}
