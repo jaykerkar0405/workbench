@@ -22,6 +22,7 @@ import {
 	siTailscale,
 	siTypescript,
 	siPostgresql,
+	siCloudflare,
 	siTailwindcss,
 	siGooglegemini
 } from 'simple-icons';
@@ -35,7 +36,17 @@ export const projects: Project[] = [
 		deployedLink: 'https://vesitrail.vercel.app',
 		githubLink: 'https://github.com/VESITRail/VESITRail',
 		shortDescription: 'Streamlined Railway Concessions with Real-time Tracking',
-		techStack: [siZod, siReact, siPrisma, siFirebase, siNextdotjs, siTypescript, siPostgresql, siTailwindcss],
+		techStack: [
+			siZod,
+			siReact,
+			siPrisma,
+			siFirebase,
+			siNextdotjs,
+			siCloudflare,
+			siTypescript,
+			siPostgresql,
+			siTailwindcss
+		],
 		teamMembers: [
 			{
 				githubUsername: 'jaykerkar0405'
