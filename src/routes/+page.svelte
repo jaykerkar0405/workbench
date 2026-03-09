@@ -53,7 +53,8 @@
 		'$ achievements --list',
 		'🏆 ETHOnline 2025 | Winner — Top 10 / 634 projects (Global)',
 		'🥇 HackByte 3.0 | Top 10 — 125 teams (Central India)',
-		'🥈 Hackx 3.0 | Runner-up — NMIMS Navi Mumbai'
+		'🥈 HackX 3.0 | Runner-up — NMIMS Navi Mumbai',
+		'🥈 HackX 4.0 | Runner-up — NMIMS Navi Mumbai'
 	];
 
 	let currentLine = $state(0);
