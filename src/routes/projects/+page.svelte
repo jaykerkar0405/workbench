@@ -2,10 +2,20 @@
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { projects } from '$lib/projects';
+	import { hackathons } from '$lib/hackathons';
+	import type { Project } from '$lib/projects/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
 
-	const otherProjects = projects.filter((p) => !p.featured);
-	const featuredProjects = projects.filter((p) => p.featured);
+	const hackathonTimestamp = (p: Project): number => {
+		if (!p.hackathonId) return -Infinity;
+		const h = hackathons.find((h) => h.id === p.hackathonId);
+		return h ? new Date(h.timestamp).getTime() : -Infinity;
+	};
+
+	const sortByHackathon = (a: Project, b: Project) => hackathonTimestamp(b) - hackathonTimestamp(a);
+
+	const otherProjects = projects.filter((p) => !p.featured).sort(sortByHackathon);
+	const featuredProjects = projects.filter((p) => p.featured).sort(sortByHackathon);
 
 	let mounted = $state(false);
 
