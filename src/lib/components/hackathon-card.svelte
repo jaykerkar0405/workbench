@@ -45,10 +45,6 @@
 					<h3 class="mb-1 text-xl font-bold">{hackathon.title}</h3>
 					<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
 						<span class="flex items-center gap-1">
-							<MapPin class="size-3.5 shrink-0" />
-							{hackathon.location}
-						</span>
-						<span class="flex items-center gap-1">
 							<Calendar class="size-3.5 shrink-0" />
 							{dateRange}
 						</span>
@@ -71,6 +67,10 @@
 			<span class="flex items-center gap-2 text-sm text-muted-foreground">
 				<Building2 class="size-4 shrink-0" />
 				{hackathon.organizer}
+			</span>
+			<span class="flex items-center gap-2 text-sm text-muted-foreground">
+				<MapPin class="size-4 shrink-0" />
+				{hackathon.location}
 			</span>
 		</div>
 
