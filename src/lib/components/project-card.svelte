@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { hackathons } from '$lib/hackathons';
 	import { Button } from '$lib/components/ui/button';
 	import type { Project } from '$lib/projects/types';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
-	import { hackathons } from '$lib/hackathons';
 	import { ExternalLink, Github, Zap, ArrowRight } from 'lucide-svelte';
 
 	let { project }: { project: Project } = $props();
@@ -31,7 +31,7 @@
 
 				<div class="-mt-1 min-w-0 flex-1">
 					<h3 class="mb-1 text-xl font-bold">{project.title}</h3>
-					<p class="text-sm text-muted-foreground">{project.shortDescription}</p>
+					<p class="line-clamp-2 text-sm text-muted-foreground">{project.shortDescription}</p>
 				</div>
 			</div>
 
