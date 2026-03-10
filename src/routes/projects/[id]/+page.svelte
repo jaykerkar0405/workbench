@@ -176,7 +176,14 @@
 					<Carousel.Content class="-ml-2 md:-ml-4">
 						{#each screenshots as screenshot, i}
 							<Carousel.Item class="basis-full pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3">
-								<Card class="cursor-pointer overflow-hidden py-0" onclick={() => openImageModal(i)}>
+								<Card
+									tabindex={0}
+									onclick={() => openImageModal(i)}
+									class="cursor-pointer overflow-hidden py-0"
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') openImageModal(i);
+									}}
+								>
 									<CardContent class="p-0">
 										<div class="relative">
 											{#if !loadedFlags[i]}
@@ -354,17 +361,24 @@
 	</div>
 {/key}
 
+<svelte:window
+	onkeydown={(e) => {
+		if (selectedImageIndex === null) return;
+		if (e.key === 'Escape') closeImageModal();
+		if (e.key === 'ArrowLeft') navigateImage('prev');
+		if (e.key === 'ArrowRight') navigateImage('next');
+	}}
+/>
+
 {#if selectedImageIndex !== null}
 	<div
 		role="button"
 		tabindex="-1"
 		onclick={closeImageModal}
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
 		onkeydown={(e) => {
-			if (e.key === 'Escape') closeImageModal();
-			if (e.key === 'ArrowLeft') navigateImage('prev');
-			if (e.key === 'ArrowRight') navigateImage('next');
+			if (e.key === 'Enter' || e.key === ' ') closeImageModal();
 		}}
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
 	>
 		<button
 			aria-label="Close"
