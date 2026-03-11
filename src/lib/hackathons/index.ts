@@ -69,6 +69,15 @@ export const hackathons: Hackathon[] = [
 		prize: {
 			rank: '2nd'
 		}
+	},
+	{
+		duration: 24,
+		id: 'err-404-6.0',
+		organizer: 'MHSSCE',
+		title: 'Err_404 6.0',
+		timestamp: '2025-02-15',
+		location: 'Mumbai, India',
+		website: 'https://err-11.devfolio.co'
 	}
 ];
 
