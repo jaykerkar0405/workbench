@@ -1,11 +1,22 @@
 <script lang="ts">
+	import {
+		X,
+		Clock,
+		Users,
+		Trophy,
+		MapPin,
+		Calendar,
+		ImageOff,
+		Building2,
+		ChevronUp,
+		ExternalLink
+	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { Button } from '$lib/components/ui/button';
 	import type { Hackathon } from '$lib/hackathons/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Users, MapPin, Calendar, Clock, Building2, Trophy, ExternalLink, ChevronUp, X } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -184,8 +195,8 @@
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-			<div bind:this={leftColRef} class="flex flex-col gap-5" in:fly={{ y: -20, duration: 600, delay: 300 }}>
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+			<div bind:this={leftColRef} class="flex h-full flex-col gap-5" in:fly={{ y: -20, duration: 600, delay: 300 }}>
 				{#if project}
 					<ProjectCard {project} />
 				{/if}
@@ -278,6 +289,20 @@
 								</Button>
 							</div>
 						{/if}
+					</div>
+				</div>
+			{:else}
+				<div class="flex h-full lg:col-span-2" in:fly={{ y: -20, duration: 600, delay: 450 }}>
+					<div
+						class="flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-secondary/20 p-8 text-center lg:gap-6 lg:p-12"
+					>
+						<ImageOff class="size-12 text-muted-foreground/60 lg:size-20" />
+						<div class="flex flex-col gap-2 lg:gap-3">
+							<p class="text-lg font-bold tracking-tight lg:text-2xl">404: Photos Not Found</p>
+							<p class="max-w-xs text-sm text-muted-foreground lg:text-base">
+								Too busy shipping code to open the camera app.
+							</p>
+						</div>
 					</div>
 				</div>
 			{/if}
