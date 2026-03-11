@@ -292,7 +292,7 @@
 					</div>
 				</div>
 			{:else}
-				<div class="flex h-full lg:col-span-2" in:fly={{ y: -20, duration: 600, delay: 450 }}>
+				<div class="flex h-full lg:col-span-2" in:fly|global={{ y: -20, duration: 600, delay: 450 }}>
 					<div
 						class="flex h-full w-full flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-border bg-secondary/20 p-8 text-center lg:gap-6 lg:p-12"
 					>
