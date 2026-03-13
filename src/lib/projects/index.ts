@@ -198,28 +198,28 @@ export const projects: Project[] = [
 			}
 		]
 	},
-	{
-		featured: false,
-		id: 'zero-trace',
-		title: 'ZeroTrace',
-		hackathonId: 'genesis-2026',
-		videoLink: 'https://youtu.be/IQi4S4Cq8Fs',
-		deployedLink: 'https://zerotrace-seven.vercel.app',
-		githubLink: 'https://github.com/jaykerkar0405/ZeroTrace',
-		shortDescription: 'Decentralized quadratic funding, anon sybil-safe voting',
-		techStack: [siSolidity, siEthereum, siNextdotjs, siTypescript, siTailwindcss, siShadcnui, siWagmi, siIpfs],
-		teamMembers: [
-			{
-				githubUsername: 'jaykerkar0405'
-			},
-			{
-				githubUsername: 'Chirag8405'
-			},
-			{
-				githubUsername: 'chaitanyakelkar27'
-			}
-		]
-	},
+	// {
+	// 	featured: false,
+	// 	id: 'zero-trace',
+	// 	title: 'ZeroTrace',
+	// 	hackathonId: 'genesis-2026',
+	// 	videoLink: 'https://youtu.be/IQi4S4Cq8Fs',
+	// 	deployedLink: 'https://zerotrace-seven.vercel.app',
+	// 	githubLink: 'https://github.com/jaykerkar0405/ZeroTrace',
+	// 	shortDescription: 'Decentralized quadratic funding, anon sybil-safe voting',
+	// 	techStack: [siSolidity, siEthereum, siNextdotjs, siTypescript, siTailwindcss, siShadcnui, siWagmi, siIpfs],
+	// 	teamMembers: [
+	// 		{
+	// 			githubUsername: 'jaykerkar0405'
+	// 		},
+	// 		{
+	// 			githubUsername: 'Chirag8405'
+	// 		},
+	// 		{
+	// 			githubUsername: 'chaitanyakelkar27'
+	// 		}
+	// 	]
+	// },
 	{
 		id: 'kepler-fs',
 		featured: false,
