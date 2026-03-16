@@ -1,0 +1,69 @@
+# The Problem It Solves
+
+Every web search you make leaves behind a **data exhaust trail**. Traditional search engines log your **IP address, queries, timestamps, device information, and behavioral patterns**, gradually building detailed profiles about users.
+
+Platforms like Google and Bing use this data for **targeted advertising, analytics, and sometimes share it with third parties**. In many cases, this information can also be **subpoenaed by governments or exposed in data breaches**. Even modern AI-powered search tools often rely on the same infrastructure, meaning that **every query — human or AI-generated — can reveal sensitive intent**.
+
+MeshSearch addresses this by making **private web search practical for both humans and AI agents**, eliminating the need to trade personal data for access to information.
+
+## Private Search for AI Agents
+
+AI agents frequently perform web searches to gather context, answer questions, or automate tasks. However, when these agents query traditional search APIs, they unintentionally expose the **user’s intent and context** to external providers.
+
+MeshSearch prevents this leakage by using **Zero-Knowledge (ZK) commitments**. Queries are **cryptographically committed on the client device before leaving the system**, ensuring that the relay network never sees the plaintext query.
+
+This enables tools like Claude, Cursor, and any **MCP-compatible AI agent** to perform web searches **without revealing the user’s intent or query contents**.
+
+## Anonymous Micropayments Instead of Surveillance
+
+Most search engines operate on an **advertising-based business model**, where users effectively pay for search by giving up their personal data.
+
+MeshSearch replaces this model with **anonymous micropayments**. Each search is paid for using **USDC via the x402 micropayment protocol**, requiring only a wallet signature.
+
+This means:
+
+- No accounts
+- No tracking
+- No behavioral profiling
+
+Users simply **pay per search instead of paying with their identity and attention**.
+
+## Transparent and Auditable Routing
+
+Traditional search infrastructure is a **black box**. Users have no visibility into how their queries are routed or processed.
+
+MeshSearch routes traffic through **three ENS-named relay nodes** in a multi-hop path. Each relay operator is publicly identifiable through ENS, and every search result includes information about which relays handled the request.
+
+This makes the routing layer **transparent and auditable**, allowing users to verify relay operators on-chain.
+
+## Encrypted Search History
+
+Search history is often stored on centralized servers where service providers have full access to user data.
+
+MeshSearch encrypts search history using **AES-256-GCM**, with encryption keys derived from the user’s wallet. The encrypted data is stored on **Fileverse**, ensuring that:
+
+- Only the user can decrypt their history
+- No server ever sees the plaintext data
+- Users retain full ownership and control of their search records
+
+MeshSearch replaces the traditional **surveillance-based search model** with a system built on **cryptography, transparency, and user ownership**, enabling truly private search for both humans and AI agents.
+
+---
+
+# Challenges We Ran Into
+
+## 1. Getting the x402 payment flow to actually trigger
+
+Initially, the MCP search tool was returning results without triggering the payment flow. The expected `402 Payment Required` response was being silently swallowed by the client, causing the search endpoint to respond successfully even when no payment was authorized. The fix was separating the payment gate into a dedicated `/api/paid-search` endpoint in the Next.js backend. This ensured that the client first received the `402` response, signed the USDC authorization with the wallet, and then resent the request with the signed payment attached.
+
+## 2. ENS resolution was not actually happening
+
+The relay routing system originally treated ENS relay names such as `relay1.meshsearch.eth` as plain strings instead of resolving them on-chain. This meant the routing layer appeared to support ENS but was effectively hardcoded. The solution was integrating `@ensdomains/ensjs` v4 and using `ensPublicActions` on a `viem` client so relay operators are properly resolved on Ethereum L1. Now each relay resolves both forward and reverse ENS records during startup and whenever routing decisions are made.
+
+## 3. Using the wrong Fileverse product
+
+The first implementation used Fileverse Storage V2 which is a low-level IPFS API requiring UCAN tokens, multipart uploads, and multiple headers such as `Contract`, `Invoker`, and `Chain`. However, the hackathon integration was actually designed for Fileverse **dDocs**, which exposes a much simpler REST interface. Once this became clear from the hackathon documentation, the storage layer was rewritten to use the correct endpoints such as `POST /api/ddocs` and `GET /api/ddocs/:ddocId` with API key authentication.
+
+## 4. ZK proof generation blocking the event loop
+
+Semaphore v4 Groth16 proof generation was initially running synchronously during tests. Because proof generation is computationally heavy, it blocked the Node.js event loop long enough to cause intermittent test timeouts and flaky behavior. The fix involved moving proof generation into a worker thread and mocking system time using `vi.setSystemTime` in the test suite to ensure deterministic and stable tests.
