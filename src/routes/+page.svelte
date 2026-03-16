@@ -52,6 +52,7 @@
 	const achievements = [
 		'$ achievements --list',
 		'🏆 ETHOnline 2025 | Winner — Top 10 / 634 projects (Global)',
+		'🏆 ETHMumbai 2026 | Winner — Main AI Track + BitGo Sponsor Track (National)',
 		'🥇 HackByte 3.0 | Top 10 — 125 teams (Central India)',
 		'🥈 HackX 3.0 | Runner-up — NMIMS Navi Mumbai',
 		'🥈 HackX 4.0 | Runner-up — NMIMS Navi Mumbai'
