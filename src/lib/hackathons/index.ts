@@ -78,6 +78,18 @@ export const hackathons: Hackathon[] = [
 		timestamp: '2025-02-15',
 		location: 'Mumbai, India',
 		website: 'https://err-11.devfolio.co'
+	},
+	{
+		duration: 48,
+		id: 'ethmumbai-2026',
+		organizer: 'ETHMumbai',
+		title: 'ETHMumbai 2026',
+		timestamp: '2026-03-13',
+		location: 'Mumbai, India',
+		website: 'https://ethmumbai2026.devfolio.co',
+		prize: {
+			label: 'AI & BitGo Track Winner'
+		}
 	}
 	// {
 	// 	duration: 24,
