@@ -64,7 +64,7 @@ export const projects: Project[] = [
 		videoLink: 'https://youtu.be/Qg4RDl1IBHM',
 		githubLink: 'https://github.com/WhyAsh5114/ChronoVault',
 		deployedLink: 'https://chronovault-ethonline.vercel.app',
-		techStack: [siSolidity, siEthereum, siNextdotjs, siTypescript, siTailwindcss],
+		techStack: [siSolidity, siEthereum, siNextdotjs, siWagmi, siTypescript, siTailwindcss],
 		shortDescription: 'Web3 wallet with TOTP-based 2FA and zero-knowledge security',
 		teamMembers: [
 			{
@@ -83,7 +83,7 @@ export const projects: Project[] = [
 		videoLink: 'https://youtu.be/kNMljHOG6n8',
 		githubLink: 'https://github.com/Crew-object-Object/VaultID',
 		shortDescription: 'Portable, wallet-encrypted authentication sessions',
-		techStack: [siVite, siSolidity, siEthereum, siTypescript, siTailwindcss],
+		techStack: [siVite, siSolidity, siEthereum, siTypescript, siIpfs, siWagmi, siTailwindcss],
 		teamMembers: [
 			{
 				githubUsername: 'jaykerkar0405'
@@ -229,6 +229,29 @@ export const projects: Project[] = [
 		shortDescription: 'Leaderless distributed peer-to-peer FS',
 		githubLink: 'https://github.com/Crew-object-Object/KeplerFS',
 		techStack: [siSvelte, siBun, siTypescript, siTailwindcss, siShadcnui, siSqlite, siDocker, siTailscale],
+		teamMembers: [
+			{
+				githubUsername: 'jaykerkar0405'
+			},
+			{
+				githubUsername: 'WhyAsh5114'
+			},
+			{
+				githubUsername: 'sundaram123krishnan'
+			},
+			{
+				githubUsername: 'kryyo1441'
+			}
+		]
+	},
+	{
+		featured: true,
+		id: 'mesh-search',
+		title: 'MeshSearch',
+		hackathonId: 'ethmumbai-2026',
+		githubLink: 'https://github.com/WhyAsh5114/MeshSearch',
+		shortDescription: 'Search privately. Pay anonymously. Trust no one.',
+		techStack: [siNextdotjs, siTypescript, siSolidity, siShadcnui, siEthereum, siWagmi, siTailwindcss],
 		teamMembers: [
 			{
 				githubUsername: 'jaykerkar0405'
