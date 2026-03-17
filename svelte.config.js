@@ -8,7 +8,7 @@ const config = {
 		adapter: adapter(),
 		prerender: {
 			handleHttpError: ({ path, referrer, message }) => {
-				if (path.match(/\/projects\/[^/]+\/screenshot-\d+\.png$/)) {
+				if (path.match(/\/projects\/[^/]+\/screenshot-\d+\.webp$/)) {
 					return;
 				}
 				if (path.startsWith('/hackathons/')) {
