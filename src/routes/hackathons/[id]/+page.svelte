@@ -69,16 +69,18 @@
 		if (leftColRef && imagesInnerRef) {
 			const leftCol = leftColRef;
 			const imagesInner = imagesInnerRef;
+
+			leftColHeight = leftCol.scrollHeight - 9.3;
+
 			const checkHeight = () => {
-				const lHeight = leftCol.offsetHeight - 9.3;
 				const iHeight = imagesInner.scrollHeight;
-				leftColHeight = lHeight;
 				fullHeight = iHeight;
-				needsExpansion = iHeight > lHeight;
+				needsExpansion = iHeight > leftColHeight;
 			};
+
 			checkHeight();
+
 			const ro = new ResizeObserver(checkHeight);
-			ro.observe(leftCol);
 			ro.observe(imagesInner);
 			return () => ro.disconnect();
 		}
@@ -195,8 +197,8 @@
 			</div>
 		</div>
 
-		<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-			<div bind:this={leftColRef} class="flex h-full flex-col gap-5" in:fly={{ y: -20, duration: 600, delay: 300 }}>
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
+			<div bind:this={leftColRef} class="flex flex-col gap-5" in:fly={{ y: -20, duration: 600, delay: 300 }}>
 				{#if project}
 					<ProjectCard {project} />
 				{/if}
