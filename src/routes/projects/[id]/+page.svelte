@@ -117,7 +117,7 @@
 				<div class="flex items-start gap-4">
 					<img
 						alt={project.title}
-						src={`/projects/${project.id}/icon.png`}
+						src={`/projects/${project.id}/icon.webp`}
 						class="size-15 rounded-lg border border-border object-cover"
 					/>
 

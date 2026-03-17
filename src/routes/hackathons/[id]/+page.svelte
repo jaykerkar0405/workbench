@@ -153,7 +153,7 @@
 				<div class="flex items-start gap-4">
 					<img
 						alt={hackathon.title}
-						src={`/hackathons/${hackathon.id}/icon.png`}
+						src={`/hackathons/${hackathon.id}/icon.webp`}
 						class="size-15 rounded-lg border border-border object-cover"
 					/>
 					<div class="-mt-1 flex flex-col lg:gap-1">

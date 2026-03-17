@@ -37,7 +37,7 @@
 			<div class="flex items-start gap-3">
 				<img
 					alt={hackathon.title}
-					src={`/hackathons/${hackathon.id}/icon.png`}
+					src={`/hackathons/${hackathon.id}/icon.webp`}
 					class="size-12 rounded-lg border border-border object-cover"
 				/>
 
