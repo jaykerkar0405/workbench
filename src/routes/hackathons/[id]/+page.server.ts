@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const images: string[] = [];
 
 	for (let i = 1; i <= 20; i++) {
-		const imagePath = `/hackathons/${params.id}/image-${i}.png`;
+		const imagePath = `/hackathons/${params.id}/image-${i}.webp`;
 		try {
 			const response = await fetch(imagePath, { method: 'HEAD' });
 			if (response.ok) {
