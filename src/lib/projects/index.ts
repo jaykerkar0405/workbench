@@ -24,7 +24,8 @@ import {
 	siPostgresql,
 	siCloudflare,
 	siTailwindcss,
-	siGooglegemini
+	siGooglegemini,
+	siModelcontextprotocol
 } from 'simple-icons';
 import type { Project } from './types';
 
@@ -245,13 +246,22 @@ export const projects: Project[] = [
 		]
 	},
 	{
+		techStack: [
+			siWagmi,
+			siShadcnui,
+			siSolidity,
+			siEthereum,
+			siNextdotjs,
+			siTypescript,
+			siTailwindcss,
+			siModelcontextprotocol
+		],
 		featured: true,
 		id: 'mesh-search',
 		title: 'MeshSearch',
 		hackathonId: 'ethmumbai-2026',
 		githubLink: 'https://github.com/WhyAsh5114/MeshSearch',
 		shortDescription: 'Search privately. Pay anonymously. Trust no one.',
-		techStack: [siNextdotjs, siTypescript, siSolidity, siShadcnui, siEthereum, siWagmi, siTailwindcss],
 		teamMembers: [
 			{
 				githubUsername: 'jaykerkar0405'
