@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://jaykerkar.vercel.app/sitemap.xml
+Sitemap: https://jaykerkar.is-a.dev/sitemap.xml
