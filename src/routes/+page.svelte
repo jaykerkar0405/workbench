@@ -302,7 +302,7 @@
 							</p>
 						</div>
 						<div class="mt-6">
-							<a href="/docs/resume.pdf" download="Jay_Kerkar_Resume.pdf">
+							<a href="/docs/jay_kerkar_resume.pdf" download="jay_kerkar_resume.pdf">
 								<Button class="gap-2">
 									<Download class="size-4" />
 									Download Resume
