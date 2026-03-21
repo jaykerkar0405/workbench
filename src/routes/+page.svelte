@@ -14,10 +14,10 @@
 	} from 'simple-icons';
 	import { onMount } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
-	import { Button } from '$lib/components/ui/button';
+	import { MapPin, ChevronDown } from 'lucide-svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
-	import { MapPin, ChevronDown, Download } from 'lucide-svelte';
+	import ResumeActions from '$lib/components/resume-actions.svelte';
 
 	type SvgIcon = { viewBox: string; paths: string[] };
 
@@ -302,12 +302,7 @@
 							</p>
 						</div>
 						<div class="mt-6">
-							<a href="/docs/jay_kerkar_resume.pdf" download="jay_kerkar_resume.pdf">
-								<Button class="gap-2">
-									<Download class="size-4" />
-									Download Resume
-								</Button>
-							</a>
+							<ResumeActions resumeUrl="/docs/jay_kerkar_resume.pdf" downloadFileName="jay_kerkar_resume.pdf" />
 						</div>
 					</CardContent>
 				</Card>
