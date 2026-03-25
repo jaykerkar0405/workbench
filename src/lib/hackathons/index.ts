@@ -90,17 +90,17 @@ export const hackathons: Hackathon[] = [
 		prize: {
 			label: 'AI & BitGo Track Winner'
 		}
+	},
+	{
+		duration: 24,
+		id: 'genesis-2026',
+		title: 'Genesis 2026',
+		timestamp: '2026-02-06',
+		location: 'Mumbai, India',
+		organizer: 'QuestIT VESIT',
+		website:
+			'https://unstop.com/p/genesis-2026-vivekanand-education-societys-institute-of-technology-vesit-mumbai-1626873'
 	}
-	// {
-	// 	duration: 24,
-	// 	id: 'genesis-2026',
-	// 	title: 'Genesis 2026',
-	// 	timestamp: '2026-02-06',
-	// 	location: 'Mumbai, India',
-	// 	organizer: 'QuestIT VESIT',
-	// 	website:
-	// 		'https://unstop.com/p/genesis-2026-vivekanand-education-societys-institute-of-technology-vesit-mumbai-1626873'
-	// }
 ];
 
 export type { Hackathon } from './types';
