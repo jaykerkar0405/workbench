@@ -2,6 +2,7 @@ import {
 	siZod,
 	siBun,
 	siVite,
+	siHono,
 	siIpfs,
 	siReact,
 	siNumpy,
@@ -274,6 +275,26 @@ export const projects: Project[] = [
 			},
 			{
 				githubUsername: 'kryyo1441'
+			}
+		]
+	},
+	{
+		featured: false,
+		id: 'codex-swarm',
+		title: 'Codex Swarm',
+		hackathonId: 'codex-community',
+		shortDescription: 'DAG Parallel Codex Orchestrator',
+		githubLink: 'https://github.com/WhyAsh5114/codex-hackathon',
+		techStack: [siSvelte, siTypescript, siTailwindcss, siShadcnui, siDocker, siZod, siHono],
+		teamMembers: [
+			{
+				githubUsername: 'jaykerkar0405'
+			},
+			{
+				githubUsername: 'WhyAsh5114'
+			},
+			{
+				githubUsername: 'RishiBuilds'
 			}
 		]
 	}
