@@ -13,6 +13,7 @@
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
+	import { formatDateRange } from '$lib/utils.js';
 	import { Button } from '$lib/components/ui/button';
 	import type { Hackathon } from '$lib/hackathons/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
@@ -85,16 +86,6 @@
 			return () => ro.disconnect();
 		}
 	});
-
-	const formatDateRange = (timestamp: string, duration: number): string => {
-		const start = new Date(timestamp + 'T00:00:00');
-		const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
-		const fmt = (d: Date, opts: Intl.DateTimeFormatOptions) => d.toLocaleDateString('en-US', opts);
-		if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-			return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { day: 'numeric' })}, ${start.getFullYear()}`;
-		}
-		return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { month: 'short', day: 'numeric' })}, ${end.getFullYear()}`;
-	};
 
 	const dateRange = $derived(formatDateRange(hackathon.timestamp, hackathon.duration));
 

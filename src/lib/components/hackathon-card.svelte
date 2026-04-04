@@ -1,21 +1,12 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { formatDateRange } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import type { Hackathon } from '$lib/hackathons/types';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { MapPin, Clock, Calendar, Trophy, ExternalLink, ArrowRight, Building2 } from 'lucide-svelte';
 
 	let { hackathon }: { hackathon: Hackathon } = $props();
-
-	const formatDateRange = (timestamp: string, duration: number): string => {
-		const start = new Date(timestamp + 'T00:00:00');
-		const end = new Date(start.getTime() + duration * 60 * 60 * 1000);
-		const fmt = (d: Date, opts: Intl.DateTimeFormatOptions) => d.toLocaleDateString('en-US', opts);
-		if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-			return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { day: 'numeric' })}, ${start.getFullYear()}`;
-		}
-		return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { month: 'short', day: 'numeric' })}, ${end.getFullYear()}`;
-	};
 
 	const dateRange = $derived(formatDateRange(hackathon.timestamp, hackathon.duration));
 
