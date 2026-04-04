@@ -100,6 +100,15 @@ export const hackathons: Hackathon[] = [
 		organizer: 'QuestIT VESIT',
 		website:
 			'https://unstop.com/p/genesis-2026-vivekanand-education-societys-institute-of-technology-vesit-mumbai-1626873'
+	},
+	{
+		duration: 7,
+		id: 'codex-community',
+		timestamp: '2026-04-04',
+		title: 'Codex Community',
+		location: 'Mumbai, India',
+		website: 'https://luma.com/kauset3d',
+		organizer: 'OpenAI Codex Ambassadors'
 	}
 ];
 
