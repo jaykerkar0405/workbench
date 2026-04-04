@@ -1,0 +1,32 @@
+# The Problem It Solves
+
+Current Codex CLI workflows are fundamentally sequential and manual. Developers must write a prompt, wait for execution, and then manually trigger the next step. This creates multiple inefficiencies:
+
+- Tasks that could run in parallel are executed sequentially, wasting time and compute resources.
+- There is no concept of dependency tracking, so execution order is often suboptimal.
+- Developers are forced to manually orchestrate workflows, increasing cognitive load.
+- There is no real-time visibility into progress, failures, or task relationships.
+
+As a result, workflows that should be parallelizable become slow, fragmented, and inefficient.
+
+Codex Swarm solves this by transforming a single natural language specification into a dependency-aware DAG of tasks, enabling automated orchestration and true parallel execution.
+
+# Challenges We Ran Into
+
+Building Codex Swarm required solving several non-trivial engineering challenges:
+
+- **Dependency-aware scheduling**: Designing a system that respects task dependencies while still maximizing parallel execution required implementing a frontier-based DAG scheduler instead of a simple queue.
+
+- **Dynamic task orchestration**: Ensuring that new tasks are immediately scheduled as soon as dependencies are resolved, without relying on polling or batching.
+
+- **Failure propagation**: Handling failures in a DAG structure was complex. A failed task needed to correctly propagate failure to all dependent tasks while still allowing targeted retries.
+
+- **Sandboxed execution**: Running LLM-generated code safely required isolating each task inside Docker containers with strict resource limits and no shared state.
+
+- **State synchronization**: Maintaining consistent real-time state across backend orchestration and frontend visualization using WebSockets.
+
+- **LLM planning reliability**: Separating planning (LLM-generated actions) from execution (Docker environment) to avoid unsafe or unpredictable behavior.
+
+- **Concurrency control**: Balancing maximum throughput with system constraints like CPU, memory, and API limits.
+
+- **Real-time observability**: Building a dashboard capable of visualizing DAG execution, logs, diffs, and timelines without introducing performance bottlenecks.
