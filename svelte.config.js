@@ -7,13 +7,13 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		prerender: {
-			handleHttpError: ({ path, referrer, message }) => {
-				if (path.match(/\/projects\/[^/]+\/screenshot-\d+\.webp$/)) {
+			handleHttpError: ({ path, message }) => {
+				const ignoredPaths = ['/projects/', '/hackathons/'];
+
+				if (ignoredPaths.some(p => path.startsWith(p))) {
 					return;
 				}
-				if (path.startsWith('/hackathons/')) {
-					return;
-				}
+
 				throw new Error(message);
 			}
 		}
