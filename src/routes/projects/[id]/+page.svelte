@@ -5,7 +5,6 @@
 		Star,
 		Video,
 		Users,
-		Github,
 		Layers,
 		ChevronUp,
 		ChevronLeft,
@@ -13,6 +12,7 @@
 		ExternalLink
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
+	import { siGithub } from 'simple-icons';
 	import { fly } from 'svelte/transition';
 	import { hackathons } from '$lib/hackathons';
 	import { Button } from '$lib/components/ui/button';
@@ -162,7 +162,9 @@
 
 						<a href={project.githubLink} target="_blank" rel="noopener noreferrer">
 							<Button size="icon" aria-label="View on GitHub">
-								<Github class="size-4" />
+								<svg class="size-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+									<path d={siGithub.path} />
+								</svg>
 							</Button>
 						</a>
 					</div>

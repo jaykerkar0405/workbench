@@ -1,10 +1,11 @@
 <script lang="ts">
+	import { siGithub } from 'simple-icons';
 	import { hackathons } from '$lib/hackathons';
 	import { Button } from '$lib/components/ui/button';
 	import type { Project } from '$lib/projects/types';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
-	import { ExternalLink, Github, Zap, ArrowRight } from 'lucide-svelte';
+	import { ExternalLink, Zap, ArrowRight } from 'lucide-svelte';
 
 	let { project }: { project: Project } = $props();
 
@@ -38,7 +39,9 @@
 			<div class="flex shrink-0 gap-2">
 				<a target="_blank" href={project.githubLink} rel="noopener noreferrer">
 					<Button variant="outline" size="icon" aria-label="View on GitHub">
-						<Github class="size-4" />
+						<svg class="size-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+							<path d={siGithub.path} />
+						</svg>
 					</Button>
 				</a>
 
