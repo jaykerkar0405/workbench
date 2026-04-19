@@ -7,6 +7,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { ExternalLink, Zap, ArrowRight } from 'lucide-svelte';
+	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 
 	let { project }: { project: Project } = $props();
 
@@ -28,7 +29,12 @@
 		<div class="flex items-start justify-between gap-4">
 			<div class="flex items-start gap-3">
 				{#if icon}
-					<enhanced:img src={icon} alt={project.title} class="size-12 rounded-lg border border-border object-cover" />
+					<EnhancedImage
+						src={icon}
+						alt={project.title}
+						skeletonClass="rounded-lg"
+						class="size-12 rounded-lg border border-border object-cover"
+					/>
 				{/if}
 
 				<div class="-mt-1 min-w-0 flex-1">
