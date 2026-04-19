@@ -17,6 +17,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import type { Hackathon } from '$lib/hackathons/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
+	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import { getHackathonIcon, loadHackathonImages } from '$lib/assets/images';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
@@ -127,9 +128,11 @@
 			onkeydown={(e) => e.stopPropagation()}
 			class="flex items-center justify-center"
 		>
-			<enhanced:img
+			<EnhancedImage
 				src={images[lightboxIndex]}
 				alt="{hackathon.title} Image {lightboxIndex + 1}"
+				containerClass="max-h-[90vh] max-w-[90vw]"
+				skeletonClass="h-[70vh] w-[70vw] rounded-lg"
 				class="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
 			/>
 		</div>
@@ -142,10 +145,12 @@
 			<div class="flex flex-wrap items-start justify-between gap-4">
 				<div class="flex items-start gap-4">
 					{#if icon}
-						<enhanced:img
+						<EnhancedImage
 							src={icon}
 							alt={hackathon.title}
-							class="size-15 rounded-lg border border-border object-cover"
+							containerClass="shrink-0"
+							skeletonClass="rounded-lg"
+							class="size-15 rounded-lg border border-border object-contain"
 						/>
 					{/if}
 					<div class="-mt-1 flex flex-col lg:gap-1">
@@ -242,7 +247,12 @@
 												aria-label="View image {i + 1} fullscreen"
 												class="block w-full cursor-zoom-in border-0 bg-transparent p-0"
 											>
-												<enhanced:img src={image} class="h-auto w-full" alt="{hackathon.title} Image {i + 1}" />
+												<EnhancedImage
+													src={image}
+													class="h-auto w-full"
+													skeletonClass="aspect-video w-full"
+													alt="{hackathon.title} Image {i + 1}"
+												/>
 											</button>
 										</div>
 									</div>

@@ -5,6 +5,7 @@
 	import { getHackathonIcon } from '$lib/assets/images';
 	import type { Hackathon } from '$lib/hackathons/types';
 	import { Card, CardContent } from '$lib/components/ui/card';
+	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import { MapPin, Clock, Calendar, Trophy, ExternalLink, ArrowRight, Building2 } from 'lucide-svelte';
 
 	let { hackathon }: { hackathon: Hackathon } = $props();
@@ -29,7 +30,13 @@
 		<div class="flex items-start justify-between gap-4">
 			<div class="flex items-start gap-3">
 				{#if icon}
-					<enhanced:img src={icon} alt={hackathon.title} class="size-12 rounded-lg border border-border object-cover" />
+					<EnhancedImage
+						src={icon}
+						alt={hackathon.title}
+						containerClass="shrink-0"
+						skeletonClass="rounded-lg"
+						class="size-12 rounded-lg border border-border object-contain"
+					/>
 				{/if}
 
 				<div class="-mt-1 min-w-0 flex-1">

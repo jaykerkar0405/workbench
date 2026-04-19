@@ -5,6 +5,7 @@
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import { Button } from '$lib/components/ui/button';
 	import { navigationItems } from '$lib/config/navigation';
+	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import logo from '$lib/assets/icons/apple-touch-icon.png?enhanced';
 
 	const isActive = (href: string) => {
@@ -20,7 +21,7 @@
 >
 	<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-16 xl:px-6">
 		<a href="/" class="flex items-center gap-2.5">
-			<enhanced:img src={logo} alt="Logo" class="size-8 rounded-lg" />
+			<EnhancedImage src={logo} alt="Logo" class="size-8 rounded-lg" skeletonClass="rounded-lg" />
 			<span class="text-lg font-bold">Jay Kerkar</span>
 		</a>
 

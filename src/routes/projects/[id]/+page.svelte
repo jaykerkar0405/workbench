@@ -19,6 +19,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Carousel from '$lib/components/ui/carousel';
 	import HackathonCard from '$lib/components/hackathon-card.svelte';
+	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import { getProjectIcon, loadProjectScreenshots } from '$lib/assets/images';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
@@ -114,7 +115,12 @@
 			<div class="flex flex-wrap items-start justify-between gap-4">
 				<div class="flex items-start gap-4">
 					{#if icon}
-						<enhanced:img src={icon} alt={project.title} class="size-15 rounded-lg border border-border object-cover" />
+						<EnhancedImage
+							src={icon}
+							alt={project.title}
+							skeletonClass="rounded-lg"
+							class="size-15 rounded-lg border border-border object-cover"
+						/>
 					{/if}
 
 					<div class="-mt-1 flex flex-col lg:gap-1">
@@ -184,9 +190,10 @@
 								>
 									<CardContent class="p-0">
 										<div class="relative">
-											<enhanced:img
+											<EnhancedImage
 												src={screenshot}
 												alt="{project.title} Screenshot {i + 1}"
+												skeletonClass="aspect-video w-full rounded-lg"
 												class="aspect-video w-full rounded-lg object-cover transition-transform hover:scale-105"
 											/>
 										</div>
@@ -408,8 +415,10 @@
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
-			<enhanced:img
+			<EnhancedImage
 				src={screenshots[selectedImageIndex]}
+				containerClass="max-h-[90vh] max-w-[90vw]"
+				skeletonClass="h-[70vh] w-[70vw] rounded-lg"
 				class="max-h-[90vh] w-auto rounded-lg object-contain"
 				alt="{project.title} Screenshot {selectedImageIndex + 1}"
 			/>
