@@ -25,7 +25,6 @@ export const load: PageLoad = async ({ params, data }) => {
 		project,
 		ExtendedDescription,
 		repoData: data.repoData,
-		screenshots: data.screenshots,
 		teamMembersData: data.teamMembersData
 	};
 };

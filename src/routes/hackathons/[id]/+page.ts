@@ -17,9 +17,8 @@ export const load: PageLoad = ({ params, data }) => {
 	const project = projects.find((p) => p.hackathonId === params.id) ?? null;
 
 	return {
-		hackathon,
 		project,
-		images: data.images,
+		hackathon,
 		teamMembersData: data.teamMembersData
 	};
 };
