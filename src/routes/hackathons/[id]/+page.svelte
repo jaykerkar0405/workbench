@@ -17,44 +17,39 @@
 	import { Button } from '$lib/components/ui/button';
 	import type { Hackathon } from '$lib/hackathons/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
+	import { getHackathonIcon, loadHackathonImages } from '$lib/assets/images';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	let { data } = $props();
 
+	let images = $state<any[]>([]);
 	const project = $derived(data.project);
 	const hackathon = $derived(data.hackathon);
-	const images = $derived(data.images || []);
+	const icon = $derived(getHackathonIcon(hackathon.id));
 	const teamMembersData = $derived(data.teamMembersData || []);
+
+	$effect(() => {
+		loadHackathonImages(hackathon.id).then((imgs) => {
+			images = imgs;
+		});
+	});
 
 	let fullHeight = $state(0);
 	let mounted = $state(false);
 	let leftColHeight = $state(0);
 	let isExpanded = $state(false);
 	let needsExpansion = $state(false);
+	let lightboxIndex = $state<number | null>(null);
 	let leftColRef: HTMLDivElement | undefined = $state();
 	let imagesInnerRef: HTMLDivElement | undefined = $state();
 
-	let loadedFlags = $state<boolean[]>([]);
-
-	$effect(() => {
-		loadedFlags = images.map(() => false);
-	});
-
-	function onImageLoad(i: number) {
-		loadedFlags = loadedFlags.map((v, idx) => (idx === i ? true : v));
-	}
-
-	let lightboxSrc = $state<string | null>(null);
-	let lightboxAlt = $state('');
-
-	function openLightbox(src: string, alt: string) {
-		lightboxSrc = src;
-		lightboxAlt = alt;
+	function openLightbox(index: number) {
+		lightboxIndex = index;
 		document.body.style.overflow = 'hidden';
 	}
 
 	function closeLightbox() {
-		lightboxSrc = null;
+		lightboxIndex = null;
 		document.body.style.overflow = '';
 	}
 
@@ -108,7 +103,7 @@
 
 <svelte:window onkeydown={handleWindowKeydown} />
 
-{#if lightboxSrc}
+{#if lightboxIndex !== null}
 	<div
 		role="dialog"
 		tabindex="-1"
@@ -132,7 +127,11 @@
 			onkeydown={(e) => e.stopPropagation()}
 			class="flex items-center justify-center"
 		>
-			<img src={lightboxSrc} alt={lightboxAlt} class="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl" />
+			<enhanced:img
+				src={images[lightboxIndex]}
+				alt="{hackathon.title} Image {lightboxIndex + 1}"
+				class="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
+			/>
 		</div>
 	</div>
 {/if}
@@ -142,11 +141,13 @@
 		<div class="mb-8" in:fly={{ y: -20, duration: 600, delay: 0 }}>
 			<div class="flex flex-wrap items-start justify-between gap-4">
 				<div class="flex items-start gap-4">
-					<img
-						alt={hackathon.title}
-						src={`/hackathons/${hackathon.id}/icon.webp`}
-						class="size-15 rounded-lg border border-border object-cover"
-					/>
+					{#if icon}
+						<enhanced:img
+							src={icon}
+							alt={hackathon.title}
+							class="size-15 rounded-lg border border-border object-cover"
+						/>
+					{/if}
 					<div class="-mt-1 flex flex-col lg:gap-1">
 						<h1 class="text-[1.675rem] font-bold">{hackathon.title}</h1>
 						<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.9rem] text-muted-foreground">
@@ -235,23 +236,13 @@
 								{#each images as image, i (i)}
 									<div class="mb-3 break-inside-avoid overflow-hidden rounded-xl border border-border">
 										<div class="relative">
-											{#if !loadedFlags[i]}
-												<div class="animate-pulse bg-muted" style="aspect-ratio: 4/3;"></div>
-											{/if}
 											<button
 												type="button"
+												onclick={() => openLightbox(i)}
 												aria-label="View image {i + 1} fullscreen"
-												onclick={() => openLightbox(image, `${hackathon.title} Image ${i + 1}`)}
-												class="block w-full cursor-zoom-in border-0 bg-transparent p-0 {loadedFlags[i]
-													? ''
-													: 'sr-only'}"
+												class="block w-full cursor-zoom-in border-0 bg-transparent p-0"
 											>
-												<img
-													src={image}
-													class="h-auto w-full"
-													onload={() => onImageLoad(i)}
-													alt="{hackathon.title} Image {i + 1}"
-												/>
+												<enhanced:img src={image} class="h-auto w-full" alt="{hackathon.title} Image {i + 1}" />
 											</button>
 										</div>
 									</div>

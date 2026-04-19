@@ -33,22 +33,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		}
 	}
 
-	const screenshots: string[] = [];
-
-	for (let i = 1; i <= 20; i++) {
-		const screenshotPath = `/projects/${params.id}/screenshot-${i}.webp`;
-		try {
-			const response = await fetch(screenshotPath, { method: 'HEAD' });
-			if (response.ok) {
-				screenshots.push(screenshotPath);
-			} else {
-				break;
-			}
-		} catch {
-			break;
-		}
-	}
-
 	const teamMembersData = await Promise.all(
 		project.teamMembers.map(async (member) => {
 			try {
@@ -74,7 +58,6 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	return {
 		repoData,
-		screenshots,
 		teamMembersData: teamMembersData.filter((member): member is NonNullable<typeof member> => member !== null)
 	};
 };

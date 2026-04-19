@@ -19,15 +19,23 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Carousel from '$lib/components/ui/carousel';
 	import HackathonCard from '$lib/components/hackathon-card.svelte';
+	import { getProjectIcon, loadProjectScreenshots } from '$lib/assets/images';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	let { data } = $props();
 
+	let screenshots = $state<any[]>([]);
 	const project = $derived(data.project);
 	const repoData = $derived(data.repoData);
-	const screenshots = $derived(data.screenshots || []);
+	const icon = $derived(getProjectIcon(project.id));
 	const teamMembersData = $derived(data.teamMembersData || []);
 	const ExtendedDescription = $derived(data.ExtendedDescription);
+
+	$effect(() => {
+		loadProjectScreenshots(project.id).then((imgs) => {
+			screenshots = imgs;
+		});
+	});
 	const hackathon = $derived(
 		project.hackathonId ? (hackathons.find((h) => h.id === project.hackathonId) ?? null) : null
 	);
@@ -40,16 +48,6 @@
 	let selectedImageIndex = $state<number | null>(null);
 	let descColRef: HTMLDivElement | undefined = $state();
 	let leftColRef: HTMLDivElement | undefined = $state();
-
-	let loadedFlags = $state<boolean[]>([]);
-
-	$effect(() => {
-		loadedFlags = screenshots.map(() => false);
-	});
-
-	function onScreenshotLoad(i: number) {
-		loadedFlags = loadedFlags.map((v, idx) => (idx === i ? true : v));
-	}
 
 	const openImageModal = (index: number) => {
 		selectedImageIndex = index;
@@ -115,11 +113,9 @@
 		<div class="mb-8" in:fly={{ y: -20, duration: 600, delay: 0 }}>
 			<div class="flex flex-wrap items-start justify-between gap-4">
 				<div class="flex items-start gap-4">
-					<img
-						alt={project.title}
-						src={`/projects/${project.id}/icon.webp`}
-						class="size-15 rounded-lg border border-border object-cover"
-					/>
+					{#if icon}
+						<enhanced:img src={icon} alt={project.title} class="size-15 rounded-lg border border-border object-cover" />
+					{/if}
 
 					<div class="-mt-1 flex flex-col lg:gap-1">
 						<h1 class="text-[1.675rem] font-bold">{project.title}</h1>
@@ -188,18 +184,10 @@
 								>
 									<CardContent class="p-0">
 										<div class="relative">
-											{#if !loadedFlags[i]}
-												<div class="aspect-video w-full animate-pulse rounded-lg bg-muted"></div>
-											{/if}
-											<img
+											<enhanced:img
 												src={screenshot}
-												onload={() => onScreenshotLoad(i)}
 												alt="{project.title} Screenshot {i + 1}"
-												class="aspect-video w-full rounded-lg object-cover transition-transform hover:scale-105 {loadedFlags[
-													i
-												]
-													? ''
-													: 'sr-only'}"
+												class="aspect-video w-full rounded-lg object-cover transition-transform hover:scale-105"
 											/>
 										</div>
 									</CardContent>
@@ -420,7 +408,7 @@
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
-			<img
+			<enhanced:img
 				src={screenshots[selectedImageIndex]}
 				class="max-h-[90vh] w-auto rounded-lg object-contain"
 				alt="{project.title} Screenshot {selectedImageIndex + 1}"
