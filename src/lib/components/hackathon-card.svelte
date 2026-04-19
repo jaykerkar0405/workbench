@@ -2,12 +2,14 @@
 	import { resolve } from '$app/paths';
 	import { formatDateRange } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
+	import { getHackathonIcon } from '$lib/assets/images';
 	import type { Hackathon } from '$lib/hackathons/types';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { MapPin, Clock, Calendar, Trophy, ExternalLink, ArrowRight, Building2 } from 'lucide-svelte';
 
 	let { hackathon }: { hackathon: Hackathon } = $props();
 
+	const icon = $derived(getHackathonIcon(hackathon.id));
 	const dateRange = $derived(formatDateRange(hackathon.timestamp, hackathon.duration));
 
 	const prizeLabel = (h: Hackathon): string | null => {
@@ -26,11 +28,9 @@
 	<CardContent class="flex flex-1 flex-col gap-5 p-6">
 		<div class="flex items-start justify-between gap-4">
 			<div class="flex items-start gap-3">
-				<img
-					alt={hackathon.title}
-					src={`/hackathons/${hackathon.id}/icon.webp`}
-					class="size-12 rounded-lg border border-border object-cover"
-				/>
+				{#if icon}
+					<enhanced:img src={icon} alt={hackathon.title} class="size-12 rounded-lg border border-border object-cover" />
+				{/if}
 
 				<div class="-mt-1 min-w-0 flex-1">
 					<h3 class="mb-1 text-xl font-bold">{hackathon.title}</h3>

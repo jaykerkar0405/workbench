@@ -3,11 +3,14 @@
 	import { hackathons } from '$lib/hackathons';
 	import { Button } from '$lib/components/ui/button';
 	import type { Project } from '$lib/projects/types';
+	import { getProjectIcon } from '$lib/assets/images';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { ExternalLink, Zap, ArrowRight } from 'lucide-svelte';
 
 	let { project }: { project: Project } = $props();
+
+	const icon = $derived(getProjectIcon(project.id));
 
 	const hackathon = $derived(
 		project.hackathonId ? (hackathons.find((h) => h.id === project.hackathonId) ?? null) : null
@@ -24,11 +27,9 @@
 	<CardContent class="flex flex-1 flex-col gap-5.5 p-6">
 		<div class="flex items-start justify-between gap-4">
 			<div class="flex items-start gap-3">
-				<img
-					alt={project.title}
-					src={`/projects/${project.id}/icon.webp`}
-					class="size-12 rounded-lg border border-border object-cover"
-				/>
+				{#if icon}
+					<enhanced:img src={icon} alt={project.title} class="size-12 rounded-lg border border-border object-cover" />
+				{/if}
 
 				<div class="-mt-1 min-w-0 flex-1">
 					<h3 class="mb-1 text-xl font-bold">{project.title}</h3>
