@@ -109,6 +109,18 @@ export const hackathons: Hackathon[] = [
 		location: 'Mumbai, India',
 		website: 'https://luma.com/kauset3d',
 		organizer: 'OpenAI Codex Ambassadors'
+	},
+	{
+		id: 'hackx',
+		duration: 24,
+		organizer: 'KJSSE',
+		timestamp: '2026-04-11',
+		title: 'GajShield Hack X',
+		location: 'Mumbai, India',
+		website: 'https://hack-x.devfolio.co',
+		prize: {
+			rank: '2nd'
+		}
 	}
 ];
 
