@@ -26,7 +26,8 @@ import {
 	siCloudflare,
 	siTailwindcss,
 	siGooglegemini,
-	siModelcontextprotocol
+	siModelcontextprotocol,
+	siCodesandbox
 } from 'simple-icons';
 import type { Project } from './types';
 
@@ -295,6 +296,27 @@ export const projects: Project[] = [
 			},
 			{
 				githubUsername: 'RishiBuilds'
+			}
+		]
+	},
+	{
+		featured: false,
+		id: 'exploit-arena',
+		hackathonId: 'hackx',
+		title: 'Exploit Arena',
+		videoLink: 'https://youtu.be/IGlVT8_t94E',
+		githubLink: 'https://github.com/WhyAsh5114/exploit-arena',
+		shortDescription: 'Web3 bug bounty protocol with sandboxed exploit',
+		techStack: [siSolidity, siEthereum, siNextdotjs, siWagmi, siTypescript, siTailwindcss, siShadcnui],
+		teamMembers: [
+			{
+				githubUsername: 'jaykerkar0405'
+			},
+			{
+				githubUsername: 'WhyAsh5114'
+			},
+			{
+				githubUsername: 'sundaram123krishnan'
 			}
 		]
 	}
