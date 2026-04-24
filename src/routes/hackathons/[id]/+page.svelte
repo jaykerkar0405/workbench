@@ -245,11 +245,11 @@
 												type="button"
 												onclick={() => openLightbox(i)}
 												aria-label="View image {i + 1} fullscreen"
-												class="block w-full cursor-zoom-in border-0 bg-transparent p-0"
+												class="group block w-full cursor-zoom-in border-0 bg-transparent p-0"
 											>
 												<EnhancedImage
 													src={image}
-													class="h-auto w-full"
+													class="h-auto w-full transition-transform duration-300 group-hover:scale-105"
 													skeletonClass="aspect-video w-full"
 													alt="{hackathon.title} Image {i + 1}"
 												/>
