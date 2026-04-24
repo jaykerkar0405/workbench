@@ -37,9 +37,12 @@
 	};
 </script>
 
-<div class={cn('grid', containerClass)}>
+<div class={cn('relative', containerClass)}>
 	{#if !isLoaded}
-		<Skeleton aria-hidden="true" class={cn('z-0 col-start-1 row-start-1 rounded-[inherit]', skeletonClass)} />
+		<Skeleton
+			aria-hidden="true"
+			class={cn('pointer-events-none absolute inset-0 z-0 h-full w-full rounded-[inherit]', skeletonClass)}
+		/>
 	{/if}
 
 	<enhanced:img
@@ -48,6 +51,6 @@
 		{...restProps}
 		onload={handleLoad}
 		onerror={handleError}
-		class={cn('z-10 col-start-1 row-start-1 transition-opacity duration-300', !isLoaded && 'opacity-0', className)}
+		class={cn('relative z-10 block transition-opacity duration-300', !isLoaded && 'opacity-0', className)}
 	/>
 </div>
