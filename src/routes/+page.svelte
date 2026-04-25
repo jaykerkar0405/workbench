@@ -55,7 +55,8 @@
 		'🏆 ETHMumbai 2026 | Winner — Main AI Track + BitGo Sponsor Track (National)',
 		'🥇 HackByte 3.0 | Top 10 — 125 teams (Central India)',
 		'🥈 HackX 3.0 | Runner-up — NMIMS Navi Mumbai',
-		'🥈 HackX 4.0 | Runner-up — NMIMS Navi Mumbai'
+		'🥈 HackX 4.0 | Runner-up — NMIMS Navi Mumbai',
+		'🥈 GajShield Hack X | Runner-up — KJSSE, Mumbai'
 	];
 
 	let currentLine = $state(0);
