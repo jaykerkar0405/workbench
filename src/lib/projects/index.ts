@@ -21,13 +21,14 @@ import {
 	siNextdotjs,
 	siMediapipe,
 	siTailscale,
+	siTurborepo,
 	siTypescript,
 	siPostgresql,
+	siCodemirror,
 	siCloudflare,
 	siTailwindcss,
 	siGooglegemini,
-	siModelcontextprotocol,
-	siCodesandbox
+	siModelcontextprotocol
 } from 'simple-icons';
 import type { Project } from './types';
 
@@ -258,7 +259,7 @@ export const projects: Project[] = [
 			siTailwindcss,
 			siModelcontextprotocol
 		],
-		featured: true,
+		featured: false,
 		id: 'mesh-search',
 		title: 'MeshSearch',
 		hackathonId: 'ethmumbai-2026',
@@ -308,6 +309,39 @@ export const projects: Project[] = [
 		githubLink: 'https://github.com/WhyAsh5114/exploit-arena',
 		shortDescription: 'Web3 bug bounty protocol with sandboxed exploit',
 		techStack: [siSolidity, siEthereum, siNextdotjs, siWagmi, siTypescript, siTailwindcss, siShadcnui],
+		teamMembers: [
+			{
+				githubUsername: 'jaykerkar0405'
+			},
+			{
+				githubUsername: 'WhyAsh5114'
+			},
+			{
+				githubUsername: 'sundaram123krishnan'
+			}
+		]
+	},
+	{
+		featured: true,
+		id: 'crucible',
+		title: 'Crucible',
+		githubLink: 'https://github.com/WhyAsh5114/Crucible',
+		shortDescription: 'AI builds, deploys, previews dApps in-browser',
+		techStack: [
+			siZod,
+			siBun,
+			siHono,
+			siWagmi,
+			siSvelte,
+			siPrisma,
+			siSolidity,
+			siShadcnui,
+			siTurborepo,
+			siTypescript,
+			siCodemirror,
+			siPostgresql,
+			siModelcontextprotocol
+		],
 		teamMembers: [
 			{
 				githubUsername: 'jaykerkar0405'
