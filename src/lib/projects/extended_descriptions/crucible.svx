@@ -1,0 +1,47 @@
+# The problem it solves
+
+Building dApps requires stitching together five disconnected tools: editor, terminal, browser, wallet extension, and block explorer. AI assistants see only code, unaware of chain state, balances, or transaction history.
+
+Crucible solves this by turning dApp development into a **single unified browser tab**, where an AI agent is the primary interface with full visibility into chain state and transaction context.
+
+---
+
+# What makes it special
+
+**The chat is the entire interface.** You describe what you want. The agent:
+
+- Writes Solidity + frontend code
+- Compiles and deploys to a real Hardhat node
+- Renders a live dApp preview
+- **Automatically detects and heals failed transactions** by tracing execution and consulting a decentralized peer network for known fixes
+- Wires keepers and automation through KeeperHub
+
+All visible, inspectable, and overridable at any point.
+
+---
+
+# How it works
+
+**Zero-Config Local Chain** — Each workspace gets its own server-side Hardhat instance with isolated state, pre-funded accounts, and automatic nonce syncing.
+
+**Self-Healing Reverts** — When a transaction fails, the agent traces execution, queries a decentralized peer network (Gensyn AXL) for known fixes, proposes a patch, verifies it works, and redeploys.
+
+**Live Preview** — Real frontend dev server with EIP-1193 bridge that lets the preview call contracts safely without exposing private keys.
+
+**Persistent Agent Memory** — Reverts solved by any agent are stored on 0G Storage and shared across the peer network, creating a decentralized knowledge layer.
+
+---
+
+# Architecture
+
+Three core pillars:
+
+1. **0G-Native Agent** — Sealed inference on 0G Compute; persistent memory on 0G Storage
+2. **AXL Peer Network** — Agents share learned revert fixes with each other over Gensyn AXL mesh
+3. **KeeperHub Integration** — Automate post-deployment actions via MCP server discovery
+
+---
+
+# Key insight
+
+**Crucible proved that an AI agent can be the primary interface for Web3 development**, with real-time context over chain state, wallet balances, and peer knowledge. By standardizing on MCP for all integrations, new sponsor tools are picked up automatically without rebuilds.
