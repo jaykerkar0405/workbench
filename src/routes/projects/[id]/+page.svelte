@@ -20,6 +20,7 @@
 	import * as Carousel from '$lib/components/ui/carousel';
 	import HackathonCard from '$lib/components/hackathon-card.svelte';
 	import EnhancedImage from '$lib/components/enhanced-image.svelte';
+	import type { CarouselAPI } from '$lib/components/ui/carousel/context';
 	import { getProjectIcon, loadProjectScreenshots } from '$lib/assets/images';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
@@ -46,9 +47,11 @@
 	let leftColHeight = $state(0);
 	let isExpanded = $state(false);
 	let needsExpansion = $state(false);
+	let carouselApi = $state<CarouselAPI | undefined>();
 	let selectedImageIndex = $state<number | null>(null);
 	let descColRef: HTMLDivElement | undefined = $state();
 	let leftColRef: HTMLDivElement | undefined = $state();
+	let carouselRef: HTMLDivElement | undefined = $state();
 
 	const openImageModal = (index: number) => {
 		selectedImageIndex = index;
@@ -69,6 +72,27 @@
 
 	onMount(() => {
 		mounted = true;
+	});
+
+	$effect(() => {
+		if (carouselRef && carouselApi) {
+			const handleWheel = (e: WheelEvent) => {
+				e.preventDefault();
+				const api = carouselApi;
+				if (!api) return;
+				if (e.deltaX > 0) {
+					api.scrollNext();
+				} else if (e.deltaX < 0) {
+					api.scrollPrev();
+				}
+			};
+
+			carouselRef.addEventListener('wheel', handleWheel, { passive: false });
+
+			return () => {
+				carouselRef?.removeEventListener('wheel', handleWheel);
+			};
+		}
 	});
 
 	$effect(() => {
@@ -175,8 +199,8 @@
 		</div>
 
 		{#if screenshots.length > 0}
-			<div class="mb-8" in:fly={{ y: -20, duration: 600, delay: 150 }}>
-				<Carousel.Root opts={{ align: 'start' }} class="w-full">
+			<div bind:this={carouselRef} class="mb-8" in:fly={{ y: -20, duration: 600, delay: 150 }}>
+				<Carousel.Root opts={{ align: 'start' }} class="w-full" setApi={(api) => (carouselApi = api)}>
 					<Carousel.Content class="-ml-2 md:-ml-4">
 						{#each screenshots as screenshot, i}
 							<Carousel.Item class="basis-full pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3">
