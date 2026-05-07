@@ -322,9 +322,10 @@ export const projects: Project[] = [
 		]
 	},
 	{
-		featured: true,
 		id: 'crucible',
+		featured: true,
 		title: 'Crucible',
+		hackathonId: 'open-agents',
 		videoLink: 'https://youtu.be/XDz7qSXFfp8',
 		githubLink: 'https://github.com/WhyAsh5114/Crucible',
 		shortDescription: 'AI builds, deploys, previews dApps in-browser',
