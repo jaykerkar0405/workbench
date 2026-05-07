@@ -325,6 +325,7 @@ export const projects: Project[] = [
 		featured: true,
 		id: 'crucible',
 		title: 'Crucible',
+		videoLink: 'https://youtu.be/XDz7qSXFfp8',
 		githubLink: 'https://github.com/WhyAsh5114/Crucible',
 		shortDescription: 'AI builds, deploys, previews dApps in-browser',
 		techStack: [
