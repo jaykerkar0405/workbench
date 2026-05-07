@@ -121,6 +121,15 @@ export const hackathons: Hackathon[] = [
 		prize: {
 			rank: '2nd'
 		}
+	},
+	{
+		duration: 288,
+		id: 'open-agents',
+		location: 'Online',
+		title: 'Open Agents',
+		organizer: 'ETHGlobal',
+		timestamp: '2026-04-24',
+		website: 'https://ethglobal.com/events/openagents'
 	}
 ];
 
