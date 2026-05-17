@@ -3,18 +3,17 @@
 # ============================================================================
 # Image Optimization Script for Portfolio
 # ============================================================================
-# Optimizes images in projects and hackathons directories
-# - Icons (icon.png/jpg) → PNG format with lossless compression
-# - Screenshots and images → JPG format (only if smaller than PNG)
+# Optimizes and resizes images for web performance
+# - Icons: PNG format, lossless compression, max 512px
+# - Screenshots/Images: JPG format, max 1920px width, 85% quality
 # ============================================================================
 
-set -e
-
-# Colors (minimal and professional)
-GRAY='\033[0;90m'
+# Colors
+CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
+BLUE='\033[0;34m'
 BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'
@@ -22,20 +21,28 @@ NC='\033[0m'
 # Configuration
 PROJECTS_DIR="src/lib/assets/projects"
 HACKATHONS_DIR="src/lib/assets/hackathons"
+
+# Image optimization settings
 PNG_QUALITY=90
 PNG_COMPRESSION=9
 JPG_QUALITY=85
+MAX_WIDTH=1920
+MAX_ICON_SIZE=512
+
+# Threshold: Skip if file was already optimized (less than 2% potential savings)
+OPTIMIZATION_THRESHOLD=2
 
 # Counters
 TOTAL_FILES=0
 OPTIMIZED_FILES=0
 CONVERTED_FILES=0
+RESIZED_FILES=0
 SKIPPED_FILES=0
 FAILED_FILES=0
 TOTAL_ORIGINAL_SIZE=0
 TOTAL_NEW_SIZE=0
 
-# Check if ImageMagick is installed
+# Check dependencies
 if ! command -v magick &> /dev/null; then
     echo -e "${RED}Error: ImageMagick is not installed${NC}"
     echo "Install: sudo apt install imagemagick"
@@ -43,9 +50,15 @@ if ! command -v magick &> /dev/null; then
 fi
 
 # Header
+clear
 echo ""
-echo -e "${BOLD}Image Optimization${NC}"
-echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+echo -e "${BOLD}${CYAN}          Image Optimization for Portfolio${NC}"
+echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+echo ""
+
+VERSION=$(magick -version | head -n1 | grep -oP '\d+\.\d+\.\d+' | head -n1)
+echo -e "${DIM}Using ImageMagick ${VERSION}${NC}"
 echo ""
 
 # Function to format file size
@@ -54,7 +67,7 @@ format_size() {
     if [ $size -ge 1048576 ]; then
         awk "BEGIN {printf \"%.2f MB\", $size / 1048576}"
     else
-        awk "BEGIN {printf \"%.2f KB\", $size / 1024}"
+        awk "BEGIN {printf \"%.0f KB\", $size / 1024}"
     fi
 }
 
@@ -62,7 +75,7 @@ format_size() {
 get_file_size() {
     local file="$1"
     if [ -f "$file" ]; then
-        stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo 0
+        stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo 0
     else
         echo 0
     fi
@@ -74,6 +87,12 @@ is_icon() {
     [[ "$filename" == "icon.png" ]] || [[ "$filename" == "icon.jpg" ]] || [[ "$filename" == "icon.jpeg" ]]
 }
 
+# Function to get image dimensions
+get_dimensions() {
+    local file="$1"
+    magick identify -format "%wx%h" "$file" 2>/dev/null || echo "0x0"
+}
+
 # Function to optimize image
 optimize_image() {
     local file="$1"
@@ -82,216 +101,169 @@ optimize_image() {
     local extension="${filename##*.}"
     local basename="${filename%.*}"
     
-    # Get original size
+    # Get original size and dimensions
     local original_size=$(get_file_size "$file")
+    local dimensions=$(get_dimensions "$file")
     TOTAL_ORIGINAL_SIZE=$((TOTAL_ORIGINAL_SIZE + original_size))
     
     local output_file="$file"
-    local temp_file="${dirname}/.${basename}_temp"
+    local temp_file="${dirname}/.${basename}_temp.tmp"
+    local was_resized=false
+    local was_converted=false
     
-    # Determine optimization strategy
     if is_icon "$file"; then
         # ============================================================
-        # ICONS: Convert to PNG with lossless compression
+        # ICONS: PNG format, resize if too large, lossless compression
         # ============================================================
         output_file="${dirname}/${basename}.png"
-        temp_file="${output_file}.tmp"
         
-        magick "$file" -strip -quality $PNG_QUALITY -define png:compression-level=$PNG_COMPRESSION "$temp_file" 2>/dev/null
+        local width=$(echo $dimensions | cut -d'x' -f1)
+        local height=$(echo $dimensions | cut -d'x' -f2)
         
-        if [ $? -eq 0 ]; then
+        if [ $width -gt $MAX_ICON_SIZE ] || [ $height -gt $MAX_ICON_SIZE ]; then
+            magick "$file" -resize "${MAX_ICON_SIZE}x${MAX_ICON_SIZE}>" -strip -quality $PNG_QUALITY \
+                -define png:compression-level=$PNG_COMPRESSION "$temp_file" 2>/dev/null
+            was_resized=true
+        else
+            magick "$file" -strip -quality $PNG_QUALITY \
+                -define png:compression-level=$PNG_COMPRESSION "$temp_file" 2>/dev/null
+        fi
+        
+        if [ $? -eq 0 ] && [ -f "$temp_file" ]; then
             local new_size=$(get_file_size "$temp_file")
+            local new_dimensions=$(get_dimensions "$temp_file")
             
-            if [ $new_size -le $original_size ] || [ "$file" == "$output_file" ]; then
-                [ "$file" != "$output_file" ] && rm -f "$file"
+            # Calculate potential savings
+            local potential_savings=$(awk "BEGIN {printf \"%.1f\", (($original_size - $new_size) / $original_size) * 100}")
+            local savings_int=$(awk "BEGIN {printf \"%.0f\", $potential_savings}")
+            
+            # Only optimize if savings are significant or format needs conversion
+            if [ $savings_int -ge $OPTIMIZATION_THRESHOLD ] || [ "$file" != "$output_file" ]; then
+                [ "$file" != "$output_file" ] && rm -f "$file" && was_converted=true
                 mv "$temp_file" "$output_file"
                 
                 TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + new_size))
                 
-                local savings=$(awk "BEGIN {printf \"%.1f\", (($original_size - $new_size) / $original_size) * 100}")
                 local original_fmt=$(format_size $original_size)
                 local new_fmt=$(format_size $new_size)
                 
-                if [ "$file" != "$output_file" ]; then
-                    echo -e "  ${GREEN}✓${NC} ${BOLD}icon.${extension}${NC} → ${BOLD}icon.png${NC}  ${DIM}${original_fmt} → ${new_fmt} (${savings}% saved)${NC}"
+                printf "  ${GREEN}✓${NC} %-30s ${DIM}%9s → %-9s${NC} ${GREEN}(%4.1f%%)${NC}" "$filename" "$original_fmt" "$new_fmt" "$potential_savings"
+                
+                if [ "$was_converted" = true ]; then
+                    printf " ${YELLOW}[PNG]${NC}"
                     CONVERTED_FILES=$((CONVERTED_FILES + 1))
-                else
-                    echo -e "  ${GREEN}✓${NC} ${BOLD}${filename}${NC}  ${DIM}${original_fmt} → ${new_fmt} (${savings}% saved) [PNG-${PNG_COMPRESSION}]${NC}"
                 fi
+                if [ "$was_resized" = true ]; then
+                    printf " ${BLUE}[${new_dimensions}]${NC}"
+                    RESIZED_FILES=$((RESIZED_FILES + 1))
+                fi
+                echo ""
                 OPTIMIZED_FILES=$((OPTIMIZED_FILES + 1))
             else
                 rm -f "$temp_file"
                 TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-                echo -e "  ${GRAY}−${NC} ${DIM}${filename}  Already optimal${NC}"
+                printf "  ${DIM}− %-30s${NC} ${DIM}Already optimal${NC}\n" "$filename"
                 SKIPPED_FILES=$((SKIPPED_FILES + 1))
             fi
         else
-            echo -e "  ${RED}✗${NC} ${filename}  ${RED}Failed${NC}"
+            rm -f "$temp_file"
+            printf "  ${RED}✗ %-30s Failed${NC}\n" "$filename"
             FAILED_FILES=$((FAILED_FILES + 1))
             TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-            rm -f "$temp_file"
         fi
         
     elif [[ "$filename" == screenshot-* ]] || [[ "$filename" == image-* ]]; then
         # ============================================================
-        # SCREENSHOTS/IMAGES: Try JPG conversion, fallback to PNG
+        # SCREENSHOTS/IMAGES: JPG format, resize to max width, compress
         # ============================================================
         output_file="${dirname}/${basename}.jpg"
-        temp_file="${output_file}.tmp"
         
-        magick "$file" -strip -quality $JPG_QUALITY -sampling-factor 4:2:0 -interlace Plane "$temp_file" 2>/dev/null
+        local width=$(echo $dimensions | cut -d'x' -f1)
         
-        if [ $? -eq 0 ]; then
+        if [ $width -gt $MAX_WIDTH ]; then
+            magick "$file" -resize "${MAX_WIDTH}x>" -strip -quality $JPG_QUALITY \
+                -sampling-factor 4:2:0 -interlace Plane -colorspace RGB "$temp_file" 2>/dev/null
+            was_resized=true
+        else
+            magick "$file" -strip -quality $JPG_QUALITY \
+                -sampling-factor 4:2:0 -interlace Plane -colorspace RGB "$temp_file" 2>/dev/null
+        fi
+        
+        if [ $? -eq 0 ] && [ -f "$temp_file" ]; then
             local new_size=$(get_file_size "$temp_file")
+            local new_dimensions=$(get_dimensions "$temp_file")
             
-            if [ $new_size -lt $original_size ]; then
-                # JPG is smaller - use it
-                [ "$file" != "$output_file" ] && rm -f "$file"
+            # Calculate potential savings
+            local potential_savings=$(awk "BEGIN {printf \"%.1f\", (($original_size - $new_size) / $original_size) * 100}")
+            local savings_int=$(awk "BEGIN {printf \"%.0f\", $potential_savings}")
+            
+            # Only optimize if savings are significant
+            if [ $savings_int -ge $OPTIMIZATION_THRESHOLD ] || [ "$file" != "$output_file" ]; then
+                [ "$file" != "$output_file" ] && rm -f "$file" && was_converted=true
                 mv "$temp_file" "$output_file"
                 
                 TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + new_size))
                 
-                local savings=$(awk "BEGIN {printf \"%.1f\", (($original_size - $new_size) / $original_size) * 100}")
                 local original_fmt=$(format_size $original_size)
                 local new_fmt=$(format_size $new_size)
                 
-                if [ "$file" != "$output_file" ]; then
-                    echo -e "  ${GREEN}✓${NC} ${BOLD}${filename}${NC} → ${BOLD}${basename}.jpg${NC}  ${DIM}${original_fmt} → ${new_fmt} (${savings}% saved) [JPG-${JPG_QUALITY}]${NC}"
+                printf "  ${GREEN}✓${NC} %-30s ${DIM}%9s → %-9s${NC} ${GREEN}(%4.1f%%)${NC}" "$filename" "$original_fmt" "$new_fmt" "$potential_savings"
+                
+                if [ "$was_converted" = true ]; then
+                    printf " ${YELLOW}[JPG]${NC}"
                     CONVERTED_FILES=$((CONVERTED_FILES + 1))
-                else
-                    echo -e "  ${GREEN}✓${NC} ${BOLD}${filename}${NC}  ${DIM}${original_fmt} → ${new_fmt} (${savings}% saved) [JPG-${JPG_QUALITY}]${NC}"
                 fi
-                OPTIMIZED_FILES=$((OPTIMIZED_FILES + 1))
-            else
-                # PNG is smaller - optimize PNG instead
-                rm -f "$temp_file"
-                temp_file="${file}.tmp"
-                
-                if [[ "$extension" == "png" ]]; then
-                    magick "$file" -strip -quality $PNG_QUALITY -define png:compression-level=$PNG_COMPRESSION "$temp_file" 2>/dev/null
-                    
-                    if [ $? -eq 0 ]; then
-                        local new_size=$(get_file_size "$temp_file")
-                        
-                        if [ $new_size -lt $original_size ]; then
-                            mv "$temp_file" "$file"
-                            TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + new_size))
-                            
-                            local savings=$(awk "BEGIN {printf \"%.1f\", (($original_size - $new_size) / $original_size) * 100}")
-                            local original_fmt=$(format_size $original_size)
-                            local new_fmt=$(format_size $new_size)
-                            
-                            echo -e "  ${GREEN}✓${NC} ${BOLD}${filename}${NC}  ${DIM}${original_fmt} → ${new_fmt} (${savings}% saved) [PNG-${PNG_COMPRESSION}]${NC}"
-                            OPTIMIZED_FILES=$((OPTIMIZED_FILES + 1))
-                        else
-                            rm -f "$temp_file"
-                            TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-                            echo -e "  ${GRAY}−${NC} ${DIM}${filename}  Already optimal${NC}"
-                            SKIPPED_FILES=$((SKIPPED_FILES + 1))
-                        fi
-                    else
-                        TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-                        echo -e "  ${GRAY}−${NC} ${DIM}${filename}  Already optimal${NC}"
-                        SKIPPED_FILES=$((SKIPPED_FILES + 1))
-                    fi
-                else
-                    # Already JPG, optimize it
-                    magick "$file" -strip -quality $JPG_QUALITY -sampling-factor 4:2:0 -interlace Plane "$temp_file" 2>/dev/null
-                    
-                    if [ $? -eq 0 ]; then
-                        local new_size=$(get_file_size "$temp_file")
-                        
-                        if [ $new_size -lt $original_size ]; then
-                            mv "$temp_file" "$file"
-                            TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + new_size))
-                            
-                            local savings=$(awk "BEGIN {printf \"%.1f\", (($original_size - $new_size) / $original_size) * 100}")
-                            local original_fmt=$(format_size $original_size)
-                            local new_fmt=$(format_size $new_size)
-                            
-                            echo -e "  ${GREEN}✓${NC} ${BOLD}${filename}${NC}  ${DIM}${original_fmt} → ${new_fmt} (${savings}% saved) [JPG-${JPG_QUALITY}]${NC}"
-                            OPTIMIZED_FILES=$((OPTIMIZED_FILES + 1))
-                        else
-                            rm -f "$temp_file"
-                            TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-                            echo -e "  ${GRAY}−${NC} ${DIM}${filename}  Already optimal${NC}"
-                            SKIPPED_FILES=$((SKIPPED_FILES + 1))
-                        fi
-                    else
-                        TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-                        echo -e "  ${GRAY}−${NC} ${DIM}${filename}  Already optimal${NC}"
-                        SKIPPED_FILES=$((SKIPPED_FILES + 1))
-                    fi
+                if [ "$was_resized" = true ]; then
+                    printf " ${BLUE}[${new_dimensions}]${NC}"
+                    RESIZED_FILES=$((RESIZED_FILES + 1))
                 fi
-            fi
-        else
-            echo -e "  ${RED}✗${NC} ${filename}  ${RED}Failed${NC}"
-            FAILED_FILES=$((FAILED_FILES + 1))
-            TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-            rm -f "$temp_file"
-        fi
-    else
-        # ============================================================
-        # OTHER: Optimize in original format
-        # ============================================================
-        temp_file="${file}.tmp"
-        
-        if [[ "$extension" == "png" ]]; then
-            magick "$file" -strip -quality $PNG_QUALITY -define png:compression-level=$PNG_COMPRESSION "$temp_file" 2>/dev/null
-        else
-            magick "$file" -strip -quality $JPG_QUALITY -sampling-factor 4:2:0 -interlace Plane "$temp_file" 2>/dev/null
-        fi
-        
-        if [ $? -eq 0 ]; then
-            local new_size=$(get_file_size "$temp_file")
-            
-            if [ $new_size -lt $original_size ]; then
-                mv "$temp_file" "$file"
-                TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + new_size))
-                
-                local savings=$(awk "BEGIN {printf \"%.1f\", (($original_size - $new_size) / $original_size) * 100}")
-                local original_fmt=$(format_size $original_size)
-                local new_fmt=$(format_size $new_size)
-                
-                echo -e "  ${GREEN}✓${NC} ${BOLD}${filename}${NC}  ${DIM}${original_fmt} → ${new_fmt} (${savings}% saved)${NC}"
+                echo ""
                 OPTIMIZED_FILES=$((OPTIMIZED_FILES + 1))
             else
                 rm -f "$temp_file"
                 TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-                echo -e "  ${GRAY}−${NC} ${DIM}${filename}  Already optimal${NC}"
+                printf "  ${DIM}− %-30s${NC} ${DIM}Already optimal${NC}\n" "$filename"
                 SKIPPED_FILES=$((SKIPPED_FILES + 1))
             fi
         else
-            echo -e "  ${RED}✗${NC} ${filename}  ${RED}Failed${NC}"
+            rm -f "$temp_file"
+            printf "  ${RED}✗ %-30s Failed${NC}\n" "$filename"
             FAILED_FILES=$((FAILED_FILES + 1))
             TOTAL_NEW_SIZE=$((TOTAL_NEW_SIZE + original_size))
-            rm -f "$temp_file"
         fi
     fi
 }
 
-# Process projects directory
-if [ -d "$PROJECTS_DIR" ]; then
-    echo -e "${DIM}Scanning${NC} ${PROJECTS_DIR}"
+# Process directory
+process_directory() {
+    local dir=$1
+    
+    if [ ! -d "$dir" ]; then
+        return
+    fi
+    
+    echo -e "${CYAN}▶${NC} Processing ${BOLD}${dir}${NC}"
     echo ""
     
-    while IFS= read -r -d '' file; do
-        TOTAL_FILES=$((TOTAL_FILES + 1))
-        optimize_image "$file"
-    done < <(find "$PROJECTS_DIR" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) -print0)
-fi
+    local found_files=0
+    while IFS= read -r file; do
+        if [ -f "$file" ]; then
+            ((TOTAL_FILES++))
+            ((found_files++))
+            optimize_image "$file"
+        fi
+    done < <(find "$dir" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \))
+    
+    if [ $found_files -eq 0 ]; then
+        echo -e "  ${DIM}No images found${NC}"
+    fi
+    
+    echo ""
+}
 
-# Process hackathons directory
-if [ -d "$HACKATHONS_DIR" ]; then
-    echo ""
-    echo -e "${DIM}Scanning${NC} ${HACKATHONS_DIR}"
-    echo ""
-    
-    while IFS= read -r -d '' file; do
-        TOTAL_FILES=$((TOTAL_FILES + 1))
-        optimize_image "$file"
-    done < <(find "$HACKATHONS_DIR" -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) -print0)
-fi
+# Process both directories
+process_directory "$PROJECTS_DIR"
+process_directory "$HACKATHONS_DIR"
 
 # Calculate totals
 TOTAL_ORIGINAL_FMT=$(format_size $TOTAL_ORIGINAL_SIZE)
@@ -308,19 +280,27 @@ fi
 
 # Print summary
 echo ""
-echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
+echo -e "${BOLD}${CYAN}                          Summary${NC}"
+echo -e "${BOLD}${CYAN}═══════════════════════════════════════════════════════════════${NC}"
 echo ""
-echo -e "${BOLD}Summary${NC}"
+echo -e "  ${BOLD}Files${NC}"
+echo -e "    Total:           ${TOTAL_FILES}"
+echo -e "    ${GREEN}Optimized:       ${OPTIMIZED_FILES}${NC}"
+echo -e "    ${YELLOW}Converted:       ${CONVERTED_FILES}${NC}"
+echo -e "    ${BLUE}Resized:         ${RESIZED_FILES}${NC}"
+echo -e "    ${DIM}Skipped:         ${SKIPPED_FILES}${NC}"
+[ $FAILED_FILES -gt 0 ] && echo -e "    ${RED}Failed:          ${FAILED_FILES}${NC}"
 echo ""
-echo -e "  Total files:     ${TOTAL_FILES}"
-echo -e "  ${GREEN}Optimized:       ${OPTIMIZED_FILES}${NC}"
-echo -e "  ${YELLOW}Converted:       ${CONVERTED_FILES}${NC}"
-echo -e "  ${GRAY}Skipped:         ${SKIPPED_FILES}${NC}"
-[ $FAILED_FILES -gt 0 ] && echo -e "  ${RED}Failed:          ${FAILED_FILES}${NC}"
+echo -e "  ${BOLD}Storage${NC}"
+echo -e "    Original:        ${TOTAL_ORIGINAL_FMT}"
+echo -e "    Optimized:       ${TOTAL_NEW_FMT}"
+echo -e "    ${GREEN}Saved:           ${SAVED_FMT} (${TOTAL_SAVINGS}%)${NC}"
 echo ""
-echo -e "  Original size:   ${TOTAL_ORIGINAL_FMT}"
-echo -e "  New size:        ${TOTAL_NEW_FMT}"
-echo -e "  ${GREEN}Saved:           ${SAVED_FMT} (${TOTAL_SAVINGS}%)${NC}"
+echo -e "  ${BOLD}Settings${NC}"
+echo -e "    Icons:           PNG, max ${MAX_ICON_SIZE}px, compression ${PNG_COMPRESSION}"
+echo -e "    Screenshots:     JPG, max ${MAX_WIDTH}px width, quality ${JPG_QUALITY}%"
+echo -e "    Threshold:       Skip if savings < ${OPTIMIZATION_THRESHOLD}%"
 echo ""
-echo -e "${GRAY}Compression: PNG-${PNG_COMPRESSION} (lossless), JPG-${JPG_QUALITY} (lossy)${NC}"
+echo -e "${GREEN}✓ Optimization complete!${NC}"
 echo ""
