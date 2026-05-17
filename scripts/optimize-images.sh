@@ -191,13 +191,17 @@ optimize_image() {
         local width=$(echo $dimensions | cut -d'x' -f1)
         
         # First attempt: Standard quality with resizing
+        # IMPORTANT: Use -flatten to remove alpha channel, -colorspace sRGB for proper color conversion
+        # and explicitly set format to JPEG to prevent PNG output
         if [ $width -gt $MAX_WIDTH ]; then
-            magick "$file" -resize "${MAX_WIDTH}x>" -strip -quality $JPG_QUALITY \
-                -sampling-factor 4:2:0 -interlace Plane -colorspace RGB "$temp_file" 2>/dev/null
+            magick "$file" -resize "${MAX_WIDTH}x>" -flatten -strip -quality $JPG_QUALITY \
+                -sampling-factor 4:2:0 -interlace Plane -colorspace sRGB -define jpeg:dct-method=float \
+                JPEG:"$temp_file" 2>/dev/null
             was_resized=true
         else
-            magick "$file" -strip -quality $JPG_QUALITY \
-                -sampling-factor 4:2:0 -interlace Plane -colorspace RGB "$temp_file" 2>/dev/null
+            magick "$file" -flatten -strip -quality $JPG_QUALITY \
+                -sampling-factor 4:2:0 -interlace Plane -colorspace sRGB -define jpeg:dct-method=float \
+                JPEG:"$temp_file" 2>/dev/null
         fi
         
         if [ $? -eq 0 ] && [ -f "$temp_file" ]; then
@@ -208,11 +212,13 @@ optimize_image() {
             if [ $new_size -gt $original_size ]; then
                 
                 if [ $width -gt $MAX_WIDTH ]; then
-                    magick "$file" -resize "${MAX_WIDTH}x>" -strip -quality $JPG_AGGRESSIVE_QUALITY \
-                        -sampling-factor 4:2:0 -interlace Plane -colorspace RGB "$temp_file.2" 2>/dev/null
+                    magick "$file" -resize "${MAX_WIDTH}x>" -flatten -strip -quality $JPG_AGGRESSIVE_QUALITY \
+                        -sampling-factor 4:2:0 -interlace Plane -colorspace sRGB -define jpeg:dct-method=float \
+                        JPEG:"$temp_file.2" 2>/dev/null
                 else
-                    magick "$file" -strip -quality $JPG_AGGRESSIVE_QUALITY \
-                        -sampling-factor 4:2:0 -interlace Plane -colorspace RGB "$temp_file.2" 2>/dev/null
+                    magick "$file" -flatten -strip -quality $JPG_AGGRESSIVE_QUALITY \
+                        -sampling-factor 4:2:0 -interlace Plane -colorspace sRGB -define jpeg:dct-method=float \
+                        JPEG:"$temp_file.2" 2>/dev/null
                 fi
                 
                 if [ -f "$temp_file.2" ]; then
