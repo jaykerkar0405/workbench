@@ -7,7 +7,7 @@ const projectIconModules: Record<string, ImageModule> = import.meta.glob('$lib/a
 	query: { enhanced: true }
 });
 
-const projectScreenshotModules = import.meta.glob('$lib/assets/projects/*/screenshot-*.png', {
+const projectScreenshotModules = import.meta.glob('$lib/assets/projects/*/screenshot-*.jpg', {
 	eager: false,
 	query: { enhanced: true }
 });
@@ -17,7 +17,7 @@ const hackathonIconModules: Record<string, ImageModule> = import.meta.glob('$lib
 	query: { enhanced: true }
 });
 
-const hackathonImageModules = import.meta.glob('$lib/assets/hackathons/*/image-*.{png,jpg}', {
+const hackathonImageModules = import.meta.glob('$lib/assets/hackathons/*/image-*.jpg', {
 	eager: false,
 	query: { enhanced: true }
 });
