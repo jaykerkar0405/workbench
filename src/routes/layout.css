@@ -1,9 +1,27 @@
+@font-face {
+	font-family: 'Akt';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 100 900;
+	src: url('/fonts/akt.woff2') format('woff2');
+}
+
+@font-face {
+	font-display: swap;
+	font-weight: 100 900;
+	font-family: 'Geist Mono';
+	font-style: italic normal;
+	src: url('/fonts/geist_mono.woff2') format('woff2');
+}
+
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
 @custom-variant dark (&:is(.dark *));
 
 :root {
+	--font-sans: 'Akt', sans-serif;
+	--font-mono: 'Geist Mono', monospace;
 	--radius: 0.625rem;
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
@@ -73,6 +91,8 @@
 }
 
 @theme inline {
+	--font-sans: var(--font-sans);
+	--font-mono: var(--font-mono);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -118,7 +138,13 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
+		font-family: var(--font-sans);
 		@apply bg-background text-foreground;
+	}
+	pre,
+	kbd,
+	code {
+		font-family: var(--font-mono);
 	}
 	::selection {
 		background-color: var(--primary);
