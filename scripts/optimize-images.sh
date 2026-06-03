@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+# Resolve repository root
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 # ── Nerd Font glyphs ──────────────────────────────────────────────────────────
 NF_OK=""     # nf-fa-check
 NF_SKIP=""   # nf-fa-minus
@@ -31,8 +34,8 @@ CYAN=$'\033[38;5;80m'
 GREY=$'\033[38;5;245m'
 
 # ── Defaults ──────────────────────────────────────────────────────────────────
-PROJECTS_DIR="src/lib/assets/projects"
-HACKATHONS_DIR="src/lib/assets/hackathons"
+PROJECTS_DIR="${REPO_ROOT}/src/lib/assets/projects"
+HACKATHONS_DIR="${REPO_ROOT}/src/lib/assets/hackathons"
 PNG_COMPRESSION=9       # zlib level, 0-9
 JPG_QUALITY=85          # standard pass
 JPG_FALLBACK_QUALITY=78 # used only if standard pass produces a larger file
@@ -108,7 +111,13 @@ is_image() {
 }
 
 pct() { # pct <old> <new>
-	awk "BEGIN{printf \"%.1f\", (($1 - $2) / $1) * 100}"
+	local old=${1:-0}
+	local new=${2:-0}
+	if (( old == 0 )); then
+		printf "0.0"
+		return
+	fi
+	awk "BEGIN{printf \"%.1f\", (($old - $new) / $old) * 100}"
 }
 
 already_stamped() { # returns true if we've already tagged this file
