@@ -53,8 +53,8 @@
 		"@vercel/analytics": "^2.0.1",
 		"@vercel/speed-insights": "^2.0.0",
 		"lucide-svelte": "^1.0.1",
-		"marked": "^18.0.4",
+		"marked": "^18.0.5",
 		"mode-watcher": "^1.1.0",
-		"simple-icons": "^16.21.0"
+		"simple-icons": "^16.22.0"
 	}
 }
