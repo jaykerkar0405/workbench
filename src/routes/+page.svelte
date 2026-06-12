@@ -330,7 +330,7 @@
 								</div>
 								<div class="shrink-0 space-y-2 text-right">
 									<p class="text-sm text-muted-foreground">2023 - 2027</p>
-									<p class="text-sm font-medium">CGPA: 9.85 / 10</p>
+									<p class="text-sm font-medium">CGPA: 9.87 / 10</p>
 								</div>
 							</div>
 						</CardContent>
