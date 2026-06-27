@@ -6,6 +6,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { navigationItems } from '$lib/config/navigation';
 	import EnhancedImage from '$lib/components/enhanced-image.svelte';
+	import SearchCommand from '$lib/components/search-command.svelte';
 	import logo from '$lib/assets/icons/apple-touch-icon.png?enhanced';
 
 	const isActive = (href: string) => {
@@ -38,6 +39,8 @@
 					</a>
 				{/each}
 			</nav>
+
+			<SearchCommand />
 
 			<Button onclick={toggleMode} variant="outline" size="icon" class="relative">
 				<SunIcon class="size-[1.15rem] scale-100 rotate-0 dark:scale-0 dark:-rotate-90" />
