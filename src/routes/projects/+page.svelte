@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { projects } from '$lib/projects';
+	import Seo from '$lib/components/seo.svelte';
 	import { hackathons } from '$lib/hackathons';
 	import type { Project } from '$lib/projects/types';
 	import ProjectCard from '$lib/components/project-card.svelte';
@@ -24,9 +25,10 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Projects | Jay Kerkar | Full-Stack Developer - Web, Mobile & Web3 Solutions</title>
-</svelte:head>
+<Seo
+	title="Projects | Jay Kerkar | Full-Stack Developer"
+	description="Browse Jay Kerkar's full-stack projects spanning Web3 dApps, AI-powered applications, and developer tools. Featuring award-winning hackathon builds using React, SvelteKit, Solidity, and more."
+/>
 
 <div class="container mx-auto max-w-7xl px-4 py-12">
 	{#if featuredProjects.length > 0}

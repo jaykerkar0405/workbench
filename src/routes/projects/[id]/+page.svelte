@@ -14,6 +14,7 @@
 	import { onMount } from 'svelte';
 	import { siGithub } from 'simple-icons';
 	import { fly } from 'svelte/transition';
+	import Seo from '$lib/components/seo.svelte';
 	import { hackathons } from '$lib/hackathons';
 	import { Button } from '$lib/components/ui/button';
 	import * as Tooltip from '$lib/components/ui/tooltip';
@@ -128,10 +129,7 @@
 	};
 </script>
 
-<svelte:head>
-	<title>{project.title} | Projects | Jay Kerkar</title>
-	<meta name="description" content={project.shortDescription} />
-</svelte:head>
+<Seo title="{project.title} | Projects | Jay Kerkar" description={project.shortDescription} />
 
 {#key mounted}
 	<div class="container mx-auto max-w-7xl px-4 py-12">
