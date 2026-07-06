@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
+	import Seo from '$lib/components/seo.svelte';
 	import { hackathons } from '$lib/hackathons';
 	import HackathonCard from '$lib/components/hackathon-card.svelte';
 
@@ -15,9 +16,10 @@
 	});
 </script>
 
-<svelte:head>
-	<title>Hackathons | Jay Kerkar | Full-Stack Developer - Web, Mobile & Web3 Solutions</title>
-</svelte:head>
+<Seo
+	title="Hackathons | Jay Kerkar | Full-Stack Developer"
+	description="Jay Kerkar's hackathon journey — 12+ hackathons including ETHOnline winner, ETHMumbai AI track winner, and multiple runner-up finishes across national and global competitions."
+/>
 
 <div class="container mx-auto max-w-7xl px-4 py-12">
 	{#key mounted}

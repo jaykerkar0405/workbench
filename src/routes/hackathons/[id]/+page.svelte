@@ -13,6 +13,7 @@
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
+	import Seo from '$lib/components/seo.svelte';
 	import { formatDateRange } from '$lib/utils.js';
 	import { Button } from '$lib/components/ui/button';
 	import type { Hackathon } from '$lib/hackathons/types';
@@ -95,12 +96,21 @@
 	};
 
 	const badge = $derived(prizeLabel(hackathon));
+
+	const seoDescription = $derived(() => {
+		const durationUnit = Number(hackathon.duration) === 1 ? 'hour' : 'hours';
+		const prize = hackathon.prize
+			? hackathon.prize.rank
+				? ` Achieved ${hackathon.prize.rank} place.`
+				: hackathon.prize.label
+					? ` Won ${hackathon.prize.label}.`
+					: ''
+			: '';
+		return `${hackathon.title} hackathon by ${hackathon.organizer} in ${hackathon.location}. ${hackathon.duration} ${durationUnit} event.${prize}`;
+	});
 </script>
 
-<svelte:head>
-	<title>{hackathon.title} | Hackathons | Jay Kerkar</title>
-	<meta name="description" content="{hackathon.title} by {hackathon.organizer} in {hackathon.location}" />
-</svelte:head>
+<Seo description={seoDescription()} title="{hackathon.title} | Hackathons | Jay Kerkar" />
 
 <svelte:window onkeydown={handleWindowKeydown} />
 
