@@ -13,6 +13,7 @@
 		siTailwindcss
 	} from 'simple-icons';
 	import { onMount } from 'svelte';
+	import Seo from '$lib/components/seo.svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { MapPin, ChevronDown } from 'lucide-svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
@@ -108,6 +109,11 @@
 </script>
 
 {#key mounted}
+	<Seo
+		title="Jay Kerkar | Full-Stack Developer – Web, Mobile & Web3 Solutions"
+		description="Full-stack developer specializing in scalable web applications, mobile development, and Web3 solutions. Explore my projects, hackathon wins, and technical expertise in modern frameworks."
+	/>
+
 	<div class="container mx-auto max-w-7xl px-4 py-12">
 		<div class="lg:flex lg:flex-col">
 			<div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
