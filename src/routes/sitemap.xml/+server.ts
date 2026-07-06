@@ -5,14 +5,23 @@ import { PUBLIC_SITE_URL } from '$env/static/public';
 export const prerender = true;
 
 const BASE_URL = PUBLIC_SITE_URL;
+const SITEMAP_XMLNS = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 
 function buildUrl(path: string, lastmod: string, priority: string): string {
-	return `
-	<url>
-		<loc>${BASE_URL}${path}</loc>
-		<lastmod>${lastmod}</lastmod>
-		<priority>${priority}</priority>
-	</url>`;
+	return [
+		'<url>',
+		`<loc>${BASE_URL}${path}</loc>`,
+		`<lastmod>${lastmod}</lastmod>`,
+		`<priority>${priority}</priority>`,
+		'</url>'
+	].join('');
+}
+
+function toLastmod(dateValue: string | undefined, fallback: string): string {
+	if (!dateValue) return fallback;
+	const parsed = new Date(dateValue);
+	if (isNaN(parsed.getTime())) return fallback;
+	return parsed.toISOString().split('T')[0];
 }
 
 export function GET() {
@@ -26,11 +35,14 @@ export function GET() {
 
 	const projectRoutes = projects.map((project) => buildUrl(`/projects/${project.id}`, today, '0.6'));
 
-	const hackathonRoutes = hackathons.map((hackathon) => buildUrl(`/hackathons/${hackathon.id}`, today, '0.6'));
+	const hackathonRoutes = hackathons.map((hackathon) =>
+		buildUrl(`/hackathons/${hackathon.id}`, toLastmod(hackathon.timestamp, today), '0.6')
+	);
 
-	const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticRoutes.join('')}${projectRoutes.join('')}${hackathonRoutes.join('')}
-</urlset>`;
+	const sitemap = [
+		'<?xml version="1.0" encoding="UTF-8"?>',
+		`<urlset xmlns="${SITEMAP_XMLNS}">${staticRoutes.join('')}${projectRoutes.join('')}${hackathonRoutes.join('')}</urlset>`
+	].join('');
 
 	return new Response(sitemap.trim(), {
 		headers: {
