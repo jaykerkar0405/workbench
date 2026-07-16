@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Fuse from 'fuse.js';
 	import { goto } from '$app/navigation';
 	import { projects } from '$lib/projects';
 	import { hackathons } from '$lib/hackathons';
@@ -83,6 +84,112 @@
 
 	const prizeHackathons = sortedHackathons.filter((h) => h.prize);
 	const otherHackathonsList = sortedHackathons.filter((h) => !h.prize);
+
+	interface SearchableItem {
+		value: string;
+		title: string;
+		keywords: string[];
+		description: string;
+	}
+
+	const searchableItems: SearchableItem[] = [
+		...navigationItems.map((item) => ({
+			description: '',
+			title: item.label,
+			value: `page-${item.href}`,
+			keywords: ['page', 'navigate', item.label.toLowerCase()]
+		})),
+		{
+			title: 'Resume',
+			description: '',
+			value: 'page-resume',
+			keywords: ['page', 'resume', 'cv', 'pdf', 'document']
+		},
+		...featuredProjects.map((project) => ({
+			title: project.title,
+			value: `project-${project.id}`,
+			description: project.shortDescription,
+			keywords: ['project', 'featured', ...project.techStack.map((t) => t.title)]
+		})),
+		...otherProjects.map((project) => ({
+			title: project.title,
+			value: `project-${project.id}`,
+			description: project.shortDescription,
+			keywords: ['project', ...project.techStack.map((t) => t.title)]
+		})),
+		...prizeHackathons.map((hackathon) => ({
+			title: hackathon.title,
+			description: hackathon.organizer,
+			value: `hackathon-${hackathon.id}`,
+			keywords: [
+				'prize',
+				'winner',
+				'hackathon',
+				hackathon.location,
+				hackathon.prize?.label ?? '',
+				hackathon.prize?.rank ? `${hackathon.prize.rank} Place` : ''
+			].filter(Boolean)
+		})),
+		...otherHackathonsList.map((hackathon) => ({
+			title: hackathon.title,
+			description: hackathon.organizer,
+			value: `hackathon-${hackathon.id}`,
+			keywords: ['hackathon', hackathon.location]
+		})),
+		{
+			title: 'GitHub',
+			description: '',
+			value: 'social-github',
+			keywords: ['social', 'git', 'code', 'repository', 'open source']
+		},
+		{
+			description: '',
+			title: 'LinkedIn',
+			value: 'social-linkedin',
+			keywords: ['social', 'professional', 'network', 'job', 'career']
+		},
+		{
+			title: 'X',
+			description: '',
+			value: 'social-x',
+			keywords: ['social', 'twitter', 'tweet', 'post']
+		},
+		{
+			description: '',
+			title: 'LeetCode',
+			value: 'social-leetcode',
+			keywords: ['social', 'coding', 'competitive', 'programming', 'dsa', 'algorithm']
+		}
+	];
+
+	const fuse = new Fuse(searchableItems, {
+		keys: [
+			{ name: 'title', weight: 2 },
+			{ name: 'keywords', weight: 1 },
+			{ name: 'description', weight: 1.5 }
+		],
+		threshold: 0.4,
+		includeScore: true,
+		ignoreLocation: true
+	});
+
+	let cachedSearch = '';
+	let cachedScoreMap = new Map<string, number>();
+
+	function fuseFilter(value: string, search: string): number {
+		if (!search) return 1;
+
+		if (search !== cachedSearch) {
+			cachedSearch = search;
+			const results = fuse.search(search);
+			cachedScoreMap = new Map<string, number>();
+			for (const result of results) {
+				cachedScoreMap.set(result.item.value, 1 - (result.score ?? 0));
+			}
+		}
+
+		return cachedScoreMap.get(value) ?? 0;
+	}
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
@@ -94,6 +201,7 @@
 
 <Command.Dialog
 	bind:open
+	filter={fuseFilter}
 	class="sm:max-w-137.5"
 	title="Search Portfolio"
 	description="Search across projects, hackathons, pages, and more."
@@ -104,13 +212,13 @@
 
 		<Command.Group heading="Pages">
 			{#each navigationItems as item (item.href)}
-				<Command.Item onSelect={() => navigate(item.href)}>
+				<Command.Item value={`page-${item.href}`} onSelect={() => navigate(item.href)}>
 					{@const Icon = item.icon}
 					<Icon />
 					<span>{item.label}</span>
 				</Command.Item>
 			{/each}
-			<Command.Item onSelect={() => openExternal('/docs/jay_kerkar_resume.pdf')}>
+			<Command.Item value="page-resume" onSelect={() => openExternal('/docs/jay_kerkar_resume.pdf')}>
 				<FileTextIcon />
 				<span>Resume</span>
 			</Command.Item>
@@ -121,10 +229,7 @@
 		<Command.Group heading="Featured Projects">
 			{#each featuredProjects as project (project.id)}
 				{@const icon = getProjectIcon(project.id)}
-				<Command.Item
-					onSelect={() => navigate(`/projects/${project.id}`)}
-					keywords={[project.shortDescription, ...project.techStack.map((t) => t.title)]}
-				>
+				<Command.Item value={`project-${project.id}`} onSelect={() => navigate(`/projects/${project.id}`)}>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
@@ -149,10 +254,7 @@
 		<Command.Group heading="Projects">
 			{#each otherProjects as project (project.id)}
 				{@const icon = getProjectIcon(project.id)}
-				<Command.Item
-					onSelect={() => navigate(`/projects/${project.id}`)}
-					keywords={[project.shortDescription, ...project.techStack.map((t) => t.title)]}
-				>
+				<Command.Item value={`project-${project.id}`} onSelect={() => navigate(`/projects/${project.id}`)}>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
@@ -177,10 +279,7 @@
 		<Command.Group heading="Hackathon Wins">
 			{#each prizeHackathons as hackathon (hackathon.id)}
 				{@const icon = getHackathonIcon(hackathon.id)}
-				<Command.Item
-					keywords={[hackathon.organizer, hackathon.location]}
-					onSelect={() => navigate(`/hackathons/${hackathon.id}`)}
-				>
+				<Command.Item value={`hackathon-${hackathon.id}`} onSelect={() => navigate(`/hackathons/${hackathon.id}`)}>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
@@ -207,10 +306,7 @@
 		<Command.Group heading="Other Hackathons">
 			{#each otherHackathonsList as hackathon (hackathon.id)}
 				{@const icon = getHackathonIcon(hackathon.id)}
-				<Command.Item
-					keywords={[hackathon.organizer, hackathon.location]}
-					onSelect={() => navigate(`/hackathons/${hackathon.id}`)}
-				>
+				<Command.Item value={`hackathon-${hackathon.id}`} onSelect={() => navigate(`/hackathons/${hackathon.id}`)}>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
@@ -235,7 +331,7 @@
 		<Command.Separator />
 
 		<Command.Group heading="Socials">
-			<Command.Item onSelect={() => openExternal('https://github.com/jaykerkar0405')}>
+			<Command.Item value="social-github" onSelect={() => openExternal('https://github.com/jaykerkar0405')}>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -251,7 +347,7 @@
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item onSelect={() => openExternal('https://in.linkedin.com/in/jaykerkar0405')}>
+			<Command.Item value="social-linkedin" onSelect={() => openExternal('https://in.linkedin.com/in/jaykerkar0405')}>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -267,7 +363,7 @@
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item onSelect={() => openExternal('https://x.com/jaykerkar0405')}>
+			<Command.Item value="social-x" onSelect={() => openExternal('https://x.com/jaykerkar0405')}>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -283,7 +379,7 @@
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item onSelect={() => openExternal('https://leetcode.com/u/jaykerkar0405')}>
+			<Command.Item value="social-leetcode" onSelect={() => openExternal('https://leetcode.com/u/jaykerkar0405')}>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
