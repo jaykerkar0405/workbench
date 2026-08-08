@@ -54,8 +54,8 @@
 		"@vercel/speed-insights": "^2.0.0",
 		"fuse.js": "^7.5.0",
 		"lucide-svelte": "^1.0.1",
-		"marked": "^18.0.7",
+		"marked": "^18.0.9",
 		"mode-watcher": "^1.1.0",
-		"simple-icons": "^16.27.1"
+		"simple-icons": "^16.28.0"
 	}
 }
