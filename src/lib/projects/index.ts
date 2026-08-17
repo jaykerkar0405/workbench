@@ -37,7 +37,7 @@ export const projects: Project[] = [
 		featured: true,
 		id: 'vesit-rail',
 		title: 'VESITRail',
-		deployedLink: 'https://vesitrail.vercel.app',
+		deployedLink: 'https://rail.vesit.ves.ac.in',
 		githubLink: 'https://github.com/VESITRail/VESITRail',
 		shortDescription: 'Streamlined Railway Concessions with Real-time Tracking',
 		techStack: [
