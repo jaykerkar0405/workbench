@@ -204,7 +204,7 @@
 	filter={fuseFilter}
 	title="Search Portfolio"
 	description="Search across projects, hackathons, pages, and more."
-	class="top-[14vh] rounded-lg! duration-(--dur-2) ease-(--ease-out) data-[state=closed]:animate-out data-[state=closed]:duration-(--dur-1) data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2 sm:max-w-[min(42rem,calc(100%-2rem))] [&_[data-slot=command-input-wrapper]]:flex [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:items-center [&_[data-slot=command-input-wrapper]]:border-b [&_[data-slot=command-input-wrapper]]:px-2 [&_[data-slot=command-input-wrapper]]:pb-0 [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:border-0 [&_[data-slot=input-group]]:bg-transparent! [&_[data-slot=input-group]]:shadow-none"
+	class="top-[14vh] rounded-lg! duration-(--dur-2) ease-(--ease-out) sm:max-w-[min(42rem,calc(100%-2rem))] data-open:zoom-in-100! data-open:slide-in-from-bottom-2 data-closed:duration-(--dur-1) data-closed:zoom-out-100! [&_[data-slot=command-input-wrapper]]:flex [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:items-center [&_[data-slot=command-input-wrapper]]:border-b [&_[data-slot=command-input-wrapper]]:px-2 [&_[data-slot=command-input-wrapper]]:pb-0 [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:border-0 [&_[data-slot=input-group]]:bg-transparent! [&_[data-slot=input-group]]:shadow-none"
 >
 	<Command.Input placeholder="Search projects, hackathons, pages..." />
 	<Command.List class="max-h-[min(26rem,60dvh)]">

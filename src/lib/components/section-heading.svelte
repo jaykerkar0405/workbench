@@ -21,7 +21,7 @@
 </script>
 
 <div class={cn('w-full', className)}>
-	<Separator class="h-px w-full" />
+	<Separator />
 
 	<div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 pt-6 sm:flex-nowrap">
 		<span class="shrink-0 label tabular-nums" aria-hidden="true">{index}</span>

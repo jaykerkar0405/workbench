@@ -18,6 +18,14 @@
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
 @custom-variant dark (&:is(.dark *));
+/* shadcn-svelte's components are written against shorthand variants (data-open:, data-closed:,
+   data-horizontal:, data-vertical:) that Tailwind v4 reads as "has a data-open attribute". bits-ui
+   sets data-state / data-orientation instead, so define the shorthands against those. Tooltip uses
+   delayed-open / instant-open for its open state. */
+@custom-variant data-open (&:is([data-state='open'], [data-state='delayed-open'], [data-state='instant-open'], [data-open]));
+@custom-variant data-closed (&:is([data-state='closed'], [data-closed]));
+@custom-variant data-horizontal (&:is([data-orientation='horizontal'], [data-horizontal]));
+@custom-variant data-vertical (&:is([data-orientation='vertical'], [data-vertical]));
 
 :root {
 	--font-sans: 'Akt', sans-serif;

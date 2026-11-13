@@ -59,7 +59,7 @@
 	<Dialog.Root bind:open={isPreviewOpen}>
 		<Dialog.Content
 			showCloseButton
-			class="flex h-[80vh] flex-col gap-0 overflow-hidden rounded-lg! p-0 duration-(--dur-2) ease-(--ease-out) data-[state=closed]:animate-out data-[state=closed]:duration-(--dur-1) data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2 sm:max-w-[min(56rem,calc(100%-2rem))]"
+			class="flex h-[80vh] flex-col gap-0 overflow-hidden rounded-lg! p-0 duration-(--dur-2) ease-(--ease-out) sm:max-w-[min(56rem,calc(100%-2rem))] data-open:zoom-in-100! data-open:slide-in-from-bottom-2 data-closed:duration-(--dur-1) data-closed:zoom-out-100!"
 		>
 			<Dialog.Header class="flex-row items-center justify-between gap-4 border-b py-3 pr-14 pl-4">
 				<Dialog.Title class="text-base font-semibold">Resume</Dialog.Title>
