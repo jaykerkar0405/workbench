@@ -12,11 +12,9 @@
 	import { getProjectIcon, getHackathonIcon } from '$lib/assets/images';
 	import { GithubIcon, LeetCodeIcon, LinkedInIcon, XBrandIcon } from '$lib/components/brand-icons';
 
-	import StarIcon from '@lucide/svelte/icons/star';
 	import CodeIcon from '@lucide/svelte/icons/code';
 	import TrophyIcon from '@lucide/svelte/icons/trophy';
 	import SearchIcon from '@lucide/svelte/icons/search';
-	import MapPinIcon from '@lucide/svelte/icons/map-pin';
 	import FileTextIcon from '@lucide/svelte/icons/file-text';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 
@@ -169,6 +167,21 @@
 
 		return cachedScoreMap.get(value) ?? 0;
 	}
+
+	const pageCount = navigationItems.length + 1;
+	const projectCount = featuredProjects.length + otherProjects.length;
+	const hackathonCount = prizeHackathons.length + otherHackathonsList.length;
+	const socialCount = searchableItems.filter((item) => item.value.startsWith('social-')).length;
+
+	// Slice rather than new Date(): a bare YYYY-MM-DD parses as UTC and can shift year by timezone.
+	const yearOf = (timestamp: string) => timestamp.slice(0, 4);
+
+	const rowClass =
+		'relative h-10 gap-3 overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 data-selected:before:opacity-100';
+	const metaClass =
+		'flex shrink-0 items-center gap-1.5 font-mono text-[0.72rem] tracking-normal uppercase tabular-nums';
+	const headingClass =
+		'**:[[data-command-group-heading]]:font-mono **:[[data-command-group-heading]]:text-[0.72rem] **:[[data-command-group-heading]]:font-normal **:[[data-command-group-heading]]:tracking-[0.08em] **:[[data-command-group-heading]]:uppercase';
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
@@ -189,88 +202,76 @@
 <Command.Dialog
 	bind:open
 	filter={fuseFilter}
-	class="sm:max-w-137.5"
 	title="Search Portfolio"
 	description="Search across projects, hackathons, pages, and more."
+	class="top-[14vh] rounded-lg! duration-(--dur-2) ease-(--ease-out) data-[state=closed]:animate-out data-[state=closed]:duration-(--dur-1) data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2 sm:max-w-[min(42rem,calc(100%-2rem))] [&_[data-slot=command-input-wrapper]]:flex [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:items-center [&_[data-slot=command-input-wrapper]]:border-b [&_[data-slot=command-input-wrapper]]:px-2 [&_[data-slot=command-input-wrapper]]:pb-0 [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:border-0 [&_[data-slot=input-group]]:bg-transparent! [&_[data-slot=input-group]]:shadow-none"
 >
 	<Command.Input placeholder="Search projects, hackathons, pages..." />
-	<Command.List>
-		<Command.Empty>No results found.</Command.Empty>
+	<Command.List class="max-h-[min(26rem,60dvh)]">
+		<Command.Empty class="py-8 font-mono text-[0.72rem] text-muted-foreground">No results found.</Command.Empty>
 
-		<Command.Group heading="Pages">
+		<Command.Group value="pages" heading={`Pages · ${pageCount}`} class={headingClass}>
 			{#each navigationItems as item (item.href)}
-				<Command.Item value={`page-${item.href}`} onSelect={() => navigate(item.href)}>
+				<Command.Item value={`page-${item.href}`} onSelect={() => navigate(item.href)} class={rowClass}>
 					{@const Icon = item.icon}
 					<Icon />
-					<span>{item.label}</span>
+					<span class="min-w-0 flex-1 truncate">{item.label}</span>
+					<Command.Shortcut class={metaClass}>{item.href}</Command.Shortcut>
 				</Command.Item>
 			{/each}
-			<Command.Item value="page-resume" onSelect={() => openExternal('/docs/jay_kerkar_resume.pdf')}>
+			<Command.Item value="page-resume" onSelect={() => openExternal('/docs/jay_kerkar_resume.pdf')} class={rowClass}>
 				<FileTextIcon />
-				<span>Resume</span>
+				<span class="min-w-0 flex-1 truncate">Resume</span>
+				<Command.Shortcut class={metaClass}>PDF ↗</Command.Shortcut>
 			</Command.Item>
 		</Command.Group>
 
 		<Command.Separator />
 
-		<Command.Group heading="Featured Projects">
-			{#each featuredProjects as project (project.id)}
+		<Command.Group value="projects" heading={`Projects · ${projectCount}`} class={headingClass}>
+			{#each [...featuredProjects, ...otherProjects] as project (project.id)}
 				{@const icon = getProjectIcon(project.id)}
-				<Command.Item value={`project-${project.id}`} onSelect={() => navigate(`/projects/${project.id}`)}>
+				<Command.Item
+					value={`project-${project.id}`}
+					onSelect={() => navigate(`/projects/${project.id}`)}
+					class={rowClass}
+				>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
-							alt={project.title}
+							alt=""
 							skeletonClass="rounded"
 							containerClass="size-6 shrink-0"
-							class="size-6 rounded object-cover"
-						/>
-					{:else}
-						<StarIcon />
-					{/if}
-					<div class="flex flex-col">
-						<span>{project.title}</span>
-						<span class="text-xs text-muted-foreground">{project.shortDescription}</span>
-					</div>
-				</Command.Item>
-			{/each}
-		</Command.Group>
-
-		<Command.Separator />
-
-		<Command.Group heading="Projects">
-			{#each otherProjects as project (project.id)}
-				{@const icon = getProjectIcon(project.id)}
-				<Command.Item value={`project-${project.id}`} onSelect={() => navigate(`/projects/${project.id}`)}>
-					{#if icon}
-						<EnhancedImage
-							src={icon}
-							alt={project.title}
-							containerClass="size-6 shrink-0"
-							skeletonClass="rounded"
 							class="size-6 rounded object-cover"
 						/>
 					{:else}
 						<CodeIcon />
 					{/if}
-					<div class="flex flex-col">
-						<span>{project.title}</span>
-						<span class="text-xs text-muted-foreground">{project.shortDescription}</span>
-					</div>
+					<span class="min-w-0 flex-1 truncate">{project.title}</span>
+					<Command.Shortcut class={metaClass}>
+						{#if project.featured}
+							<span class="text-[color-mix(in_oklab,var(--brand)_90%,var(--foreground))] dark:text-brand">Featured</span
+							>
+						{/if}
+					</Command.Shortcut>
 				</Command.Item>
 			{/each}
 		</Command.Group>
 
 		<Command.Separator />
 
-		<Command.Group heading="Hackathon Wins">
-			{#each prizeHackathons as hackathon (hackathon.id)}
+		<Command.Group value="hackathons" heading={`Hackathons · ${hackathonCount}`} class={headingClass}>
+			{#each [...prizeHackathons, ...otherHackathonsList] as hackathon (hackathon.id)}
 				{@const icon = getHackathonIcon(hackathon.id)}
-				<Command.Item value={`hackathon-${hackathon.id}`} onSelect={() => navigate(`/hackathons/${hackathon.id}`)}>
+				<Command.Item
+					value={`hackathon-${hackathon.id}`}
+					onSelect={() => navigate(`/hackathons/${hackathon.id}`)}
+					class={rowClass}
+				>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
-							alt={hackathon.title}
+							alt=""
 							skeletonClass="rounded"
 							containerClass="size-6 shrink-0"
 							class="size-6 rounded object-contain"
@@ -278,47 +279,26 @@
 					{:else}
 						<TrophyIcon />
 					{/if}
-					<div class="flex flex-col">
-						<span>{hackathon.title}</span>
-						<span class="text-xs text-muted-foreground">
-							{hackathon.prize?.rank ? `${hackathon.prize.rank} Place` : hackathon.prize?.label} · {hackathon.organizer}
-						</span>
-					</div>
+					<span class="min-w-0 flex-1 truncate">{hackathon.title}</span>
+					<Command.Shortcut class={metaClass}>
+						{#if hackathon.prize}
+							<span aria-hidden="true" class="size-1.5 rounded-full bg-brand"></span>
+							<span class="sr-only">Winner</span>
+						{/if}
+						{yearOf(hackathon.timestamp)}
+					</Command.Shortcut>
 				</Command.Item>
 			{/each}
 		</Command.Group>
 
 		<Command.Separator />
 
-		<Command.Group heading="Other Hackathons">
-			{#each otherHackathonsList as hackathon (hackathon.id)}
-				{@const icon = getHackathonIcon(hackathon.id)}
-				<Command.Item value={`hackathon-${hackathon.id}`} onSelect={() => navigate(`/hackathons/${hackathon.id}`)}>
-					{#if icon}
-						<EnhancedImage
-							src={icon}
-							alt={hackathon.title}
-							skeletonClass="rounded"
-							containerClass="size-6 shrink-0"
-							class="size-6 rounded object-contain"
-						/>
-					{:else}
-						<MapPinIcon />
-					{/if}
-					<div class="flex flex-col">
-						<span>{hackathon.title}</span>
-						<span class="text-xs text-muted-foreground">
-							{hackathon.organizer} · {hackathon.location}
-						</span>
-					</div>
-				</Command.Item>
-			{/each}
-		</Command.Group>
-
-		<Command.Separator />
-
-		<Command.Group heading="Socials">
-			<Command.Item value="social-github" onSelect={() => openExternal('https://github.com/jaykerkar0405')}>
+		<Command.Group value="socials" heading={`Socials · ${socialCount}`} class={headingClass}>
+			<Command.Item
+				value="social-github"
+				onSelect={() => openExternal('https://github.com/jaykerkar0405')}
+				class={rowClass}
+			>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -329,12 +309,16 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>GitHub</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">GitHub</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item value="social-linkedin" onSelect={() => openExternal('https://in.linkedin.com/in/jaykerkar0405')}>
+			<Command.Item
+				value="social-linkedin"
+				onSelect={() => openExternal('https://in.linkedin.com/in/jaykerkar0405')}
+				class={rowClass}
+			>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -345,12 +329,12 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>LinkedIn</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">LinkedIn</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item value="social-x" onSelect={() => openExternal('https://x.com/jaykerkar0405')}>
+			<Command.Item value="social-x" onSelect={() => openExternal('https://x.com/jaykerkar0405')} class={rowClass}>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -361,12 +345,16 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>X</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">X</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item value="social-leetcode" onSelect={() => openExternal('https://leetcode.com/u/jaykerkar0405')}>
+			<Command.Item
+				value="social-leetcode"
+				onSelect={() => openExternal('https://leetcode.com/u/jaykerkar0405')}
+				class={rowClass}
+			>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -377,11 +365,21 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>LeetCode</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">LeetCode</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
 		</Command.Group>
 	</Command.List>
+
+	<div
+		aria-hidden="true"
+		class="-mx-1 -mb-1 hidden items-center gap-4 border-t px-3 py-2 font-mono text-[0.72rem] text-muted-foreground sm:flex"
+	>
+		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">↑↓</Kbd> navigate</span>
+		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">↵</Kbd> open</span>
+		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">esc</Kbd> close</span>
+		<span class="ml-auto tabular-nums">{searchableItems.length} entries</span>
+	</div>
 </Command.Dialog>
