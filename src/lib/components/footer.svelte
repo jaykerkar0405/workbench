@@ -69,12 +69,12 @@
 <footer aria-label="Footer" class="w-full border-t pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
 	<div class="mx-auto max-w-7xl px-5 md:px-10">
 		<div class="grid gap-10 py-20 lg:grid-cols-12 lg:items-end lg:gap-x-6 lg:py-28" {@attach reveal()}>
-			<div class="lg:col-span-8">
+			<div class="lg:col-span-7 xl:col-span-8">
 				<p class="mb-4 label">Get in touch</p>
 				<h2 class="text-display text-balance">Let’s build something.</h2>
 			</div>
 
-			<div class="flex flex-wrap items-center gap-x-6 gap-y-3 lg:col-span-4 lg:justify-end">
+			<div class="flex flex-col items-start gap-3 lg:col-span-5 xl:col-span-4">
 				<ResumeActions class="max-sm:w-full" />
 				<a
 					href={linkedInUrl}
@@ -89,17 +89,20 @@
 		</div>
 
 		<div
-			class="grid gap-6 border-t pt-6 label tabular-nums md:grid-cols-[auto_1fr_auto] md:items-start md:gap-x-8 lg:pb-8"
+			class="grid gap-6 border-t pt-6 label tabular-nums md:grid-cols-2 md:items-start md:gap-x-8 lg:pb-8 xl:grid-cols-[auto_1fr_auto]"
 		>
 			<p>© {currentYear} Jay Kerkar</p>
 
-			<nav aria-label="Social links" class="md:justify-self-center">
-				<ul class="flex flex-wrap gap-x-6 gap-y-2 md:justify-center">
+			<nav
+				aria-label="Social links"
+				class="order-first md:col-span-2 xl:order-none xl:col-span-1 xl:justify-self-center"
+			>
+				<ul class="flex flex-wrap gap-x-8 gap-y-2 xl:justify-center">
 					{#each socials as social (social.name)}
 						<li>
 							<a href={social.href} target="_blank" rel="noopener noreferrer" class="link-underline {metaLink}">
-								{social.name}
-								<span class="text-foreground/70">{social.handle}</span>
+								<span class="text-foreground">{social.name}</span>
+								<span class="text-muted-foreground md:max-lg:sr-only">{social.handle}</span>
 								<span aria-hidden="true" class={arrow}>↗</span>
 								<span class="sr-only">(opens in a new tab)</span>
 							</a>
@@ -108,7 +111,7 @@
 				</ul>
 			</nav>
 
-			<div class="flex flex-col gap-2 md:min-w-[15.5em] md:items-end md:text-right">
+			<div class="flex flex-col gap-2 md:min-w-[15.5em] md:items-end md:justify-self-end md:text-right">
 				<p>
 					Mumbai, IN · <time hidden={!time} datetime={stamp || undefined}>{time}</time> IST
 				</p>
