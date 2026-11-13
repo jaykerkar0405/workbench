@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { Download, Eye, X } from 'lucide-svelte';
+	import EyeIcon from '@lucide/svelte/icons/eye';
+	import DownloadIcon from '@lucide/svelte/icons/download';
 	import { Button } from '$lib/components/ui/button';
+	import * as Dialog from '$lib/components/ui/dialog';
 
 	let {
 		class: className = '',
+		showDownload = true,
 		useDesktopModal = true,
+		previewVariant = 'default',
 		previewLabel = 'Preview Resume',
 		downloadLabel = 'Download Resume',
 		resumeUrl = '/docs/jay_kerkar_resume.pdf',
@@ -13,9 +17,11 @@
 		class?: string;
 		resumeUrl?: string;
 		previewLabel?: string;
+		showDownload?: boolean;
 		downloadLabel?: string;
 		downloadFileName?: string;
 		useDesktopModal?: boolean;
+		previewVariant?: 'default' | 'link';
 	} = $props();
 
 	let isPreviewOpen = $state(false);
@@ -31,71 +37,43 @@
 		isPreviewOpen = true;
 	};
 
-	const closePreview = () => {
-		isPreviewOpen = false;
-	};
-
-	const handleWindowKeydown = (event: KeyboardEvent) => {
-		if (isPreviewOpen && event.key === 'Escape') {
-			closePreview();
-		}
-	};
+	const metaLinkClass =
+		'rounded-sm font-mono text-[0.72rem] tracking-[0.08em] text-muted-foreground uppercase transition-colors duration-(--dur-1) outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50';
 </script>
 
-<svelte:window onkeydown={handleWindowKeydown} />
-
 <div class={`flex flex-col items-start gap-3 sm:flex-row sm:items-center ${className}`.trim()}>
-	<Button
-		type="button"
-		onclick={previewResume}
-		class="w-full sm:w-auto"
-		aria-label="Preview resume in a new tab on mobile, or in a modal on desktop"
-	>
-		<Eye class="size-4" />
+	<Button type="button" variant={previewVariant} onclick={previewResume} class="w-full sm:w-auto">
+		<EyeIcon class="size-4" />
 		{previewLabel}
 	</Button>
 
-	<Button
-		href={resumeUrl}
-		variant="outline"
-		class="w-full sm:w-auto"
-		download={downloadFileName}
-		aria-label="Download resume as PDF"
-	>
-		<Download class="size-4" />
-		{downloadLabel}
-	</Button>
+	{#if showDownload}
+		<Button href={resumeUrl} variant="link" download={downloadFileName}>
+			<DownloadIcon class="size-4" />
+			{downloadLabel}
+		</Button>
+	{/if}
 </div>
 
-{#if useDesktopModal && isPreviewOpen}
-	<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="none">
-		<button
-			type="button"
-			onclick={closePreview}
-			aria-label="Close resume preview"
-			class="absolute inset-0 bg-background/50 backdrop-blur-sm"
-		></button>
-
-		<div
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="resume-preview-title"
-			class="relative z-10 flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg"
+{#if useDesktopModal}
+	<Dialog.Root bind:open={isPreviewOpen}>
+		<Dialog.Content
+			showCloseButton
+			class="flex h-[80vh] flex-col gap-0 overflow-hidden rounded-lg! p-0 duration-(--dur-2) ease-(--ease-out) data-[state=closed]:animate-out data-[state=closed]:duration-(--dur-1) data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-2 sm:max-w-[min(56rem,calc(100%-2rem))]"
 		>
-			<div class="flex items-center justify-between border-b border-border px-4 py-3">
-				<h3 id="resume-preview-title" class="text-base font-semibold">Resume Preview</h3>
-				<Button
-					size="icon"
-					type="button"
-					variant="ghost"
-					onclick={closePreview}
-					aria-label="Close resume preview modal"
-				>
-					<X class="size-4" />
-				</Button>
-			</div>
+			<Dialog.Header class="flex-row items-center justify-between gap-4 border-b py-3 pr-14 pl-4">
+				<Dialog.Title class="text-base font-semibold">Resume</Dialog.Title>
+				<Dialog.Description class="sr-only">Preview of Jay Kerkar's resume as a PDF.</Dialog.Description>
 
-			<iframe src={resumeUrl} title="Resume PDF preview" class="h-full w-full" loading="lazy"></iframe>
-		</div>
-	</div>
+				<div class="flex items-center gap-4">
+					<a href={resumeUrl} download={downloadFileName} class={metaLinkClass}>Download ↓</a>
+					<a href={resumeUrl} target="_blank" rel="noopener noreferrer" class={metaLinkClass}>Open in new tab ↗</a>
+				</div>
+			</Dialog.Header>
+
+			<div class="min-h-0 flex-1 bg-muted">
+				<iframe src={resumeUrl} title="Resume PDF preview" class="size-full"></iframe>
+			</div>
+		</Dialog.Content>
+	</Dialog.Root>
 {/if}
