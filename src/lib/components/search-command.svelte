@@ -4,6 +4,7 @@
 	import { projects } from '$lib/projects';
 	import { hackathons } from '$lib/hackathons';
 	import type { Project } from '$lib/projects/types';
+	import { Kbd } from '$lib/components/ui/kbd';
 	import { Button } from '$lib/components/ui/button';
 	import { navigationItems } from '$lib/config/navigation';
 	import * as Command from '$lib/components/ui/command/index.js';
@@ -20,6 +21,13 @@
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 
 	let open = $state(false);
+
+	// Rendered as ⌘K on the server; switched after mount on non-Apple platforms.
+	let shortcut = $state('⌘K');
+
+	$effect(() => {
+		if (!/Mac|iPhone|iPad/i.test(navigator.userAgent)) shortcut = 'Ctrl K';
+	});
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -165,9 +173,17 @@
 
 <svelte:document onkeydown={handleKeydown} />
 
-<Button size="icon" class="relative" variant="outline" aria-label="Search (Ctrl+K)" onclick={() => (open = true)}>
-	<SearchIcon class="size-[1.15rem]" />
-	<span class="sr-only">Search</span>
+<Button
+	size="icon"
+	variant="outline"
+	aria-label="Search"
+	aria-keyshortcuts="Control+K Meta+K"
+	onclick={() => (open = true)}
+	class="relative size-9 max-lg:border-transparent max-lg:bg-transparent max-lg:hover:bg-muted lg:w-56 lg:justify-start lg:gap-2 lg:px-3 dark:max-lg:border-transparent dark:max-lg:bg-transparent dark:max-lg:hover:bg-muted/50"
+>
+	<SearchIcon class="size-[1.15rem] lg:size-4" />
+	<span class="hidden font-normal text-muted-foreground lg:inline">Search</span>
+	<Kbd class="ml-auto hidden lg:inline-flex">{shortcut}</Kbd>
 </Button>
 
 <Command.Dialog

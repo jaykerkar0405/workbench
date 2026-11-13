@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { expoOut } from 'svelte/easing';
+	import { crossfade } from 'svelte/transition';
+	import { prefersReducedMotion } from 'svelte/motion';
 	import { toggleMode } from 'mode-watcher';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import MoonIcon from '@lucide/svelte/icons/moon';
@@ -9,40 +12,117 @@
 	import SearchCommand from '$lib/components/search-command.svelte';
 	import logo from '$lib/assets/icons/apple-touch-icon.png?enhanced';
 
+	let scrollY = $state(0);
+
+	const scrolled = $derived(scrollY > 8);
+	const wordmarkHidden = $derived(scrollY > 80);
+
 	const isActive = (href: string) => {
 		if (href === '/') {
 			return page.url.pathname === '/';
 		}
 		return page.url.pathname.startsWith(href);
 	};
+
+	// One crossfade pair per dock so the (hidden) mobile pills never pair with the desktop ones.
+	const pillOptions = {
+		duration: () => (prefersReducedMotion.current ? 0 : 280),
+		easing: expoOut
+	};
+	const [sendDesktop, receiveDesktop] = crossfade(pillOptions);
+	const [sendMobile, receiveMobile] = crossfade(pillOptions);
+
+	const toggleTheme = () => {
+		if (typeof document.startViewTransition !== 'function' || prefersReducedMotion.current) {
+			toggleMode();
+			return;
+		}
+
+		const root = document.documentElement;
+		const wasDark = root.classList.contains('dark');
+
+		const transition = document.startViewTransition(
+			() =>
+				new Promise<void>((resolve) => {
+					// mode-watcher applies the class a frame after toggleMode(); wait for it so the new
+					// snapshot is the new theme.
+					const observer = new MutationObserver(() => {
+						if (root.classList.contains('dark') !== wasDark) done();
+					});
+					const timeout = setTimeout(done, 250);
+					function done() {
+						observer.disconnect();
+						clearTimeout(timeout);
+						resolve();
+					}
+					observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+					toggleMode();
+				})
+		);
+
+		transition.ready.catch(() => {});
+		transition.updateCallbackDone.catch(() => {});
+		transition.finished.catch(() => {});
+	};
 </script>
 
+<svelte:window bind:scrollY />
+
 <header
-	class="sticky top-0 z-50 w-full border-b-2 bg-background/95 backdrop-blur [view-transition-name:site-header] supports-backdrop-filter:bg-background/60"
+	class="sticky top-0 z-40 w-full [view-transition-name:site-header] max-lg:bg-background/80 max-lg:backdrop-blur lg:pointer-events-none lg:pt-4"
 >
-	<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-16 xl:px-6">
-		<a href="/" class="flex items-center gap-2.5">
-			<EnhancedImage src={logo} alt="Logo" class="size-8 rounded-lg" skeletonClass="rounded-lg" />
-			<span class="text-lg font-bold">Jay Kerkar</span>
+	<div
+		class="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 md:px-10 lg:grid lg:h-9 lg:grid-cols-[1fr_auto_1fr]"
+	>
+		<a
+			href="/"
+			aria-label="Jay Kerkar, home"
+			class="pointer-events-auto flex items-center gap-2.5 justify-self-start rounded-lg focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+		>
+			<EnhancedImage src={logo} alt="" class="size-8 rounded-lg" skeletonClass="rounded-lg" />
+			<span
+				class="text-lg font-bold transition-opacity duration-(--dur-2) ease-(--ease-out) {wordmarkHidden
+					? 'lg:pointer-events-none lg:opacity-0'
+					: ''}"
+			>
+				Jay Kerkar
+			</span>
 		</a>
 
-		<div class="flex items-center gap-4">
-			<nav class="hidden items-center space-x-1 lg:flex">
-				{#each navigationItems as item (item.href)}
-					<a
-						href={item.href}
-						class="px-5 py-2.5 text-base font-medium hover:text-foreground {isActive(item.href)
-							? 'border-b-[1.75px] border-foreground text-foreground'
-							: 'text-muted-foreground hover:border-b-[1.75px] hover:border-foreground'}"
-					>
-						{item.label}
-					</a>
-				{/each}
-			</nav>
+		<nav
+			aria-label="Primary"
+			class="pointer-events-auto hidden items-center gap-1 rounded-full border bg-background/70 p-1 backdrop-blur-md transition-shadow duration-(--dur-2) ease-(--ease-out) lg:flex {scrolled
+				? 'shadow-md'
+				: 'shadow-sm'}"
+		>
+			{#each navigationItems as item (item.href)}
+				{@const active = isActive(item.href)}
+				<Button
+					href={item.href}
+					variant="ghost"
+					size="sm"
+					aria-current={active ? 'page' : undefined}
+					class="relative isolate rounded-full px-4 text-sm hover:bg-transparent dark:hover:bg-transparent {active
+						? 'text-primary-foreground hover:text-primary-foreground'
+						: 'text-muted-foreground hover:text-foreground'}"
+				>
+					{#if active}
+						<span
+							aria-hidden="true"
+							class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary"
+							in:receiveDesktop={{ key: 'pill' }}
+							out:sendDesktop={{ key: 'pill' }}
+						></span>
+					{/if}
+					{item.label}
+				</Button>
+			{/each}
+		</nav>
 
+		<div class="pointer-events-auto flex items-center gap-1 justify-self-end">
 			<SearchCommand />
 
-			<Button onclick={toggleMode} variant="outline" size="icon" class="relative">
+			<Button onclick={toggleTheme} variant="ghost" size="icon" class="relative size-9">
 				<SunIcon class="size-[1.15rem] scale-100 rotate-0 dark:scale-0 dark:-rotate-90" />
 				<MoonIcon class="absolute size-[1.15rem] scale-0 rotate-90 dark:scale-100 dark:rotate-0" />
 				<span class="sr-only">Toggle theme</span>
@@ -51,20 +131,32 @@
 	</div>
 </header>
 
-<div class="fixed bottom-0 left-0 z-50 h-20 w-full border-t-2 bg-background [view-transition-name:site-dock] lg:hidden">
-	<div class="mx-auto grid h-full max-w-lg grid-cols-3 font-medium">
+<nav
+	aria-label="Primary"
+	class="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto h-14 max-w-md rounded-full border bg-background/80 backdrop-blur [view-transition-name:site-dock] lg:hidden"
+>
+	<div class="grid h-full grid-cols-3 p-1">
 		{#each navigationItems as item (item.href)}
+			{@const Icon = item.icon}
+			{@const active = isActive(item.href)}
 			<a
 				href={item.href}
-				class="inline-flex flex-col items-center justify-center gap-0.5 px-5 py-2 {isActive(item.href)
-					? 'bg-primary text-primary-foreground'
-					: 'hover:bg-primary hover:text-primary-foreground'}"
+				aria-current={active ? 'page' : undefined}
+				class="relative isolate flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full text-[0.7rem] font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 {active
+					? 'text-primary-foreground'
+					: 'text-muted-foreground hover:text-foreground'}"
 			>
-				<span class="flex size-5.5 items-center justify-center">
-					<svelte:component this={item.icon} />
-				</span>
-				<span class="text-[0.85rem]">{item.label}</span>
+				{#if active}
+					<span
+						aria-hidden="true"
+						class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary"
+						in:receiveMobile={{ key: 'pill' }}
+						out:sendMobile={{ key: 'pill' }}
+					></span>
+				{/if}
+				<Icon class="size-5" />
+				<span>{item.label}</span>
 			</a>
 		{/each}
 	</div>
-</div>
+</nav>
