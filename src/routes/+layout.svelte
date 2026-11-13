@@ -4,7 +4,6 @@
 	import { afterNavigate, onNavigate } from '$app/navigation';
 	import Header from '$lib/components/header.svelte';
 	import Footer from '$lib/components/footer.svelte';
-	import ScrollToTop from '$lib/components/scroll-to-top.svelte';
 
 	let { children } = $props();
 
@@ -52,5 +51,4 @@
 	</main>
 
 	<Footer />
-	<ScrollToTop />
 </div>
