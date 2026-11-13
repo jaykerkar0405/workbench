@@ -264,6 +264,46 @@
 	}
 }
 
+/* View transitions (see onNavigate in src/routes/+layout.svelte).
+   The root snapshot (everything not separately named: main and the footer) crossfades in
+   180 ms. The header and mobile dock are named so they stay pinned: only the new snapshot
+   is shown, with no crossfade. Other named groups, used later for shared elements, move
+   with --dur-2 / --ease-out; the root group is excluded so its 180 ms is untouched. */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 180ms;
+	animation-timing-function: ease;
+}
+
+::view-transition-group(*) {
+	animation-duration: var(--dur-2);
+	animation-timing-function: var(--ease-out);
+}
+
+::view-transition-group(root) {
+	animation-duration: 180ms;
+	animation-timing-function: ease;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-dock) {
+	display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-dock) {
+	animation: none;
+	opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	::before,

@@ -18,7 +18,7 @@
 </script>
 
 <header
-	class="sticky top-0 z-50 w-full border-b-2 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60"
+	class="sticky top-0 z-50 w-full border-b-2 bg-background/95 backdrop-blur [view-transition-name:site-header] supports-backdrop-filter:bg-background/60"
 >
 	<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-16 xl:px-6">
 		<a href="/" class="flex items-center gap-2.5">
@@ -51,7 +51,7 @@
 	</div>
 </header>
 
-<div class="fixed bottom-0 left-0 z-50 h-20 w-full border-t-2 bg-background lg:hidden">
+<div class="fixed bottom-0 left-0 z-50 h-20 w-full border-t-2 bg-background [view-transition-name:site-dock] lg:hidden">
 	<div class="mx-auto grid h-full max-w-lg grid-cols-3 font-medium">
 		{#each navigationItems as item (item.href)}
 			<a
