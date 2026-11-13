@@ -26,6 +26,16 @@ export const formatDateRange = (timestamp: string, duration: number): string => 
 	return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { month: 'short', day: 'numeric' })}, ${end.getFullYear()}`;
 };
 
+export const formatDuration = (hours: number): string => {
+	const pluralise = (n: number, unit: string): string => `${n} ${unit}${n === 1 ? '' : 's'}`;
+
+	if (hours < 72) {
+		return pluralise(hours, 'hour');
+	}
+
+	return pluralise(Math.round(hours / 24), 'day');
+};
+
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
 
