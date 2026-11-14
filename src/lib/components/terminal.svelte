@@ -143,7 +143,7 @@
 							0,
 							n
 						)}{/if}{#if ready && !children && i === cursorLine}<span class="relative inline-block w-0 align-baseline"
-							><span class="absolute left-0 cursor-blink text-brand" style:top="0">▊</span></span
+							><span class="absolute left-0 cursor-blink text-brand" style:top="-1.14em">▊</span></span
 						>{/if}<span class={typing ? 'motion-safe:in-[.js]:invisible' : undefined}
 						>{#if dollar && n === 0}<span class="text-brand">$</span>{line.slice(1)}{:else}{line.slice(n)}{/if}</span
 					></span
