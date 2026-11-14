@@ -51,11 +51,11 @@
 	},
 	"dependencies": {
 		"@vercel/analytics": "^2.0.1",
-		"@vercel/speed-insights": "^2.0.0",
+		"@vercel/speed-insights": "^2.1.0",
 		"fuse.js": "^7.5.0",
 		"lucide-svelte": "^1.0.1",
-		"marked": "^18.0.13",
+		"marked": "^18.2.0",
 		"mode-watcher": "^1.1.0",
-		"simple-icons": "^16.31.0"
+		"simple-icons": "^16.37.0"
 	}
 }
