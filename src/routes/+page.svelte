@@ -92,7 +92,7 @@
 						View projects
 						<span
 							aria-hidden="true"
-							class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) group-hover/cta:translate-x-1 group-focus-visible/cta:translate-x-1"
+							class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/cta:translate-x-1 motion-safe:group-focus-visible/cta:translate-x-1"
 							>→</span
 						>
 					</Button>
@@ -177,7 +177,7 @@
 			View all {projects.length} projects
 			<span
 				aria-hidden="true"
-				class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) group-hover/row:translate-x-1 group-focus-visible/row:translate-x-1"
+				class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/row:translate-x-1 motion-safe:group-focus-visible/row:translate-x-1"
 				>→</span
 			>
 		</a>

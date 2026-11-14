@@ -36,14 +36,14 @@
 		<span class="flex items-center gap-2 label tabular-nums" aria-hidden="true">
 			{#if dir === 'prev'}
 				<span
-					class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) group-hover/pn:-translate-x-1 group-focus-visible/pn:-translate-x-1"
+					class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/pn:-translate-x-1 motion-safe:group-focus-visible/pn:-translate-x-1"
 					>←</span
 				>
 			{/if}
 			<span>{word}{side.index ? ` · ${side.index}` : ''}</span>
 			{#if dir === 'next'}
 				<span
-					class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) group-hover/pn:translate-x-1 group-focus-visible/pn:translate-x-1"
+					class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/pn:translate-x-1 motion-safe:group-focus-visible/pn:translate-x-1"
 					>→</span
 				>
 			{/if}

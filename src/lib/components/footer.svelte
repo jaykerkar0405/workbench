@@ -63,7 +63,7 @@
 	const metaLink =
 		'group/link rounded-sm outline-none transition-colors duration-(--dur-1) ease-(--ease-out) hover:text-foreground focus-visible:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50';
 	const arrow =
-		'inline-block transition-transform duration-(--dur-1) ease-(--ease-out) group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 group-focus-visible/link:translate-x-0.5 group-focus-visible/link:-translate-y-0.5';
+		'inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/link:translate-x-0.5 motion-safe:group-hover/link:-translate-y-0.5 motion-safe:group-focus-visible/link:translate-x-0.5 motion-safe:group-focus-visible/link:-translate-y-0.5';
 </script>
 
 <footer aria-label="Footer" class="w-full border-t pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
@@ -122,7 +122,7 @@
 				>
 					Back to top <span
 						aria-hidden="true"
-						class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) group-hover/link:-translate-y-0.5 group-focus-visible/link:-translate-y-0.5"
+						class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/link:-translate-y-0.5 motion-safe:group-focus-visible/link:-translate-y-0.5"
 						>↑</span
 					>
 				</button>

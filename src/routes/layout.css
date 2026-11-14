@@ -516,6 +516,12 @@
 	}
 }
 
+/* Without JavaScript the loading placeholders (screenshot frames) never resolve, so they stay as still reserved
+   frames instead of pulsing forever. */
+html:not(.js) .animate-pulse {
+	animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	::before,
