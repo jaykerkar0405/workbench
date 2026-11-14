@@ -42,8 +42,10 @@
 				if (!entry) return;
 
 				if (!hiddenAtStart) {
-					// First callback: content already in view, or already scrolled past, is never reset to 0.
-					if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
+					// First callback: content already in view (even partly), or already scrolled past, is never reset to 0.
+					// (The observer's bottom margin is inset 10%, so a cell that is already on screen but inside that margin
+					// counts as in view too; otherwise it would be reset to 0 and sit there until the next scroll.)
+					if (entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight) {
 						observer.disconnect();
 						return;
 					}
