@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { Card } from '$lib/components/ui/card';
@@ -7,11 +8,14 @@
 		title,
 		lines,
 		typing = true,
+		children,
 		class: className
 	}: {
 		title: string;
 		lines: string[];
 		typing?: boolean;
+		/** Extra content printed directly after the lines, in the same mono type (not hidden from assistive tech). */
+		children?: Snippet;
 		class?: string;
 	} = $props();
 
@@ -138,11 +142,17 @@
 					>{#if dollar && n > 0}<span class="text-brand">$</span>{line.slice(1, n)}{:else}{line.slice(
 							0,
 							n
-						)}{/if}{#if ready && i === cursorLine}<span class="relative inline-block w-0 align-baseline"
+						)}{/if}{#if ready && !children && i === cursorLine}<span class="relative inline-block w-0 align-baseline"
 							><span class="absolute left-0 cursor-blink text-brand" style:top="0">▊</span></span
 						>{/if}<span class={typing ? 'motion-safe:in-[.js]:invisible' : undefined}
 						>{#if dollar && n === 0}<span class="text-brand">$</span>{line.slice(1)}{:else}{line.slice(n)}{/if}</span
 					></span
 				>{/each}</pre>
+
+		{#if children}
+			<div class="font-mono text-xs leading-relaxed wrap-anywhere text-foreground sm:text-sm">
+				{@render children()}
+			</div>
+		{/if}
 	</div>
 </Card>

@@ -1,65 +1,51 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import HomeIcon from '@lucide/svelte/icons/home';
-	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import Terminal from '$lib/components/terminal.svelte';
 
-	const errorConfig: Record<
-		number,
-		{
-			message: string;
-			description: string;
-		}
-	> = {
-		500: {
-			message: 'Internal Server Error',
-			description: 'Something went wrong on our end.'
-		},
-		503: {
-			message: 'Service Unavailable',
-			description: 'Service temporarily unavailable.'
-		},
-		404: {
-			message: 'Not Found',
-			description: "The page you're looking for doesn't exist."
-		}
+	const messages: Record<number, string> = {
+		404: 'No such file or directory',
+		500: 'Internal Server Error',
+		503: 'Service Unavailable'
 	};
 
-	const getErrorConfig = (status: number) => {
-		return (
-			errorConfig[status] ?? {
-				message: 'Unexpected Error',
-				description: 'An unexpected error occurred.'
-			}
-		);
-	};
+	const message = $derived(messages[page.status] ?? 'Unexpected Error');
 
-	const config = $derived.by(() => getErrorConfig(page.status));
+	// Anyone can type any path: it is only ever rendered as text, and a long one is shortened in the middle.
+	const MAX_PATH = 80;
+	const shown = $derived.by(() => {
+		const pathname = page.url.pathname;
+		if (pathname.length <= MAX_PATH) return pathname;
+		const keep = MAX_PATH - 1;
+		return `${pathname.slice(0, Math.ceil(keep / 2))}…${pathname.slice(pathname.length - Math.floor(keep / 2))}`;
+	});
+
+	const lines = $derived([`$ cd ${shown}`, `cd: ${message} (${page.status})`]);
+
+	const link = 'rounded-sm link-underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 </script>
 
-<div class="grid min-h-[calc(100svh-(--spacing(16)))] place-items-center px-6 py-12">
-	<Card class="w-full max-w-lg border-border py-10 shadow-sm">
-		<CardHeader class="space-y-2 text-center">
-			<CardTitle class="text-7xl font-bold">
-				{page.status}
-			</CardTitle>
+<svelte:head>
+	<title>{page.status} · {message} | Jay Kerkar</title>
+	<meta name="robots" content="noindex" />
+</svelte:head>
 
-			<p class="text-2xl font-semibold tracking-tight text-foreground">
-				{config.message}
+<div
+	class="mx-auto max-w-7xl px-5 pt-10 pb-20 md:px-10 lg:flex lg:min-h-[calc(100svh-3.25rem)] lg:items-center lg:py-16"
+>
+	<div class="w-full max-w-2xl">
+		<h1 class="sr-only">{page.status} {message}</h1>
+		<p class="mb-4 label" aria-hidden="true">Error {page.status}</p>
+
+		<Terminal title="jay@mumbai: ~" {lines} typing={false}>
+			<p>
+				<span class="text-brand">$</span>
+				<a href="/" class={link} aria-label="Go to the homepage">cd ~</a>
 			</p>
-		</CardHeader>
-
-		<CardContent class="text-center">
-			<p class="mx-auto max-w-md text-base text-muted-foreground">
-				{config.description}
+			<p>
+				<span class="text-brand">$</span> ls ~
+				<a href="/projects" class={link} aria-label="Go to projects">projects/</a>
+				<a href="/hackathons" class={link} aria-label="Go to hackathons">hackathons/</a>
 			</p>
-		</CardContent>
-
-		<CardFooter class="justify-center pt-2">
-			<Button href="/" size="lg" class="gap-2">
-				<HomeIcon class="size-4" />
-				Go back home
-			</Button>
-		</CardFooter>
-	</Card>
+		</Terminal>
+	</div>
 </div>
