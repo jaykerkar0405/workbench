@@ -412,6 +412,52 @@
 	}
 }
 
+/* Hackathons timeline. Nodes sit at 0.6 while their entry is hidden by the scroll reveal and grow to 1 when it is
+   revealed. The spine draws as its group scrolls through the viewport: a scroll-driven scaleY whose tip stays
+   about two thirds down the viewport (the view timeline's bottom edge is inset by 34%, and the animation runs
+   from the subject's top reaching that edge to its bottom reaching it; `entry` would be wrong because for a tall
+   subject it only lasts one viewport). Without support, or without JavaScript
+   (the rules are scoped to html.js), or with reduced motion, the line is simply fully drawn. */
+@keyframes timeline-spine {
+	from {
+		transform: scaleY(0);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html.js [data-timeline-node] {
+		transition: scale var(--dur-2) var(--ease-out);
+	}
+
+	html.js [data-reveal=''] [data-timeline-node] {
+		scale: 0.6;
+	}
+
+	html.js [data-reveal=''][data-revealed] [data-timeline-node] {
+		scale: 1;
+	}
+}
+
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		html.js [data-timeline-spine] {
+			transform-origin: top;
+			animation: timeline-spine linear both;
+			animation-timeline: view(block 0px 34%);
+			animation-range: cover 0% cover calc(100% - 66vh);
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-timeline-spine] {
+		animation: none;
+	}
+}
+
 /* View transitions (see onNavigate in src/routes/+layout.svelte).
    The root snapshot (everything not separately named: main and the footer) crossfades in
    180 ms. The header and mobile dock are named so they stay pinned: only the new snapshot

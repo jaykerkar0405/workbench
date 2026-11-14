@@ -22,7 +22,9 @@
 	// null means "show the real value" (server render, no JS, in view at load, finished counting).
 	let current = $state<number | null>(null);
 
-	const format = (n: number) => n.toFixed(decimals);
+	// Fixed decimals at every step, with thousands separators (1,075). Numbers under 1000 read as before.
+	const format = (n: number) =>
+		n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 	const finalText = $derived(`${format(value)}${suffix}`);
 	const shownText = $derived(`${format(current ?? value)}${suffix}`);
 
