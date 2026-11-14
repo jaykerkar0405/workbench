@@ -213,6 +213,24 @@
 	}
 }
 
+/* Terminal block cursor: visible for the first half of the period, hidden for the second, with a hard
+   step rather than a fade. Under reduced motion it stays visible and does not animate. */
+@keyframes cursor-blink {
+	0% {
+		opacity: 1;
+	}
+	50%,
+	100% {
+		opacity: 0;
+	}
+}
+
+@utility cursor-blink {
+	@media (prefers-reduced-motion: no-preference) {
+		animation: cursor-blink 1s steps(1, end) infinite;
+	}
+}
+
 @utility link-underline {
 	background-image: linear-gradient(currentColor, currentColor);
 	background-repeat: no-repeat;
