@@ -60,7 +60,7 @@
 					</div>
 				{/if}
 
-				<h1 class="min-w-0 text-display wrap-break-word" style:view-transition-name={titleTransitionName}>
+				<h1 class="min-w-0 text-page-title wrap-break-word" style:view-transition-name={titleTransitionName}>
 					{title}
 				</h1>
 			</div>

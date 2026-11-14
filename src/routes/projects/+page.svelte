@@ -54,7 +54,7 @@
 <div class="mx-auto max-w-7xl px-5 pt-12 pb-20 md:px-10 lg:pt-16 lg:pb-28">
 	<header class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
 		<div class="flex flex-col gap-4">
-			<h1 class="text-display">Projects</h1>
+			<h1 class="text-page-title">Projects</h1>
 			<p class="label tabular-nums">{summary}</p>
 		</div>
 

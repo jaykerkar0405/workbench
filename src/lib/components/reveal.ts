@@ -2,9 +2,9 @@ import type { Attachment } from 'svelte/attachments';
 
 export type RevealOptions = { delay?: number; stagger?: boolean };
 
-const TRANSITION_MS = 520;
-const STAGGER_STEP_MS = 40;
-const STAGGER_CAP = 8;
+const TRANSITION_MS = 400;
+const STAGGER_STEP_MS = 30;
+const STAGGER_CAP = 6;
 const MARGIN_MS = 80;
 // The observer's root is extended this far upward, so anything above the viewport counts as intersecting.
 // Without it, content jumped past (End key, anchor link, restored scroll) would stay hidden.

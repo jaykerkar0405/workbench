@@ -33,29 +33,36 @@
 	--radius: 0.375rem;
 	--background: oklch(0.985 0.003 250);
 	--foreground: oklch(0.2 0.02 255);
-	--card: oklch(1 0 0);
+	--surface: oklch(1 0 0);
+	--card: var(--surface);
 	--card-foreground: oklch(0.2 0.02 255);
-	--popover: oklch(1 0 0);
+	--popover: var(--surface);
 	--popover-foreground: oklch(0.2 0.02 255);
 	--primary: oklch(0.205 0 0);
 	--primary-foreground: oklch(0.985 0 0);
 	--secondary: oklch(0.96 0.006 250);
 	--secondary-foreground: oklch(0.205 0 0);
 	--muted: oklch(0.96 0.006 250);
-	--muted-foreground: oklch(0.5 0.02 255);
+	--muted-foreground: oklch(0.46 0.02 255);
 	--accent: oklch(0.96 0.006 250);
 	--accent-foreground: oklch(0.205 0 0);
 	--destructive: oklch(0.577 0.245 27.325);
 	--border: oklch(0.9 0.008 250);
 	--input: oklch(0.9 0.008 250);
 	--ring: var(--brand);
-	--brand: oklch(0.545 0.16 240);
+	--brand: oklch(0.51 0.16 240);
+	--brand-soft: color-mix(in oklab, var(--brand) 10%, var(--background));
 	--brand-foreground: oklch(0.99 0 0);
 	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-	--dur-1: 150ms;
-	--dur-2: 280ms;
-	--dur-3: 520ms;
+	--dur-1: 140ms;
+	--dur-2: 260ms;
+	--dur-3: 400ms;
+	--dur-page: 160ms;
+	--gap-section: 4rem;
+	--gap-heading: 1.5rem;
+	--gap-header-title: 2rem;
+	--gap-title-content: 2rem;
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
@@ -74,16 +81,17 @@
 .dark {
 	--background: oklch(0.16 0.012 255);
 	--foreground: oklch(0.96 0.005 250);
-	--card: oklch(0.2 0.014 255);
+	--surface: oklch(0.225 0.014 255);
+	--card: var(--surface);
 	--card-foreground: oklch(0.96 0.005 250);
-	--popover: oklch(0.2 0.014 255);
+	--popover: var(--surface);
 	--popover-foreground: oklch(0.96 0.005 250);
 	--primary: oklch(0.922 0 0);
 	--primary-foreground: oklch(0.205 0 0);
 	--secondary: oklch(0.26 0.016 255);
 	--secondary-foreground: oklch(0.985 0 0);
 	--muted: oklch(0.26 0.016 255);
-	--muted-foreground: oklch(0.72 0.02 250);
+	--muted-foreground: oklch(0.76 0.02 250);
 	--accent: oklch(0.26 0.016 255);
 	--accent-foreground: oklch(0.985 0 0);
 	--destructive: oklch(0.704 0.191 22.216);
@@ -91,6 +99,7 @@
 	--input: oklch(1 0 0 / 9%);
 	--ring: var(--brand);
 	--brand: oklch(0.78 0.13 225);
+	--brand-soft: color-mix(in oklab, var(--brand) 14%, var(--background));
 	--brand-foreground: oklch(0.16 0.012 255);
 	--chart-1: oklch(0.488 0.243 264.376);
 	--chart-2: oklch(0.696 0.17 162.48);
@@ -107,6 +116,15 @@
 	--sidebar-ring: oklch(0.556 0 0);
 }
 
+@media (min-width: 768px) {
+	:root {
+		--gap-section: 6rem;
+		--gap-heading: 2rem;
+		--gap-header-title: 4rem;
+		--gap-title-content: 3rem;
+	}
+}
+
 @theme inline {
 	--font-sans: var(--font-sans);
 	--font-mono: var(--font-mono);
@@ -116,6 +134,7 @@
 	--radius-xl: calc(var(--radius) + 4px);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+	--color-surface: var(--surface);
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
 	--color-popover: var(--popover);
@@ -133,6 +152,7 @@
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 	--color-brand: var(--brand);
+	--color-brand-soft: var(--brand-soft);
 	--color-brand-foreground: var(--brand-foreground);
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
@@ -159,6 +179,7 @@
 	body {
 		font-family: var(--font-sans);
 		@apply bg-background text-foreground;
+		font-variant-numeric: tabular-nums;
 	}
 	pre,
 	kbd,
@@ -173,24 +194,44 @@
 
 @utility label {
 	font-family: var(--font-mono);
-	font-size: 0.72rem;
+	font-size: 0.75rem;
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
+	letter-spacing: 0.06em;
 	color: var(--muted-foreground);
 }
 
 @utility text-display {
-	font-size: clamp(2.75rem, 6vw, 4.75rem);
+	font-size: clamp(3.5rem, 7.222vw, 6.5rem);
 	font-weight: 700;
-	letter-spacing: -0.03em;
-	line-height: 0.95;
+	letter-spacing: -0.035em;
+	line-height: 0.9;
 }
 
 @utility text-page-title {
-	font-size: clamp(2rem, 4vw, 3rem);
+	font-size: clamp(2.5rem, 4.444vw, 4rem);
 	font-weight: 700;
+	letter-spacing: -0.025em;
+	line-height: 1;
+}
+
+@utility text-section-title {
+	font-size: 1.75rem;
+	font-weight: 600;
 	letter-spacing: -0.02em;
-	line-height: 1.05;
+	line-height: 1.15;
+}
+
+@utility text-item-title {
+	font-size: 1.375rem;
+	font-weight: 600;
+	letter-spacing: -0.015em;
+	line-height: 1.25;
+}
+
+@utility text-lead {
+	font-size: 1.125rem;
+	line-height: 1.6;
+	color: var(--muted-foreground);
 }
 
 /* Faint dot grid painted on a pseudo-element behind the host's content, so the
@@ -262,8 +303,8 @@
 	--tw-prose-pre-bg: var(--muted);
 	--tw-prose-th-borders: var(--border);
 	--tw-prose-td-borders: var(--border);
-	font-size: 1.0625rem;
-	line-height: 1.75;
+	font-size: 1rem;
+	line-height: 1.7;
 }
 
 /* Text keeps a readable measure even when the column is wider. */
@@ -391,7 +432,7 @@
 	html.js [data-reveal=''],
 	html.js [data-reveal='stagger'] > * {
 		opacity: 0;
-		translate: 0 12px;
+		translate: 0 8px;
 		transition:
 			opacity var(--dur-3) var(--ease-out),
 			translate var(--dur-3) var(--ease-out);
@@ -405,28 +446,22 @@
 	}
 
 	html.js [data-reveal='stagger'] > :nth-child(2) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 1 * 40ms);
+		transition-delay: calc(var(--reveal-delay, 0ms) + 1 * 30ms);
 	}
 	html.js [data-reveal='stagger'] > :nth-child(3) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 2 * 40ms);
+		transition-delay: calc(var(--reveal-delay, 0ms) + 2 * 30ms);
 	}
 	html.js [data-reveal='stagger'] > :nth-child(4) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 3 * 40ms);
+		transition-delay: calc(var(--reveal-delay, 0ms) + 3 * 30ms);
 	}
 	html.js [data-reveal='stagger'] > :nth-child(5) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 4 * 40ms);
+		transition-delay: calc(var(--reveal-delay, 0ms) + 4 * 30ms);
 	}
 	html.js [data-reveal='stagger'] > :nth-child(6) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 5 * 40ms);
+		transition-delay: calc(var(--reveal-delay, 0ms) + 5 * 30ms);
 	}
-	html.js [data-reveal='stagger'] > :nth-child(7) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 6 * 40ms);
-	}
-	html.js [data-reveal='stagger'] > :nth-child(8) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 7 * 40ms);
-	}
-	html.js [data-reveal='stagger'] > :nth-child(n + 9) {
-		transition-delay: calc(var(--reveal-delay, 0ms) + 8 * 40ms);
+	html.js [data-reveal='stagger'] > :nth-child(n + 7) {
+		transition-delay: calc(var(--reveal-delay, 0ms) + 6 * 30ms);
 	}
 }
 
@@ -478,12 +513,12 @@
 
 /* View transitions (see onNavigate in src/routes/+layout.svelte).
    The root snapshot (everything not separately named: main and the footer) crossfades in
-   180 ms. The header and mobile dock are named so they stay pinned: only the new snapshot
+   --dur-page (160 ms). The header and mobile dock are named so they stay pinned: only the new snapshot
    is shown, with no crossfade. Other named groups, used later for shared elements, move
-   with --dur-2 / --ease-out; the root group is excluded so its 180 ms is untouched. */
+   with --dur-2 / --ease-out; the root group is excluded so its --dur-page is untouched. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-	animation-duration: 180ms;
+	animation-duration: var(--dur-page);
 	animation-timing-function: ease;
 }
 
@@ -493,7 +528,7 @@
 }
 
 ::view-transition-group(root) {
-	animation-duration: 180ms;
+	animation-duration: var(--dur-page);
 	animation-timing-function: ease;
 }
 

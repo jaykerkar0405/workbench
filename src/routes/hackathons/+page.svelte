@@ -28,7 +28,7 @@
 
 <div class="mx-auto max-w-7xl px-5 pt-12 pb-20 md:px-10 lg:pt-16 lg:pb-28">
 	<header>
-		<h1 class="text-display">Hackathons</h1>
+		<h1 class="text-page-title">Hackathons</h1>
 
 		<div class="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 border-y py-8 md:grid-cols-4 lg:mt-14">
 			{#each stats as stat (stat.label)}

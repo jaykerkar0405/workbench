@@ -71,7 +71,7 @@
 		<div class="grid gap-10 py-20 lg:grid-cols-12 lg:items-end lg:gap-x-6 lg:py-28" {@attach reveal()}>
 			<div class="lg:col-span-7 xl:col-span-8">
 				<p class="mb-4 label">Get in touch</p>
-				<h2 class="text-display text-balance">Let’s build something.</h2>
+				<h2 class="text-page-title text-balance">Let’s build something.</h2>
 			</div>
 
 			<div class="flex flex-col items-start gap-3 lg:col-span-5 xl:col-span-4">
