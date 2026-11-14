@@ -1,22 +1,16 @@
 <script lang="ts">
-	import {
-		siReact,
-		siDocker,
-		siPython,
-		siSvelte,
-		siMongodb,
-		siSolidity,
-		siNextdotjs,
-		siTypescript,
-		siJavascript,
-		siPostgresql,
-		siTailwindcss
-	} from 'simple-icons';
 	import { cn } from '$lib/utils';
 	import Seo from '$lib/components/seo.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
-	import { Card, CardContent } from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { reveal } from '$lib/components/reveal';
+	import { hackathons } from '$lib/hackathons';
+	import { projects } from '$lib/projects';
+	import { featuredProjects, projectIndex, hackathonFor } from '$lib/components/project-order';
+	import SectionHeading from '$lib/components/section-heading.svelte';
+	import Stat from '$lib/components/stat.svelte';
+	import SpecSheet from '$lib/components/spec-sheet.svelte';
+	import ProjectSpotlight from '$lib/components/project-spotlight.svelte';
 	import Terminal from '$lib/components/terminal.svelte';
 	import ResumeActions from '$lib/components/resume-actions.svelte';
 	import { GithubIcon, LeetCodeIcon, LinkedInIcon, XBrandIcon } from '$lib/components/brand-icons';
@@ -42,27 +36,29 @@
 	const enter =
 		'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-(--dur-3) motion-safe:ease-(--ease-out)';
 
-	type BrandIcon = { title: string; hex: string; path: string };
+	const cgpa = 9.87;
 
-	const brandColor = (hex: string) => {
-		const normalized = hex.toLowerCase();
-		if (normalized === '000000' || normalized === 'ffffff') return 'currentColor';
-		return `#${hex}`;
-	};
-
-	const techStack: { name: string; icon: BrandIcon }[] = [
-		{ name: 'React', icon: siReact },
-		{ name: 'Python', icon: siPython },
-		{ name: 'Docker', icon: siDocker },
-		{ name: 'MongoDB', icon: siMongodb },
-		{ name: 'SvelteKit', icon: siSvelte },
-		{ name: 'Next.js', icon: siNextdotjs },
-		{ name: 'Solidity', icon: siSolidity },
-		{ name: 'TypeScript', icon: siTypescript },
-		{ name: 'JavaScript', icon: siJavascript },
-		{ name: 'PostgreSQL', icon: siPostgresql },
-		{ name: 'Tailwind CSS', icon: siTailwindcss }
+	const stats = [
+		{ value: hackathons.length, label: 'Hackathons', decimals: 0 },
+		{ value: hackathons.filter((h) => h.prize).length, label: 'Podiums & track wins', decimals: 0 },
+		{ value: projects.length, label: 'Projects shipped', decimals: 0 },
+		{ value: cgpa, label: 'CGPA', decimals: 2 }
 	];
+
+	const stack = [
+		{ label: 'Languages', items: ['TypeScript', 'JavaScript', 'Python', 'Solidity'] },
+		{ label: 'Frontend', items: ['React', 'Next.js', 'SvelteKit', 'Tailwind CSS'] },
+		{ label: 'Backend & data', items: ['PostgreSQL', 'MongoDB'] },
+		{ label: 'Web3 & infra', items: ['Docker'] }
+	];
+
+	const learning = [
+		'Agentic AI systems and workflows',
+		'Ethereum fundamentals and protocol basics',
+		'Zero-knowledge proofs and ZK systems'
+	];
+
+	const container = 'mx-auto max-w-7xl px-5 md:px-10';
 </script>
 
 <Seo
@@ -143,189 +139,115 @@
 	</div>
 </section>
 
-<div class="container mx-auto max-w-7xl px-4 py-12">
-	<div class="lg:flex lg:flex-col">
-		<div class="space-y-6 lg:space-y-8">
-			<div class="flex justify-center">
-				<div class="w-full overflow-x-auto rounded-2xl border border-border bg-card">
-					<Tooltip.Provider>
-						<div class="flex min-h-20 items-center justify-between px-4">
-							{#each techStack as tech (tech.name)}
-								<Tooltip.Root>
-									<Tooltip.Trigger
-										aria-label={tech.name}
-										class="flex size-14 shrink-0 items-center justify-center rounded-lg hover:scale-110"
-									>
-										<svg
-											width="40"
-											height="40"
-											viewBox="0 0 24 24"
-											fill="currentColor"
-											xmlns="http://www.w3.org/2000/svg"
-											style="color: {brandColor(tech.icon.hex)}"
-										>
-											<path d={tech.icon.path} />
-										</svg>
-									</Tooltip.Trigger>
-									<Tooltip.Content>
-										<p class="font-medium">{tech.name}</p>
-									</Tooltip.Content>
-								</Tooltip.Root>
-							{/each}
-						</div>
-					</Tooltip.Provider>
-				</div>
+<section aria-label="At a glance" class={container}>
+	<div class="grid grid-cols-2 gap-x-6 border-y md:grid-cols-4 md:gap-x-0">
+		{#each stats as stat (stat.label)}
+			<div
+				class="border-t py-8 first:border-t-0 md:border-t-0 md:border-l md:px-6 md:first:border-l-0 md:first:pl-0 [&:nth-child(2)]:border-t-0"
+			>
+				<Stat value={stat.value} label={stat.label} decimals={stat.decimals} />
+			</div>
+		{/each}
+	</div>
+</section>
+
+<section aria-label="Selected work" class={cn(container, 'py-20 lg:py-28')}>
+	<SectionHeading index="01" title="Selected work">
+		<span class="label tabular-nums">{featuredProjects.length} of {projects.length}</span>
+	</SectionHeading>
+
+	<div class="mt-10 flex flex-col gap-20 lg:gap-28">
+		{#each featuredProjects as project, i (project.id)}
+			<div {@attach reveal()}>
+				<ProjectSpotlight
+					{project}
+					index={projectIndex(project.id)}
+					hackathon={hackathonFor(project)}
+					reverse={i % 2 === 1}
+				/>
+			</div>
+		{/each}
+	</div>
+
+	<div class="mt-16 lg:mt-20" {@attach reveal()}>
+		<a
+			href="/projects"
+			class="group/row flex items-center justify-between gap-4 border-y py-6 text-lg font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+		>
+			View all {projects.length} projects
+			<span
+				aria-hidden="true"
+				class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) group-hover/row:translate-x-1 group-focus-visible/row:translate-x-1"
+				>→</span
+			>
+		</a>
+	</div>
+</section>
+
+<section aria-label="Stack" class={cn(container, 'pb-20 lg:pb-28')}>
+	<SectionHeading index="02" title="Stack" />
+
+	<div class="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4" {@attach reveal({ stagger: true })}>
+		{#each stack as group (group.label)}
+			<div>
+				<h3 class="border-b pb-3 label">{group.label}</h3>
+				<ul class="divide-y">
+					{#each group.items as name (name)}
+						<li class="py-3 text-lg">{name}</li>
+					{/each}
+				</ul>
+			</div>
+		{/each}
+	</div>
+</section>
+
+<section id="about" aria-label="About" class={cn(container, 'pb-20 lg:pb-28')}>
+	<SectionHeading index="03" title="About" />
+
+	<div class="mt-10 grid gap-12 lg:grid-cols-12 lg:gap-x-6">
+		<div class="lg:sticky lg:top-24 lg:col-span-4 lg:self-start">
+			<h3 class="mb-4 label">Education</h3>
+			<SpecSheet
+				columns={1}
+				items={[
+					{ label: 'Institute', value: 'VES Institute of Technology' },
+					{ label: 'Degree', value: 'Bachelor of Engineering - Information Technology' },
+					{ label: 'Years', value: '2023 - 2027' },
+					{ label: 'CGPA', value: `${cgpa.toFixed(2)} / 10` }
+				]}
+			/>
+		</div>
+
+		<div class="flex flex-col gap-12 lg:col-span-8">
+			<div class="flex max-w-[65ch] flex-col gap-6 text-lg leading-relaxed text-foreground" {@attach reveal()}>
+				<p>
+					I'm a hackathon-driven developer who has participated in multiple national and global hackathons, building
+					under real constraints and tight timelines.
+				</p>
+				<p>
+					Earlier, I focused on building projects blindly for learning. Now, I intentionally design projects around real
+					problems faced by people, aiming for practical impact.
+				</p>
 			</div>
 
-			<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-				<a
-					target="_blank"
-					rel="noopener noreferrer"
-					href="https://github.com/jaykerkar0405"
-					class="flex items-center gap-4 rounded-lg border border-border bg-card p-6"
-				>
-					<svg
-						width="24"
-						height="24"
-						fill="currentColor"
-						viewBox={GithubIcon.viewBox}
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						{#each GithubIcon.paths as d (d)}
-							<path {d} />
-						{/each}
-					</svg>
-					<div>
-						<p class="font-medium">GitHub</p>
-						<p class="text-sm text-muted-foreground">jaykerkar0405</p>
-					</div>
-				</a>
+			<blockquote
+				class="max-w-[40ch] border-l-2 border-brand pl-6 text-2xl leading-tight font-medium text-balance"
+				{@attach reveal()}
+			>
+				I strongly value quality code over quantity - writing clean, maintainable systems that scale beyond demos.
+			</blockquote>
 
-				<a
-					target="_blank"
-					rel="noopener noreferrer"
-					href="https://in.linkedin.com/in/jaykerkar0405"
-					class="flex items-center gap-4 rounded-lg border border-border bg-card p-6"
-				>
-					<svg
-						width="24"
-						height="24"
-						fill="currentColor"
-						viewBox={LinkedInIcon.viewBox}
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						{#each LinkedInIcon.paths as d (d)}
-							<path {d} />
-						{/each}
-					</svg>
-					<div>
-						<p class="font-medium">LinkedIn</p>
-						<p class="text-sm text-muted-foreground">jaykerkar0405</p>
-					</div>
-				</a>
-
-				<a
-					target="_blank"
-					rel="noopener noreferrer"
-					href="https://x.com/jaykerkar0405"
-					class="flex items-center gap-4 rounded-lg border border-border bg-card p-6"
-				>
-					<svg
-						width="24"
-						height="24"
-						fill="currentColor"
-						viewBox={XBrandIcon.viewBox}
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						{#each XBrandIcon.paths as d (d)}
-							<path {d} />
-						{/each}
-					</svg>
-					<div>
-						<p class="font-medium">X</p>
-						<p class="text-sm text-muted-foreground">@jaykerkar0405</p>
-					</div>
-				</a>
-
-				<a
-					target="_blank"
-					rel="noopener noreferrer"
-					href="https://leetcode.com/u/jaykerkar0405"
-					class="flex items-center gap-4 rounded-lg border border-border bg-card p-6"
-				>
-					<svg
-						width="24"
-						height="24"
-						fill="currentColor"
-						viewBox={LeetCodeIcon.viewBox}
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						{#each LeetCodeIcon.paths as d (d)}
-							<path {d} />
-						{/each}
-					</svg>
-					<div>
-						<p class="font-medium">LeetCode</p>
-						<p class="text-sm text-muted-foreground">jaykerkar0405</p>
-					</div>
-				</a>
+			<div {@attach reveal()}>
+				<h3 class="mb-4 label">Learning now</h3>
+				<ol class="border-t">
+					{#each learning as item, i (item)}
+						<li class="flex items-baseline gap-5 border-b py-4">
+							<span aria-hidden="true" class="label tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+							<span class="text-lg">{item}</span>
+						</li>
+					{/each}
+				</ol>
 			</div>
 		</div>
 	</div>
-
-	<div id="about" class="mt-12 lg:mt-0">
-		<h2 class="mb-8 text-3xl font-bold">About</h2>
-		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-			<Card>
-				<CardContent class="px-8 py-2">
-					<h3 class="mb-4 text-xl font-semibold">My Approach</h3>
-					<div class="space-y-4 leading-relaxed text-muted-foreground">
-						<p>
-							I'm a hackathon-driven developer who has participated in multiple national and global hackathons, building
-							under real constraints and tight timelines.
-						</p>
-						<p>
-							Earlier, I focused on building projects blindly for learning. Now, I intentionally design projects around
-							real problems faced by people, aiming for practical impact.
-						</p>
-						<p>
-							I strongly value quality code over quantity - writing clean, maintainable systems that scale beyond demos.
-						</p>
-					</div>
-					<div class="mt-6">
-						<ResumeActions resumeUrl="/docs/jay_kerkar_resume.pdf" downloadFileName="jay_kerkar_resume.pdf" />
-					</div>
-				</CardContent>
-			</Card>
-
-			<div class="flex flex-col gap-6">
-				<Card class="flex-1">
-					<CardContent class="px-8 py-2">
-						<h3 class="mb-4 text-xl font-semibold">What I'm Learning Now</h3>
-						<ul class="ml-4 list-outside list-disc space-y-3 text-muted-foreground marker:text-primary">
-							<li class="pl-0.5">Agentic AI systems and workflows</li>
-							<li class="pl-0.5">Ethereum fundamentals and protocol basics</li>
-							<li class="pl-0.5">Zero-knowledge proofs and ZK systems</li>
-						</ul>
-					</CardContent>
-				</Card>
-
-				<Card class="flex-1">
-					<CardContent class="px-8 py-2">
-						<h3 class="mb-4 text-xl font-semibold">Education</h3>
-						<div class="flex items-start justify-between gap-4">
-							<div class="space-y-2">
-								<p class="font-medium">VES Institute of Technology</p>
-								<p class="text-sm text-muted-foreground">Bachelor of Engineering - Information Technology</p>
-							</div>
-							<div class="shrink-0 space-y-2 text-right">
-								<p class="text-sm text-muted-foreground">2023 - 2027</p>
-								<p class="text-sm font-medium">CGPA: 9.87 / 10</p>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-		</div>
-	</div>
-</div>
+</section>
