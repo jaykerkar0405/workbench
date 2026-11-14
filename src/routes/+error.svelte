@@ -19,9 +19,13 @@
 		return `${pathname.slice(0, Math.ceil(keep / 2))}…${pathname.slice(pathname.length - Math.floor(keep / 2))}`;
 	});
 
+	// When the path was cut, the full value is available as a tooltip (it never appears in the visible text).
+	const cut = $derived(shown !== page.url.pathname);
+
 	const lines = $derived([`$ cd ${shown}`, `cd: ${message} (${page.status})`]);
 
-	const link = 'rounded-sm link-underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+	const link =
+		'rounded-sm underline decoration-1 underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 </script>
 
 <svelte:head>
@@ -32,7 +36,7 @@
 <div
 	class="mx-auto max-w-7xl px-5 pt-10 pb-20 md:px-10 lg:flex lg:min-h-[calc(100svh-3.25rem)] lg:items-center lg:py-16"
 >
-	<div class="w-full max-w-2xl">
+	<div class="w-full max-w-2xl" title={cut ? page.url.pathname : undefined}>
 		<h1 class="sr-only">{page.status} {message}</h1>
 		<p class="mb-4 label" aria-hidden="true">Error {page.status}</p>
 
