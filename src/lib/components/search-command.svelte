@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Fuse from 'fuse.js';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import type { Pathname } from '$app/types';
 	import { projects } from '$lib/projects';
 	import { hackathons } from '$lib/hackathons';
 	import type { Project } from '$lib/projects/types';
@@ -36,7 +38,8 @@
 
 	function navigate(path: string) {
 		open = false;
-		goto(path);
+		// Every caller passes an internal absolute path (nav item or /projects/<id>, /hackathons/<id>).
+		goto(resolve(path as Pathname));
 	}
 
 	function openExternal(url: string) {
@@ -151,7 +154,8 @@
 	});
 
 	let cachedSearch = '';
-	let cachedScoreMap = new Map<string, number>();
+	// Plain object, not a Map: a non-reactive memo of the last query's scores (SvelteMap would add reactivity nothing reads).
+	let cachedScoreMap: Record<string, number> = {};
 
 	function fuseFilter(value: string, search: string): number {
 		if (!search) return 1;
@@ -159,13 +163,13 @@
 		if (search !== cachedSearch) {
 			cachedSearch = search;
 			const results = fuse.search(search);
-			cachedScoreMap = new Map<string, number>();
+			cachedScoreMap = {};
 			for (const result of results) {
-				cachedScoreMap.set(result.item.value, 1 - (result.score ?? 0));
+				cachedScoreMap[result.item.value] = 1 - (result.score ?? 0);
 			}
 		}
 
-		return cachedScoreMap.get(value) ?? 0;
+		return cachedScoreMap[value] ?? 0;
 	}
 
 	const pageCount = navigationItems.length + 1;

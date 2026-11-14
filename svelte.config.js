@@ -10,7 +10,7 @@ const config = {
 			handleHttpError: ({ path, message }) => {
 				const ignoredPaths = ['/projects/', '/hackathons/'];
 
-				if (ignoredPaths.some(p => path.startsWith(p))) {
+				if (ignoredPaths.some((p) => path.startsWith(p))) {
 					return;
 				}
 
