@@ -63,7 +63,7 @@
 	const noScreenshots = $derived(screenshots !== null && screenshots.length === 0);
 
 	onMount(() => {
-		const query = window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)');
+		const query = window.matchMedia('(min-width: 1280px) and (hover: hover) and (pointer: fine)');
 		const update = () => (previewEnabled = query.matches);
 		update();
 		query.addEventListener('change', update);
@@ -73,6 +73,9 @@
 	const iconStyleName = $derived(shareTransition ? viewTransitionName('project-icon', project.id) : undefined);
 	const titleStyleName = $derived(shareTransition ? viewTransitionName('project-title', project.id) : undefined);
 
+	/** Badges shown before "+N" in the row's tag column: three overflowed the 274 px cell for 2 of 13 projects at xl, two fit for all. */
+	const TAGS_MAX = 2;
+
 	const ext =
 		'relative z-10 opacity-0 transition-opacity duration-(--dur-1) ease-(--ease-out) group-focus-within/row:opacity-100 group-hover/row:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-100';
 </script>
@@ -81,17 +84,17 @@
 	onpointerenter={ensureScreenshots}
 	onfocusin={ensureScreenshots}
 	class={cn(
-		'group/row relative grid min-h-14 grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 rounded-md px-3 py-3 transition-colors duration-(--dur-1) ease-(--ease-out) hover:bg-muted/50 has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 lg:min-h-[72px] lg:grid-cols-12 lg:gap-x-6 lg:px-4 lg:py-0',
+		'group/row relative grid min-h-14 grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 rounded-md px-3 py-3 transition-colors duration-(--dur-1) ease-(--ease-out) hover:bg-muted/50 has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 xl:min-h-[72px] xl:grid-cols-12 xl:gap-x-6 xl:px-4 xl:py-0',
 		className
 	)}
 >
 	<span
-		class="label tabular-nums transition-colors duration-(--dur-1) ease-(--ease-out) group-focus-within/row:text-brand group-hover/row:text-brand lg:col-span-1"
+		class="label tabular-nums transition-colors duration-(--dur-1) ease-(--ease-out) group-focus-within/row:text-brand group-hover/row:text-brand xl:col-span-1"
 	>
 		{index}
 	</span>
 
-	<div class="flex min-w-0 items-center gap-3 lg:col-span-3">
+	<div class="flex min-w-0 items-center gap-3 xl:col-span-3">
 		{#if icon}
 			<div
 				class="size-8 shrink-0 overflow-hidden rounded-sm border bg-muted"
@@ -153,14 +156,14 @@
 		</h3>
 	</div>
 
-	<div class="col-span-3 col-start-2 row-start-2 min-w-0 lg:col-span-4 lg:col-start-auto lg:row-start-auto">
+	<div class="col-span-2 col-start-2 row-start-2 min-w-0 xl:col-span-3 xl:col-start-auto xl:row-start-auto">
 		<div class="flex items-center gap-2">
-			<p class="line-clamp-2 min-w-0 flex-1 text-sm text-muted-foreground lg:truncate lg:text-base">
+			<p class="line-clamp-2 min-w-0 flex-1 text-sm text-muted-foreground xl:truncate xl:text-base">
 				{project.shortDescription}
 			</p>
 
 			<!-- Space is always reserved so the description never re-truncates when these fade in. -->
-			<div class="hidden w-[4.5rem] shrink-0 items-center justify-end gap-1 lg:flex">
+			<div class="hidden w-[4.5rem] shrink-0 items-center justify-end gap-1 xl:flex">
 				<Button
 					href={project.githubLink}
 					target="_blank"
@@ -194,29 +197,34 @@
 		</div>
 	</div>
 
-	<!-- Decorative here: the column is clipped, so the "+N" tooltip button inside is made inert. -->
-	<div
-		inert
-		class="pointer-events-none hidden min-w-0 overflow-hidden mask-[linear-gradient(to_right,black_calc(100%-1.5rem),transparent)] lg:col-span-2 lg:block"
-	>
-		<TagList items={project.techStack} max={3} class="flex-nowrap" />
+	<div class="pointer-events-none relative z-10 hidden min-w-0 xl:col-span-3 xl:block [&_button]:pointer-events-auto">
+		<TagList items={project.techStack} max={TAGS_MAX} class="flex-nowrap" />
 	</div>
 
-	<div class="hidden min-w-0 lg:col-span-1 lg:block">
-		{#if hackathon}
-			<a
-				href={`/hackathons/${hackathon.id}`}
-				class="relative z-10 block truncate rounded-sm link-underline label outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-			>
-				{eventLabel(hackathon)}
-			</a>
-		{:else}
-			<span class="label" aria-label="No event">—</span>
-		{/if}
+	<div class="hidden min-w-0 items-center gap-3 xl:col-span-2 xl:flex">
+		<div class="min-w-0 flex-1">
+			{#if hackathon}
+				{@const label = eventLabel(hackathon)}
+				<a
+					href={`/hackathons/${hackathon.id}`}
+					title={label}
+					class="relative z-10 block truncate rounded-sm link-underline label outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+				>
+					{label}
+				</a>
+			{:else}
+				<span class="label" aria-label="No event">—</span>
+			{/if}
+		</div>
+
+		<ArrowRightIcon
+			aria-hidden="true"
+			class="pointer-events-none size-5 shrink-0 -rotate-45 text-muted-foreground transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-focus-within/row:rotate-0 motion-safe:group-hover/row:rotate-0"
+		/>
 	</div>
 
 	<ArrowRightIcon
 		aria-hidden="true"
-		class="pointer-events-none col-start-3 row-start-1 size-5 -rotate-45 justify-self-end text-muted-foreground transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-focus-within/row:rotate-0 motion-safe:group-hover/row:rotate-0 lg:col-span-1 lg:col-start-auto lg:row-start-auto"
+		class="pointer-events-none col-start-3 row-start-1 size-5 -rotate-45 justify-self-end text-muted-foreground transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-focus-within/row:rotate-0 motion-safe:group-hover/row:rotate-0 xl:hidden"
 	/>
 </article>

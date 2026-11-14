@@ -29,19 +29,44 @@
 	const icon = $derived(getProjectIcon(project.id));
 
 	let screenshots = $state<Awaited<ReturnType<typeof loadProjectScreenshots>> | null>(null);
+	let root = $state<HTMLElement>();
 
+	// Screenshots load once the panel is within about one viewport height of the screen. Panels already
+	// in view fire the observer's first callback straight away. The skeleton holds the frame meanwhile.
 	onMount(() => {
 		let cancelled = false;
-		loadProjectScreenshots(project.id).then(
-			(shots) => {
-				if (!cancelled) screenshots = shots;
+
+		const load = () =>
+			loadProjectScreenshots(project.id).then(
+				(shots) => {
+					if (!cancelled) screenshots = shots;
+				},
+				() => {
+					if (!cancelled) screenshots = [];
+				}
+			);
+
+		if (!root || typeof IntersectionObserver === 'undefined') {
+			load();
+			return () => {
+				cancelled = true;
+			};
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries.some((entry) => entry.isIntersecting)) {
+					observer.disconnect();
+					load();
+				}
 			},
-			() => {
-				if (!cancelled) screenshots = [];
-			}
+			{ rootMargin: '100% 0px' }
 		);
+		observer.observe(root);
+
 		return () => {
 			cancelled = true;
+			observer.disconnect();
 		};
 	});
 
@@ -55,6 +80,7 @@
 </script>
 
 <article
+	bind:this={root}
 	class={cn(
 		'group/panel relative grid gap-8 rounded-md has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 lg:grid-cols-12 lg:items-center lg:gap-x-6',
 		className
