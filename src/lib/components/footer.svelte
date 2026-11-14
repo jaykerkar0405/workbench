@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { cn } from '$lib/utils';
 	import { reveal } from '$lib/components/reveal';
 	import ResumeActions from '$lib/components/resume-actions.svelte';
 
@@ -7,11 +9,15 @@
 	const linkedInUrl = 'https://in.linkedin.com/in/jaykerkar0405';
 
 	const socials = [
-		{ name: 'GitHub', handle: 'jaykerkar0405', href: 'https://github.com/jaykerkar0405' },
-		{ name: 'LinkedIn', handle: 'jaykerkar0405', href: linkedInUrl },
-		{ name: 'X', handle: '@jaykerkar0405', href: 'https://x.com/jaykerkar0405' },
-		{ name: 'LeetCode', handle: 'jaykerkar0405', href: 'https://leetcode.com/u/jaykerkar0405' }
+		{ name: 'GitHub', href: 'https://github.com/jaykerkar0405' },
+		{ name: 'LinkedIn', href: linkedInUrl },
+		{ name: 'X', href: 'https://x.com/jaykerkar0405' },
+		{ name: 'LeetCode', href: 'https://leetcode.com/u/jaykerkar0405' }
 	];
+
+	// The sign-off is the homepage's; every other route gets the compact row only. The footer lives in the layout and
+	// persists across routes, so the variant follows the current path (also correct in each route's prerendered HTML).
+	const isHome = $derived(page.url.pathname === '/');
 
 	// Mumbai local time, whatever the visitor's own zone is. IST has no DST and a whole-minute offset,
 	// so a minute boundary in UTC is also one in IST.
@@ -60,50 +66,62 @@
 		};
 	});
 
-	const metaLink =
-		'group/link rounded-sm outline-none transition-colors duration-(--dur-1) ease-(--ease-out) hover:text-foreground focus-visible:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50';
-	const arrow =
-		'inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/link:translate-x-0.5 motion-safe:group-hover/link:-translate-y-0.5 motion-safe:group-focus-visible/link:translate-x-0.5 motion-safe:group-focus-visible/link:-translate-y-0.5';
+	const link =
+		'group/link cursor-pointer rounded-sm link-underline text-sm font-medium text-muted-foreground outline-none transition-colors duration-(--dur-1) ease-(--ease-out) hover:text-foreground focus-visible:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50';
+	const arrowBase =
+		'inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-focus-visible/link:-translate-y-0.5 motion-safe:group-hover/link:-translate-y-0.5';
+	// ↗ moves 2px up and right; ↑ moves 2px up.
+	const arrowOut = cn(
+		arrowBase,
+		'motion-safe:group-focus-visible/link:translate-x-0.5 motion-safe:group-hover/link:translate-x-0.5'
+	);
 </script>
 
 <footer aria-label="Footer" class="w-full border-t">
 	<div class="mx-auto max-w-7xl px-5 md:px-10">
-		<div class="grid gap-10 py-20 lg:grid-cols-12 lg:items-end lg:gap-x-6 lg:py-28" {@attach reveal()}>
-			<div class="lg:col-span-7 xl:col-span-8">
-				<p class="mb-4 label">Get in touch</p>
-				<h2 class="text-page-title text-balance">Let’s build something.</h2>
-			</div>
+		{#if isHome}
+			<!-- items-baseline-last: the actions sit on the baseline of the heading's last line, not on a box edge. -->
+			<div
+				class="grid gap-8 py-(--gap-section) lg:grid-cols-[1fr_auto] lg:items-baseline-last lg:gap-x-12"
+				{@attach reveal()}
+			>
+				<div>
+					<p class="mb-4 label">Get in touch</p>
+					<h2 class="text-page-title text-balance">Let’s build something.</h2>
+				</div>
 
-			<div class="flex flex-col items-start gap-3 lg:col-span-5 xl:col-span-4">
-				<ResumeActions class="max-sm:w-full" />
-				<a
-					href={linkedInUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="group/link rounded-sm link-underline text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-				>
-					Message me on LinkedIn <span aria-hidden="true" class={arrow}>↗</span>
-					<span class="sr-only">(opens in a new tab)</span>
-				</a>
+				<div class="flex flex-wrap items-baseline gap-x-6 gap-y-3 lg:flex-nowrap">
+					<!-- The buttons' first flex item is their icon, so the browser reports the icon's bottom edge as the button's
+						baseline, 4px below the text baseline. The 4px offset puts their text on the heading's baseline. -->
+					<ResumeActions class="relative top-1" />
+					<a
+						href={linkedInUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="group/link rounded-sm link-underline text-sm font-medium whitespace-nowrap outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+					>
+						Message me on LinkedIn <span aria-hidden="true" class={arrowOut}>↗</span>
+						<span class="sr-only">(opens in a new tab)</span>
+					</a>
+				</div>
 			</div>
-		</div>
+		{/if}
 
 		<div
-			class="grid gap-6 border-t pt-6 label tabular-nums md:grid-cols-2 md:items-start md:gap-x-8 lg:pb-8 xl:grid-cols-[auto_1fr_auto]"
+			class={cn(
+				'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-4 pt-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-6 lg:pb-6',
+				isHome && 'border-t'
+			)}
 		>
-			<p>© {currentYear} Jay Kerkar</p>
+			<p class="label tabular-nums">© {currentYear} Jay Kerkar</p>
 
-			<nav
-				aria-label="Social links"
-				class="order-first md:col-span-2 xl:order-none xl:col-span-1 xl:justify-self-center"
-			>
-				<ul class="flex flex-wrap gap-x-8 gap-y-2 xl:justify-center">
+			<nav aria-label="Social links" class="order-first w-full lg:order-none lg:w-auto">
+				<ul class="flex flex-wrap gap-x-6 gap-y-2">
 					{#each socials as social (social.name)}
 						<li>
-							<a href={social.href} target="_blank" rel="noopener noreferrer" class="link-underline {metaLink}">
-								<span class="text-foreground">{social.name}</span>
-								<span class="text-muted-foreground md:max-lg:sr-only">{social.handle}</span>
-								<span aria-hidden="true" class={arrow}>↗</span>
+							<a href={social.href} target="_blank" rel="noopener noreferrer" class={link}>
+								{social.name}
+								<span aria-hidden="true" class={arrowOut}>↗</span>
 								<span class="sr-only">(opens in a new tab)</span>
 							</a>
 						</li>
@@ -111,20 +129,16 @@
 				</ul>
 			</nav>
 
-			<div class="flex flex-col gap-2 md:min-w-[15.5em] md:items-end md:justify-self-end md:text-right">
-				<p>
-					Mumbai, IN · <time hidden={!time} datetime={stamp || undefined}>{time}</time> IST
-				</p>
-				<button
-					type="button"
-					onclick={() => window.scrollTo({ top: 0 })}
-					class="{metaLink} cursor-pointer self-start uppercase md:self-end"
-				>
-					Back to top <span
-						aria-hidden="true"
-						class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/link:-translate-y-0.5 motion-safe:group-focus-visible/link:-translate-y-0.5"
-						>↑</span
+			<div class="flex items-baseline gap-4 lg:justify-self-end">
+				<!-- The invisible sizer reserves the width of the full time, so nothing moves when the clock appears. -->
+				<p class="inline-grid label tabular-nums">
+					<span aria-hidden="true" class="invisible col-start-1 row-start-1 select-none">Mumbai · 00:00 IST</span>
+					<span class="col-start-1 row-start-1"
+						>Mumbai · {#if time}<time datetime={stamp}>{time}</time>{/if} IST</span
 					>
+				</p>
+				<button type="button" onclick={() => window.scrollTo({ top: 0 })} class={link}>
+					Top <span aria-hidden="true" class={arrowBase}>↑</span>
 				</button>
 			</div>
 		</div>
