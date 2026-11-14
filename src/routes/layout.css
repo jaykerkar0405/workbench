@@ -532,3 +532,34 @@ html:not(.js) .animate-pulse {
 		scroll-behavior: auto !important;
 	}
 }
+
+/* Keyboard focus ring at full strength.
+   shadcn components and the site's own components all write `ring-ring/50`, which resolves to
+   `--tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent)`: the brand colour at half opacity,
+   only 1.64:1 against the light page. `ring-3` then paints a 3 px box-shadow in `--tw-ring-color`.
+   This rule sets that variable to the full `--ring` wherever a focus ring is showing, without touching the
+   ~30 files that carry the class. It is deliberately outside any `@layer`: unlayered rules beat every
+   layered one (utilities included), whatever the specificity. `--tw-ring-color` is registered with
+   `inherits: false`, so it only affects the element it is set on: the `ring-2 ring-background` avatar halo
+   and other non-focus rings keep their own colour, and no ring appears that the utilities did not already
+   draw (the colour is only consumed where a `ring-*` width is applied).
+   - `:focus-visible`: elements that show the ring themselves.
+   - `:has(...)`: stretched-link containers (project row, spotlight, timeline entry) and the search input group
+     show the ring on a parent when the inner control has keyboard focus.
+   Invalid fields keep their destructive ring colour. */
+:focus-visible:not([aria-invalid='true']),
+:has([data-main-link]:focus-visible),
+:has([data-slot='input-group-control']:focus-visible) {
+	--tw-ring-color: var(--ring);
+}
+
+:focus-visible {
+	outline-color: var(--ring);
+}
+
+/* The search palette's input group draws no focus ring (`shadow-none!` in the command input, whose data-slot also
+   replaces `input-group-control`, so the has() ring never matched), so keyboard focus was only a caret. It gets a
+   2 px outline in the full ring colour while the field has focus (an outline, since the box-shadow is forced off). */
+[data-slot='command-input-wrapper'] [data-slot='input-group']:has([data-slot='command-input']:focus-visible) {
+	outline: 2px solid var(--ring);
+}
