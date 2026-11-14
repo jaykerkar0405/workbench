@@ -66,7 +66,7 @@
 	description="Full-stack developer specializing in scalable web applications, mobile development, and Web3 solutions. Explore my projects, hackathon wins, and technical expertise in modern frameworks."
 />
 
-<section class="relative lg:flex lg:min-h-[calc(100svh-3.25rem)] lg:items-center" aria-label="Introduction">
+<section class="relative lg:flex lg:min-h-[calc(100svh-var(--header-h))] lg:items-center" aria-label="Introduction">
 	<div class="dot-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
 
 	<div class="mx-auto w-full max-w-7xl px-5 py-12 md:px-10 lg:py-16">

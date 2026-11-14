@@ -61,6 +61,7 @@
 	--dur-2: 260ms;
 	--dur-3: 400ms;
 	--dur-page: 160ms;
+	--header-h: 3.5rem;
 	--gap-section: 4rem;
 	--gap-heading: 1.5rem;
 	--gap-header-title: 2rem;
@@ -116,6 +117,12 @@
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.556 0 0);
+}
+
+@media (min-width: 1024px) {
+	:root {
+		--header-h: 4.5rem;
+	}
 }
 
 @media (min-width: 768px) {
@@ -624,5 +631,33 @@ html:not(.js) .animate-pulse {
 
 	[data-slot='scroll-area-scrollbar'] [data-slot='scroll-area-thumb'] {
 		border-radius: var(--radius-sm);
+	}
+}
+
+/* Segmented control (V04; src/lib/components/segmented.ts). The sliding block is the container's ::before, clipped to
+   the active segment with the insets the attachment writes as custom properties, so its corners are the segment's own
+   radius on every frame. It only exists once measured (data-segmented-ready); until then the active segment has its
+   own fill, which this block turns transparent in the same frame. Only clip-path animates, and only after load. */
+[data-segmented-ready]::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background-color: var(--foreground);
+	clip-path: inset(var(--seg-t) var(--seg-r) var(--seg-b) var(--seg-l) round var(--seg-radius));
+}
+
+[data-segmented-ready][data-segmented-empty]::before {
+	opacity: 0;
+}
+
+[data-segmented-ready] > :is([aria-current='page'], [data-state='on']) {
+	background-color: transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	[data-segmented-animate]::before {
+		transition: clip-path var(--dur-2) var(--ease-out);
 	}
 }

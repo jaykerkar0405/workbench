@@ -66,7 +66,7 @@
 		'inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/link:translate-x-0.5 motion-safe:group-hover/link:-translate-y-0.5 motion-safe:group-focus-visible/link:translate-x-0.5 motion-safe:group-focus-visible/link:-translate-y-0.5';
 </script>
 
-<footer aria-label="Footer" class="w-full border-t pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
+<footer aria-label="Footer" class="w-full border-t">
 	<div class="mx-auto max-w-7xl px-5 md:px-10">
 		<div class="grid gap-10 py-20 lg:grid-cols-12 lg:items-end lg:gap-x-6 lg:py-28" {@attach reveal()}>
 			<div class="lg:col-span-7 xl:col-span-8">

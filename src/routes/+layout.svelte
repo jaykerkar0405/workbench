@@ -53,7 +53,7 @@
 
 <ModeWatcher />
 
-<div class="relative">
+<div class="relative max-lg:pb-[calc(6rem+env(safe-area-inset-bottom))]">
 	<Header />
 
 	<main>

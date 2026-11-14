@@ -34,7 +34,7 @@
 </svelte:head>
 
 <div
-	class="mx-auto max-w-7xl px-5 pt-10 pb-20 md:px-10 lg:flex lg:min-h-[calc(100svh-3.25rem)] lg:items-center lg:py-16"
+	class="mx-auto max-w-7xl px-5 pt-10 pb-20 md:px-10 lg:flex lg:min-h-[calc(100svh-var(--header-h))] lg:items-center lg:py-16"
 >
 	<div class="w-full max-w-2xl" title={cut ? page.url.pathname : undefined}>
 		<h1 class="sr-only">{page.status} {message}</h1>

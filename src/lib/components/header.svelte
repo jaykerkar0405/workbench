@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { expoOut } from 'svelte/easing';
-	import { crossfade } from 'svelte/transition';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { toggleMode } from 'mode-watcher';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import MoonIcon from '@lucide/svelte/icons/moon';
+	import { cn } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
+	import { segmentedContainer, segmentedIndicator, segmentedItem } from '$lib/components/segmented';
 	import { navigationItems } from '$lib/config/navigation';
 	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import SearchCommand from '$lib/components/search-command.svelte';
@@ -14,8 +14,8 @@
 
 	let scrollY = $state(0);
 
-	const scrolled = $derived(scrollY > 8);
-	const wordmarkHidden = $derived(scrollY > 80);
+	// The bar's bottom hairline fades in over the first 24px of scroll.
+	const hairline = $derived(Math.min(Math.max(scrollY / 24, 0), 1));
 
 	const isActive = (href: string) => {
 		if (href === '/') {
@@ -23,14 +23,6 @@
 		}
 		return page.url.pathname.startsWith(href);
 	};
-
-	// One crossfade pair per dock so the (hidden) mobile pills never pair with the desktop ones.
-	const pillOptions = {
-		duration: () => (prefersReducedMotion.current ? 0 : 280),
-		easing: expoOut
-	};
-	const [sendDesktop, receiveDesktop] = crossfade(pillOptions);
-	const [sendMobile, receiveMobile] = crossfade(pillOptions);
 
 	const toggleTheme = () => {
 		if (typeof document.startViewTransition !== 'function' || prefersReducedMotion.current) {
@@ -68,64 +60,42 @@
 
 <svelte:window bind:scrollY />
 
+<!-- The bar: the header element itself, edge to edge, sticky so it stays in normal flow (no padding on any page). It holds
+	the page colour at 85% with a 12px blur, and a hairline whose opacity follows the scroll position. -->
 <header
-	class="sticky top-0 z-40 w-full [view-transition-name:site-header] max-lg:bg-background/80 max-lg:backdrop-blur lg:pointer-events-none lg:pt-4"
+	class="sticky top-0 z-40 h-(--header-h) w-full bg-background/85 backdrop-blur-md [view-transition-name:site-header]"
 >
 	<div
-		class="mx-auto flex h-14 max-w-7xl items-center justify-between px-5 md:px-10 lg:grid lg:h-9 lg:grid-cols-[1fr_auto_1fr]"
+		aria-hidden="true"
+		class="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-border"
+		style:opacity={hairline}
+	></div>
+
+	<div
+		class="mx-auto flex h-full max-w-7xl items-center justify-between px-5 md:px-10 lg:grid lg:grid-cols-[1fr_auto_1fr]"
 	>
 		<a
 			href="/"
 			aria-label="Jay Kerkar, home"
-			class="pointer-events-auto flex items-center gap-2.5 justify-self-start rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+			class="flex h-9 items-center gap-2.5 justify-self-start rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
 		>
 			<EnhancedImage src={logo} alt="" class="size-8 rounded-sm" skeletonClass="rounded-sm" />
-			<span
-				class="text-lg font-bold transition-opacity duration-(--dur-2) ease-(--ease-out) {wordmarkHidden
-					? 'lg:pointer-events-none lg:opacity-0'
-					: ''}"
-			>
-				Jay Kerkar
-			</span>
+			<span class="text-lg font-bold">Jay Kerkar</span>
 		</a>
 
 		<nav
 			aria-label="Primary"
-			class="pointer-events-auto hidden items-center gap-1 rounded-md border bg-background/70 p-1 backdrop-blur-md transition-shadow duration-(--dur-2) ease-(--ease-out) lg:flex {scrolled
-				? 'shadow-md'
-				: 'shadow-sm'}"
+			{@attach segmentedIndicator}
+			class={cn(segmentedContainer, 'relative hidden h-9 items-center lg:flex')}
 		>
 			{#each navigationItems as item (item.href)}
-				{@const active = isActive(item.href)}
-				<Button
-					href={item.href}
-					variant="ghost"
-					size="sm"
-					aria-current={active ? 'page' : undefined}
-					class="relative isolate rounded-sm px-5 text-sm hover:bg-transparent dark:hover:bg-transparent {active
-						? 'text-primary-foreground hover:text-primary-foreground'
-						: 'text-muted-foreground hover:text-foreground'}"
-				>
-					{#if active}
-						<span
-							aria-hidden="true"
-							class="pointer-events-none absolute inset-0 -z-10 rounded-sm bg-primary"
-							in:receiveDesktop={{ key: 'pill' }}
-							out:sendDesktop={{ key: 'pill' }}
-						></span>
-						<!-- The accent: a small brand dot marks the current page. Absolutely placed in the button's padding so
-							nothing shifts when the active item changes. -->
-						<span
-							aria-hidden="true"
-							class="pointer-events-none absolute top-1/2 left-2.5 size-1.5 -translate-y-1/2 rounded-full bg-brand dark:bg-[oklch(0.545_0.16_240)]"
-						></span>
-					{/if}
+				<a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class={segmentedItem}>
 					{item.label}
-				</Button>
+				</a>
 			{/each}
 		</nav>
 
-		<div class="pointer-events-auto flex items-center gap-1 justify-self-end">
+		<div class="flex h-9 items-center gap-1 justify-self-end">
 			<SearchCommand />
 
 			<Button onclick={toggleTheme} variant="ghost" size="icon" class="relative size-9 rounded-md">
@@ -139,34 +109,21 @@
 
 <nav
 	aria-label="Primary"
-	class="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto h-14 max-w-md rounded-lg border bg-background/80 backdrop-blur [view-transition-name:site-dock] lg:hidden"
+	{@attach segmentedIndicator}
+	class={cn(
+		segmentedContainer,
+		'fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto grid h-14 max-w-md grid-cols-3 gap-0 rounded-lg bg-background/85 backdrop-blur-md [view-transition-name:site-dock] lg:hidden'
+	)}
 >
-	<div class="grid h-full grid-cols-3 p-1">
-		{#each navigationItems as item (item.href)}
-			{@const Icon = item.icon}
-			{@const active = isActive(item.href)}
-			<a
-				href={item.href}
-				aria-current={active ? 'page' : undefined}
-				class="relative isolate flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md text-[0.7rem] font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 {active
-					? 'text-primary-foreground'
-					: 'text-muted-foreground hover:text-foreground'}"
-			>
-				{#if active}
-					<span
-						aria-hidden="true"
-						class="pointer-events-none absolute inset-0 -z-10 rounded-md bg-primary"
-						in:receiveMobile={{ key: 'pill' }}
-						out:sendMobile={{ key: 'pill' }}
-					></span>
-					<span
-						aria-hidden="true"
-						class="pointer-events-none absolute top-1.5 left-1/2 ml-3 size-1.5 rounded-full bg-brand dark:bg-[oklch(0.545_0.16_240)]"
-					></span>
-				{/if}
-				<Icon class="size-5" />
-				<span>{item.label}</span>
-			</a>
-		{/each}
-	</div>
+	{#each navigationItems as item (item.href)}
+		{@const Icon = item.icon}
+		<a
+			href={item.href}
+			aria-current={isActive(item.href) ? 'page' : undefined}
+			class={cn(segmentedItem, 'h-auto min-h-11 flex-col gap-0.5 rounded-md px-0 text-xs')}
+		>
+			<Icon class="size-5" />
+			<span>{item.label}</span>
+		</a>
+	{/each}
 </nav>
