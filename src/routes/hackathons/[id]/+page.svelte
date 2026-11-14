@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Seo from '$lib/components/seo.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { reveal } from '$lib/components/reveal';
 	import { formatDateRange, formatDuration, viewTransitionName } from '$lib/utils';
-	import { getHackathonIcon, loadHackathonImages } from '$lib/assets/images';
+	import { getHackathonIcon } from '$lib/assets/images';
+	import { hackathonPhotos } from '$lib/components/hackathon-photos';
 	import { orderedHackathons, hackathonIndex } from '$lib/components/hackathon-order';
 	import { projectIndex } from '$lib/components/project-order';
 	import EnhancedImage from '$lib/components/enhanced-image.svelte';
@@ -24,42 +24,20 @@
 	const icon = $derived(getHackathonIcon(hackathon.id));
 	const teamMembersData = $derived(data.teamMembersData || []);
 
-	// Photos load on the client. Reset on every hackathon change and ignore a promise from the previous one.
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let images = $state<any[]>([]);
-	let imagesLoading = $state(true);
+	// Known at render time (see hackathon-photos.ts), so they are in the prerendered HTML and nothing shifts.
+	const images = $derived(hackathonPhotos(hackathon.id));
+	const showPhotos = $derived(images.length > 0);
+	const builtIndex = $derived(showPhotos ? '02' : '01');
+
 	let lightboxOpen = $state(false);
 	let lightboxIndex = $state(0);
 
+	// Close the lightbox when moving to another event.
 	$effect(() => {
-		const id = hackathon.id;
-		let stale = false;
-		images = [];
-		imagesLoading = true;
+		void hackathon.id;
 		lightboxOpen = false;
 		lightboxIndex = 0;
-
-		loadHackathonImages(id).then(
-			(loaded) => {
-				if (stale) return;
-				images = loaded;
-				imagesLoading = false;
-			},
-			() => {
-				if (stale) return;
-				images = [];
-				imagesLoading = false;
-			}
-		);
-
-		return () => {
-			stale = true;
-		};
 	});
-
-	const showPhotos = $derived(imagesLoading || images.length > 0);
-	const photosIndex = '01';
-	const builtIndex = $derived(showPhotos ? '02' : '01');
 
 	// Previous / next in the same order as the timeline (newest first); no wrap-around.
 	const position = $derived(orderedHackathons.findIndex((h) => h.id === hackathon.id));
@@ -73,8 +51,6 @@
 		icon: getHackathonIcon(h.id),
 		iconFit: 'contain' as const
 	});
-
-	const skeletonHeights = ['h-40', 'h-64', 'h-48', 'h-72', 'h-56', 'h-44'];
 
 	const seoDescription = $derived(() => {
 		const durationUnit = Number(hackathon.duration) === 1 ? 'hour' : 'hours';
@@ -122,48 +98,34 @@
 
 	{#if showPhotos}
 		<section class="mt-16 lg:mt-24" aria-label="Photos">
-			{#if imagesLoading}
-				<SectionHeading index={photosIndex} title="Photos" />
-			{:else}
-				<SectionHeading index={photosIndex} title="Photos">
-					<span class="label tabular-nums">{images.length} {images.length === 1 ? 'photo' : 'photos'}</span>
-				</SectionHeading>
-			{/if}
+			<SectionHeading index="01" title="Photos">
+				<span class="label tabular-nums">{images.length} {images.length === 1 ? 'photo' : 'photos'}</span>
+			</SectionHeading>
 
-			{#if imagesLoading}
-				<div class="mt-10 columns-1 gap-4 md:columns-2 lg:columns-3" aria-busy="true">
-					{#each skeletonHeights as height (height)}
-						<Skeleton class="mb-4 w-full break-inside-avoid rounded-md {height}" />
-					{/each}
-				</div>
-			{:else}
-				<div class="mt-10 columns-1 gap-4 md:columns-2 lg:columns-3" {@attach reveal({ stagger: true })}>
-					{#each images as image, i (i)}
-						<button
-							type="button"
-							onclick={() => {
-								lightboxIndex = i;
-								lightboxOpen = true;
-							}}
-							aria-label="Open photo {i + 1} of {images.length}"
-							class="mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-md border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
-						>
-							<EnhancedImage
-								src={image}
-								alt=""
-								containerClass="w-full"
-								skeletonClass="rounded-none"
-								class="h-auto w-full"
-							/>
-						</button>
-					{/each}
-				</div>
-			{/if}
+			<div class="mt-10 columns-1 gap-4 md:columns-2 lg:columns-3" {@attach reveal({ stagger: true })}>
+				{#each images as image, i (i)}
+					<button
+						type="button"
+						onclick={() => {
+							lightboxIndex = i;
+							lightboxOpen = true;
+						}}
+						aria-label="Open photo {i + 1} of {images.length}"
+						class="mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-md border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50 [html:not(.js)_&_img]:opacity-100"
+					>
+						<EnhancedImage
+							src={image}
+							alt=""
+							containerClass="w-full"
+							skeletonClass="rounded-none"
+							class="h-auto w-full"
+						/>
+					</button>
+				{/each}
+			</div>
 		</section>
 
-		{#if images.length > 0}
-			<Lightbox {images} altPrefix="{hackathon.title} photo" bind:open={lightboxOpen} bind:index={lightboxIndex} />
-		{/if}
+		<Lightbox {images} altPrefix="{hackathon.title} photo" bind:open={lightboxOpen} bind:index={lightboxIndex} />
 	{/if}
 
 	{#if project}
