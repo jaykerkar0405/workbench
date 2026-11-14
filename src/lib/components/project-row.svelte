@@ -89,7 +89,7 @@
 	)}
 >
 	<span
-		class="label tabular-nums transition-colors duration-(--dur-1) ease-(--ease-out) group-focus-within/row:text-brand group-hover/row:text-brand xl:col-span-1"
+		class="label tabular-nums transition-colors duration-(--dur-1) ease-(--ease-out) group-focus-within/row:text-[color-mix(in_oklab,var(--brand)_90%,var(--foreground))] group-hover/row:text-[color-mix(in_oklab,var(--brand)_90%,var(--foreground))] xl:col-span-1 dark:group-focus-within/row:text-brand dark:group-hover/row:text-brand"
 	>
 		{index}
 	</span>

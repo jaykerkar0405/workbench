@@ -41,7 +41,7 @@
 
 	<div class="flex min-w-0 flex-col gap-3">
 		<p
-			class="label tabular-nums transition-colors duration-(--dur-1) ease-(--ease-out) group-focus-within/entry:text-brand group-hover/entry:text-brand"
+			class="label tabular-nums transition-colors duration-(--dur-1) ease-(--ease-out) group-focus-within/entry:text-[color-mix(in_oklab,var(--brand)_90%,var(--foreground))] group-hover/entry:text-[color-mix(in_oklab,var(--brand)_90%,var(--foreground))] dark:group-focus-within/entry:text-brand dark:group-hover/entry:text-brand"
 		>
 			{index} · {formatDateRange(hackathon.timestamp, hackathon.duration)} · {hackathon.location}
 		</p>
