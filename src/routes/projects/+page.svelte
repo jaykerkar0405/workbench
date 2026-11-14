@@ -3,31 +3,18 @@
 	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { prefersReducedMotion } from 'svelte/motion';
-	import { projects } from '$lib/projects';
 	import Seo from '$lib/components/seo.svelte';
-	import { hackathons } from '$lib/hackathons';
-	import type { Project } from '$lib/projects/types';
 	import { reveal } from '$lib/components/reveal';
+	import {
+		featuredProjects,
+		otherProjects,
+		orderedProjects as ordered,
+		projectIndex,
+		hackathonFor
+	} from '$lib/components/project-order';
 	import * as ToggleGroup from '$lib/components/ui/toggle-group';
 	import ProjectRow from '$lib/components/project-row.svelte';
 	import ProjectSpotlight from '$lib/components/project-spotlight.svelte';
-
-	const hackathonTimestamp = (p: Project): number => {
-		if (!p.hackathonId) return -Infinity;
-		const h = hackathons.find((h) => h.id === p.hackathonId);
-		return h ? new Date(h.timestamp).getTime() : -Infinity;
-	};
-
-	const sortByHackathon = (a: Project, b: Project) => hackathonTimestamp(b) - hackathonTimestamp(a);
-
-	const otherProjects = projects.filter((p) => !p.featured).sort(sortByHackathon);
-	const featuredProjects = projects.filter((p) => p.featured).sort(sortByHackathon);
-
-	// A project's number is its position in "featured (sorted) then the rest (sorted)", from 01. It never
-	// changes under a filter, and the detail pages use the same rule.
-	const ordered = [...featuredProjects, ...otherProjects];
-	const indexById = Object.fromEntries(ordered.map((p, i) => [p.id, String(i + 1).padStart(2, '0')]));
-	const hackathonById = Object.fromEntries(hackathons.map((h) => [h.id, h]));
 
 	const withHackathon = ordered.filter((p) => p.hackathonId);
 	const withLive = ordered.filter((p) => p.deployedLink);
@@ -108,8 +95,8 @@
 					<div {@attach i > 0 ? reveal() : undefined}>
 						<ProjectSpotlight
 							{project}
-							index={indexById[project.id]}
-							hackathon={project.hackathonId ? hackathonById[project.hackathonId] : undefined}
+							index={projectIndex(project.id)}
+							hackathon={hackathonFor(project)}
 							reverse={i % 2 === 1}
 						/>
 					</div>
@@ -129,11 +116,7 @@
 						in:fade={{ duration: ms(200) }}
 						out:fade={{ duration: ms(120) }}
 					>
-						<ProjectRow
-							{project}
-							index={indexById[project.id]}
-							hackathon={project.hackathonId ? hackathonById[project.hackathonId] : undefined}
-						/>
+						<ProjectRow {project} index={projectIndex(project.id)} hackathon={hackathonFor(project)} />
 					</li>
 				{/each}
 			</ol>

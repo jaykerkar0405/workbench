@@ -6,6 +6,9 @@ const TRANSITION_MS = 520;
 const STAGGER_STEP_MS = 40;
 const STAGGER_CAP = 8;
 const MARGIN_MS = 80;
+// The observer's root is extended this far upward, so anything above the viewport counts as intersecting.
+// Without it, content jumped past (End key, anchor link, restored scroll) would stay hidden.
+const ABOVE_PX = 1_000_000;
 
 /**
  * Fades an element (or, with `stagger`, its direct children) in and up the first time
@@ -55,7 +58,7 @@ export function reveal(options: RevealOptions = {}): Attachment<HTMLElement> {
 					timer = setTimeout(clear, total);
 				}
 			},
-			{ rootMargin: '0px 0px -10% 0px', threshold: 0 }
+			{ rootMargin: `${ABOVE_PX}px 0px -10% 0px`, threshold: 0 }
 		);
 
 		observer.observe(node);
