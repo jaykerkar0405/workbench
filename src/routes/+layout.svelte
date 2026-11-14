@@ -36,7 +36,17 @@
 		});
 	});
 
-	afterNavigate(() => {
+	// Scroll to the top after a normal navigation. Leave the position alone on back/forward (SvelteKit
+	// restores it), on links that carry a hash (the browser scrolls to the target), and when only the
+	// query or hash changed.
+	afterNavigate((navigation) => {
+		if (
+			navigation.type === 'popstate' ||
+			navigation.to?.url.hash ||
+			navigation.from?.url.pathname === navigation.to?.url.pathname
+		) {
+			return;
+		}
 		window.scrollTo({ top: 0 });
 	});
 </script>

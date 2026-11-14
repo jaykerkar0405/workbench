@@ -116,6 +116,11 @@
 			}
 
 			sections = headings.map((h) => ({ id: h.id, text: h.textContent?.trim() ?? '' }));
+
+			// Ids only exist after mount, so a pasted /projects/<id>#<section> link is scrolled to here, once.
+			if (location.hash.length > 1) {
+				document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: 'start' });
+			}
 			if (headings.length < 2) {
 				currentId = null;
 				return;
@@ -143,15 +148,6 @@
 			observer?.disconnect();
 		};
 	});
-
-	const goTo = (event: MouseEvent, id: string) => {
-		event.preventDefault();
-		const target = document.getElementById(id);
-		if (!target) return;
-		// Default behaviour: smooth via CSS, instant under reduced motion. Scroll-margin clears the header.
-		target.scrollIntoView({ block: 'start' });
-		currentId = id;
-	};
 </script>
 
 <Seo title="{project.title} | Projects | Jay Kerkar" description={project.shortDescription} />
@@ -223,7 +219,6 @@
 								<li>
 									<a
 										href={`#${section.id}`}
-										onclick={(event) => goTo(event, section.id)}
 										aria-current={currentId === section.id ? 'true' : undefined}
 										class={cn(
 											'relative block rounded-sm py-1.5 pl-4 text-sm transition-colors duration-(--dur-1) ease-(--ease-out) outline-none before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50',
@@ -251,6 +246,13 @@
 			<div bind:this={prose} class="prose-log prose max-w-none min-w-0 lg:col-span-8 lg:col-start-1 lg:row-start-1">
 				<ExtendedDescription />
 			</div>
+		</div>
+	{:else if project.videoLink}
+		<div class="mt-16 max-w-2xl lg:mt-24">
+			<p class="mb-3 label">Demo</p>
+			{#key project.id}
+				<VideoFacade url={project.videoLink} title="{project.title} demo" />
+			{/key}
 		</div>
 	{/if}
 
