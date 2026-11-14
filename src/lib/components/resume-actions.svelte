@@ -49,7 +49,7 @@
 	};
 
 	const metaLinkClass =
-		'rounded-sm font-mono text-[0.72rem] tracking-[0.08em] text-muted-foreground uppercase transition-colors duration-(--dur-1) outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50';
+		'rounded-sm link-underline text-sm font-medium text-muted-foreground transition-colors duration-(--dur-1) outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50';
 </script>
 
 <div class={`flex flex-col items-start gap-3 sm:flex-row sm:items-center ${className}`.trim()}>

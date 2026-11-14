@@ -31,7 +31,7 @@
 
 <header class={cn('flex flex-col gap-8', className)}>
 	<Breadcrumb.Root>
-		<Breadcrumb.List class="gap-2 font-mono text-[0.72rem] tracking-[0.08em] uppercase">
+		<Breadcrumb.List class="gap-2 font-mono text-xs tracking-[0.06em] uppercase">
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href={parent.href} class="link-underline">{parent.label}</Breadcrumb.Link>
 			</Breadcrumb.Item>

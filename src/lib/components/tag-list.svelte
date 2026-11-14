@@ -19,7 +19,7 @@
 	const hidden = $derived(overflowing ? items.slice(max) : []);
 	const hiddenTitles = $derived(hidden.map((item) => item.title).join(', '));
 
-	const tagClass = 'rounded-sm font-mono text-[0.72rem] font-normal text-muted-foreground';
+	const tagClass = 'rounded-sm font-mono text-xs font-normal text-muted-foreground';
 </script>
 
 {#if items.length > 0}
@@ -40,13 +40,17 @@
 									type="button"
 									{...props}
 									aria-label={`${hidden.length} more: ${hiddenTitles}`}
-									class={cn(badgeVariants({ variant: 'outline' }), tagClass, 'cursor-help hover:text-foreground')}
+									class={cn(
+										badgeVariants({ variant: 'outline' }),
+										tagClass,
+										'cursor-help outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50'
+									)}
 								>
 									+{hidden.length}
 								</button>
 							{/snippet}
 						</Tooltip.Trigger>
-						<Tooltip.Content class="font-mono text-[0.72rem]">{hiddenTitles}</Tooltip.Content>
+						<Tooltip.Content class="font-mono text-xs">{hiddenTitles}</Tooltip.Content>
 					</Tooltip.Root>
 				</li>
 			{/if}

@@ -182,10 +182,9 @@
 
 	const rowClass =
 		'relative h-10 gap-3 overflow-hidden in-data-[slot=dialog-content]:rounded-md! before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 data-selected:before:opacity-100';
-	const metaClass =
-		'flex shrink-0 items-center gap-1.5 font-mono text-[0.72rem] tracking-normal uppercase tabular-nums';
+	const metaClass = 'flex shrink-0 items-center gap-1.5 font-mono text-xs tracking-[0.06em] uppercase tabular-nums';
 	const headingClass =
-		'**:[[data-command-group-heading]]:font-mono **:[[data-command-group-heading]]:text-[0.72rem] **:[[data-command-group-heading]]:font-normal **:[[data-command-group-heading]]:tracking-[0.08em] **:[[data-command-group-heading]]:uppercase';
+		'**:[[data-command-group-heading]]:font-mono **:[[data-command-group-heading]]:text-xs **:[[data-command-group-heading]]:font-normal **:[[data-command-group-heading]]:tracking-[0.06em] **:[[data-command-group-heading]]:uppercase';
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
@@ -212,7 +211,7 @@
 >
 	<Command.Input placeholder="Search projects, hackathons, pages..." />
 	<Command.List class="max-h-[min(26rem,60dvh)]">
-		<Command.Empty class="py-8 font-mono text-[0.72rem] text-muted-foreground">No results found.</Command.Empty>
+		<Command.Empty class="py-8 font-mono text-xs text-muted-foreground">No results found.</Command.Empty>
 
 		<Command.Group value="pages" heading={`Pages · ${pageCount}`} class={headingClass}>
 			{#each navigationItems as item (item.href)}
@@ -379,7 +378,7 @@
 
 	<div
 		aria-hidden="true"
-		class="-mx-1 -mb-1 hidden items-center gap-4 border-t px-3 py-2 font-mono text-[0.72rem] text-muted-foreground sm:flex"
+		class="-mx-1 -mb-1 hidden items-center gap-4 border-t px-3 py-2 font-mono text-xs text-muted-foreground sm:flex"
 	>
 		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">↑↓</Kbd> navigate</span>
 		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">↵</Kbd> open</span>
