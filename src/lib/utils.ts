@@ -36,6 +36,9 @@ export const formatDuration = (hours: number): string => {
 	return pluralise(Math.round(hours / 24), 'day');
 };
 
+/** A valid CSS <custom-ident> for `view-transition-name`: dots, slashes etc. in ids become hyphens. */
+export const viewTransitionName = (kind: string, id: string): string => `${kind}-${id}`.replace(/[^A-Za-z0-9_-]/g, '-');
+
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
 
