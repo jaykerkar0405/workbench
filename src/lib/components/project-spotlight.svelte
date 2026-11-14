@@ -82,12 +82,12 @@
 <article
 	bind:this={root}
 	class={cn(
-		'group/panel relative grid gap-8 rounded-md has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 lg:grid-cols-12 lg:items-center lg:gap-x-6',
+		'group/panel relative grid gap-8 rounded-lg has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 lg:grid-cols-12 lg:items-center lg:gap-x-6',
 		className
 	)}
 >
 	<div class={cn('pointer-events-none lg:col-span-7', reverse && 'lg:order-2')}>
-		<AspectRatio ratio={16 / 10} class="overflow-hidden rounded-md border bg-muted">
+		<AspectRatio ratio={16 / 10} class="overflow-hidden rounded-lg border bg-muted">
 			{#if screenshots === null}
 				<Skeleton class="size-full rounded-none" />
 			{:else if screenshots[0]}

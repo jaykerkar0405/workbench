@@ -163,10 +163,10 @@
 	>
 		{#snippet actions()}
 			{#if project.deployedLink}
-				<Button href={project.deployedLink} target="_blank" rel="noopener noreferrer">Live ↗</Button>
+				<Button href={project.deployedLink} target="_blank" rel="noopener noreferrer" class="rounded-md">Live ↗</Button>
 			{/if}
 
-			<Button href={project.githubLink} target="_blank" rel="noopener noreferrer" variant="outline">
+			<Button href={project.githubLink} target="_blank" rel="noopener noreferrer" variant="outline" class="rounded-md">
 				<svg viewBox={GithubIcon.viewBox} fill="currentColor" class="size-4" aria-hidden="true">
 					{#each GithubIcon.paths as d (d)}
 						<path {d} />

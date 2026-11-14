@@ -59,14 +59,14 @@
 		rel="noopener noreferrer"
 		variant={previewVariant}
 		onclick={previewResume}
-		class="w-full sm:w-auto"
+		class="w-full rounded-md sm:w-auto"
 	>
 		<EyeIcon class="size-4" />
 		{previewLabel}
 	</Button>
 
 	{#if showDownload}
-		<Button href={resumeUrl} variant="link" download={downloadFileName}>
+		<Button href={resumeUrl} variant="link" download={downloadFileName} class="rounded-md">
 			<DownloadIcon class="size-4" />
 			{downloadLabel}
 		</Button>

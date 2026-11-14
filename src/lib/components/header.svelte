@@ -77,9 +77,9 @@
 		<a
 			href="/"
 			aria-label="Jay Kerkar, home"
-			class="pointer-events-auto flex items-center gap-2.5 justify-self-start rounded-lg focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+			class="pointer-events-auto flex items-center gap-2.5 justify-self-start rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
 		>
-			<EnhancedImage src={logo} alt="" class="size-8 rounded-lg" skeletonClass="rounded-lg" />
+			<EnhancedImage src={logo} alt="" class="size-8 rounded-sm" skeletonClass="rounded-sm" />
 			<span
 				class="text-lg font-bold transition-opacity duration-(--dur-2) ease-(--ease-out) {wordmarkHidden
 					? 'lg:pointer-events-none lg:opacity-0'
@@ -91,7 +91,7 @@
 
 		<nav
 			aria-label="Primary"
-			class="pointer-events-auto hidden items-center gap-1 rounded-full border bg-background/70 p-1 backdrop-blur-md transition-shadow duration-(--dur-2) ease-(--ease-out) lg:flex {scrolled
+			class="pointer-events-auto hidden items-center gap-1 rounded-md border bg-background/70 p-1 backdrop-blur-md transition-shadow duration-(--dur-2) ease-(--ease-out) lg:flex {scrolled
 				? 'shadow-md'
 				: 'shadow-sm'}"
 		>
@@ -102,14 +102,14 @@
 					variant="ghost"
 					size="sm"
 					aria-current={active ? 'page' : undefined}
-					class="relative isolate rounded-full px-5 text-sm hover:bg-transparent dark:hover:bg-transparent {active
+					class="relative isolate rounded-sm px-5 text-sm hover:bg-transparent dark:hover:bg-transparent {active
 						? 'text-primary-foreground hover:text-primary-foreground'
 						: 'text-muted-foreground hover:text-foreground'}"
 				>
 					{#if active}
 						<span
 							aria-hidden="true"
-							class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary"
+							class="pointer-events-none absolute inset-0 -z-10 rounded-sm bg-primary"
 							in:receiveDesktop={{ key: 'pill' }}
 							out:sendDesktop={{ key: 'pill' }}
 						></span>
@@ -128,7 +128,7 @@
 		<div class="pointer-events-auto flex items-center gap-1 justify-self-end">
 			<SearchCommand />
 
-			<Button onclick={toggleTheme} variant="ghost" size="icon" class="relative size-9">
+			<Button onclick={toggleTheme} variant="ghost" size="icon" class="relative size-9 rounded-md">
 				<SunIcon class="size-[1.15rem] scale-100 rotate-0 dark:scale-0 dark:-rotate-90" />
 				<MoonIcon class="absolute size-[1.15rem] scale-0 rotate-90 dark:scale-100 dark:rotate-0" />
 				<span class="sr-only">Toggle theme</span>
@@ -139,7 +139,7 @@
 
 <nav
 	aria-label="Primary"
-	class="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto h-14 max-w-md rounded-full border bg-background/80 backdrop-blur [view-transition-name:site-dock] lg:hidden"
+	class="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 mx-auto h-14 max-w-md rounded-lg border bg-background/80 backdrop-blur [view-transition-name:site-dock] lg:hidden"
 >
 	<div class="grid h-full grid-cols-3 p-1">
 		{#each navigationItems as item (item.href)}
@@ -148,14 +148,14 @@
 			<a
 				href={item.href}
 				aria-current={active ? 'page' : undefined}
-				class="relative isolate flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-full text-[0.7rem] font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 {active
+				class="relative isolate flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md text-[0.7rem] font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50 {active
 					? 'text-primary-foreground'
 					: 'text-muted-foreground hover:text-foreground'}"
 			>
 				{#if active}
 					<span
 						aria-hidden="true"
-						class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary"
+						class="pointer-events-none absolute inset-0 -z-10 rounded-md bg-primary"
 						in:receiveMobile={{ key: 'pill' }}
 						out:sendMobile={{ key: 'pill' }}
 					></span>

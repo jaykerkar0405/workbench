@@ -81,7 +81,9 @@
 			<PrizeBadge prize={hackathon.prize} />
 		{/snippet}
 		{#snippet actions()}
-			<Button href={hackathon.website} target="_blank" rel="noopener noreferrer" variant="outline">Event site ↗</Button>
+			<Button href={hackathon.website} target="_blank" rel="noopener noreferrer" variant="outline" class="rounded-md"
+				>Event site ↗</Button
+			>
 		{/snippet}
 	</TitleBlock>
 
@@ -111,7 +113,7 @@
 							lightboxOpen = true;
 						}}
 						aria-label="Open photo {i + 1} of {images.length}"
-						class="mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-md border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
+						class="mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-lg border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
 					>
 						<EnhancedImage
 							src={image}

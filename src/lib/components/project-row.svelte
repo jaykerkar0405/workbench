@@ -138,7 +138,7 @@
 				</HoverCard.Trigger>
 
 				<HoverCard.Content side="bottom" align="start" class="w-80 p-1">
-					<AspectRatio ratio={16 / 10} class="overflow-hidden rounded-sm border bg-muted">
+					<AspectRatio ratio={16 / 10} class="overflow-hidden rounded-md border bg-muted">
 						{#if screenshots && screenshots[0]}
 							<EnhancedImage
 								src={screenshots[0]}

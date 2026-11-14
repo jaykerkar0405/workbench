@@ -39,7 +39,7 @@
 
 	const thumbClass = (active: boolean) =>
 		cn(
-			'relative block aspect-video w-full overflow-hidden rounded-sm border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50',
+			'relative block aspect-video w-full overflow-hidden rounded-md border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50',
 			active ? 'outline-2 outline-brand' : 'opacity-60 hover:opacity-100'
 		);
 </script>
@@ -65,22 +65,22 @@
 {#if loading}
 	<div class={cn('flex flex-col gap-4', className)} aria-busy="true">
 		<AspectRatio ratio={16 / 9}>
-			<Skeleton class="size-full rounded-md" />
+			<Skeleton class="size-full rounded-lg" />
 		</AspectRatio>
 		<div class="hidden grid-cols-5 gap-4 md:grid">
 			{#each [0, 1, 2, 3, 4] as n (n)}
-				<Skeleton class="aspect-video w-full rounded-sm" />
+				<Skeleton class="aspect-video w-full rounded-md" />
 			{/each}
 		</div>
 		<div class="flex gap-2 overflow-hidden pb-3 md:hidden">
 			{#each [0, 1, 2, 3, 4] as n (n)}
-				<Skeleton class="aspect-video w-28 shrink-0 rounded-sm" />
+				<Skeleton class="aspect-video w-28 shrink-0 rounded-md" />
 			{/each}
 		</div>
 	</div>
 {:else if images.length > 0}
 	<div class={cn('flex flex-col gap-4', className)}>
-		<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-md border bg-muted">
+		<AspectRatio ratio={16 / 9} class="overflow-hidden rounded-lg border bg-muted">
 			<button
 				type="button"
 				onclick={() => (lightboxOpen = true)}
@@ -112,8 +112,8 @@
 						{/each}
 					</Carousel.Content>
 					{#if images.length > 5}
-						<Carousel.Previous class="-start-3 bg-background" />
-						<Carousel.Next class="-end-3 bg-background" />
+						<Carousel.Previous class="-start-3 rounded-md bg-background" />
+						<Carousel.Next class="-end-3 rounded-md bg-background" />
 					{/if}
 				</Carousel.Root>
 			</div>

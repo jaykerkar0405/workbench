@@ -49,7 +49,7 @@
 </script>
 
 {#if id}
-	<AspectRatio ratio={16 / 9} class={cn('overflow-hidden rounded-md border bg-muted', className)}>
+	<AspectRatio ratio={16 / 9} class={cn('overflow-hidden rounded-lg border bg-muted', className)}>
 		{#if playing}
 			<iframe
 				{title}
@@ -69,7 +69,7 @@
 				aria-label={`Play video: ${title}`}
 				class="absolute inset-0 h-full w-full rounded-none hover:bg-black/10 dark:hover:bg-black/10"
 			>
-				<span class="flex size-14 items-center justify-center rounded-full border bg-background/90 text-foreground">
+				<span class="flex size-14 items-center justify-center rounded-md border bg-background/90 text-foreground">
 					<PlayIcon class="size-6 translate-x-0.5 fill-current" />
 				</span>
 			</Button>

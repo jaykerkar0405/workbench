@@ -181,7 +181,7 @@
 	const yearOf = (timestamp: string) => timestamp.slice(0, 4);
 
 	const rowClass =
-		'relative h-10 gap-3 overflow-hidden before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 data-selected:before:opacity-100';
+		'relative h-10 gap-3 overflow-hidden in-data-[slot=dialog-content]:rounded-md! before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 data-selected:before:opacity-100';
 	const metaClass =
 		'flex shrink-0 items-center gap-1.5 font-mono text-[0.72rem] tracking-normal uppercase tabular-nums';
 	const headingClass =
@@ -196,7 +196,7 @@
 	aria-label="Search"
 	aria-keyshortcuts="Control+K Meta+K"
 	onclick={() => (open = true)}
-	class="relative size-9 max-lg:border-transparent max-lg:bg-transparent max-lg:hover:bg-muted lg:w-56 lg:justify-start lg:gap-2 lg:px-3 dark:max-lg:border-transparent dark:max-lg:bg-transparent dark:max-lg:hover:bg-muted/50"
+	class="relative size-9 rounded-md max-lg:border-transparent max-lg:bg-transparent max-lg:hover:bg-muted lg:w-56 lg:justify-start lg:gap-2 lg:px-3 dark:max-lg:border-transparent dark:max-lg:bg-transparent dark:max-lg:hover:bg-muted/50"
 >
 	<SearchIcon class="size-[1.15rem] lg:size-4" />
 	<span class="hidden font-normal text-muted-foreground lg:inline">Search</span>

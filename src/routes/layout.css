@@ -30,7 +30,9 @@
 :root {
 	--font-sans: 'Akt', sans-serif;
 	--font-mono: 'Geist Mono', monospace;
-	--radius: 0.375rem;
+	/* Not a rectangle radius any more: the theme's rounded-* scale below is fixed at 4 / 8 / 12px. This value only
+	   feeds the calc(var(--radius) - Npx) expressions inside ui/ (input-group): 7px makes the -3px one land on 4px. */
+	--radius: 0.4375rem;
 	--background: oklch(0.985 0.003 250);
 	--foreground: oklch(0.2 0.02 255);
 	--surface: oklch(1 0 0);
@@ -128,10 +130,14 @@
 @theme inline {
 	--font-sans: var(--font-sans);
 	--font-mono: var(--font-mono);
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+	--radius-xs: 4px;
+	--radius-sm: 4px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 12px;
+	--radius-2xl: 12px;
+	--radius-3xl: 12px;
+	--radius-4xl: 12px;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-surface: var(--surface);
@@ -375,7 +381,7 @@
 	line-height: 1.65;
 	background-color: var(--muted);
 	border: 1px solid var(--border);
-	border-radius: 0.375rem;
+	border-radius: 0.5rem;
 	overflow-x: auto;
 	padding: 1rem 1.25rem;
 }
@@ -597,4 +603,26 @@ html:not(.js) .animate-pulse {
    2 px outline in the full ring colour while the field has focus (an outline, since the box-shadow is forced off). */
 [data-slot='command-input-wrapper'] [data-slot='input-group']:has([data-slot='command-input']:focus-visible) {
 	outline: 2px solid var(--ring);
+}
+
+/* Shape rule (V02): corners that no class on the call site can reach. These are shadcn internals in ui/, which is not
+   edited, so each one is keyed on its data-slot and kept as narrow as possible. They sit in the utilities layer with
+   !important because the ui/ classes they replace (rounded-lg!) are important utilities: an unlayered rule would lose.
+   - The search palette's input group is hard-coded to rounded-lg! (12px) inside CommandInput; fields are 8px.
+   - The tooltip arrow is a 10px square rotated 45deg with rounded-[2px], which is off the scale. It is a pointer, not a
+     box, so it gets 0.
+   - The scroll area's thumb is a 7px-tall bar with rounded-full, a pill rather than a circle. 4px renders identically
+     (the radius is clamped to half the height) and is on the scale. */
+@layer utilities {
+	[data-slot='command-input-wrapper'] [data-slot='input-group'] {
+		border-radius: var(--radius-md) !important;
+	}
+
+	[data-slot='tooltip-content'] > div[data-side] {
+		border-radius: 0;
+	}
+
+	[data-slot='scroll-area-scrollbar'] [data-slot='scroll-area-thumb'] {
+		border-radius: var(--radius-sm);
+	}
 }

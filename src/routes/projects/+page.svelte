@@ -63,7 +63,7 @@
 				type="single"
 				variant="outline"
 				aria-label="Filter projects"
-				class="w-max rounded-sm"
+				class="w-max rounded-md"
 				bind:value={() => filter, (next) => (filter = (next || 'all') as FilterKey)}
 			>
 				{#each filters as item (item.key)}

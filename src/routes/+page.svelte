@@ -88,7 +88,7 @@
 				</p>
 
 				<div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
-					<Button href="/projects" size="lg" class="group/cta">
+					<Button href="/projects" size="lg" class="group/cta rounded-md">
 						View projects
 						<span
 							aria-hidden="true"
@@ -113,7 +113,7 @@
 												rel="noopener noreferrer"
 												variant="ghost"
 												size="icon-lg"
-												class="text-muted-foreground hover:text-foreground"
+												class="rounded-md text-muted-foreground hover:text-foreground"
 												aria-label="Jay Kerkar on {social.name}"
 											>
 												<svg viewBox={social.icon.viewBox} fill="currentColor" class="size-5" aria-hidden="true">

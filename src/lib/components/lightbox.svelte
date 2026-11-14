@@ -40,7 +40,7 @@
 		}
 	};
 
-	const controlClass = 'absolute z-20 bg-background/70 backdrop-blur hover:bg-background';
+	const controlClass = 'absolute z-20 rounded-md bg-background/70 backdrop-blur hover:bg-background';
 </script>
 
 <Dialog.Root bind:open>
@@ -61,9 +61,9 @@
 			<EnhancedImage
 				src={images[index]}
 				alt={`${altPrefix} ${index + 1}`}
-				skeletonClass="rounded-md"
+				skeletonClass="rounded-lg"
 				containerClass="flex max-h-full max-w-full items-center justify-center"
-				class="h-auto max-h-[90vh] w-auto max-w-[96vw] rounded-md object-contain"
+				class="h-auto max-h-[90vh] w-auto max-w-[96vw] rounded-lg object-contain"
 			/>
 		{/if}
 
