@@ -102,7 +102,7 @@
 					variant="ghost"
 					size="sm"
 					aria-current={active ? 'page' : undefined}
-					class="relative isolate rounded-full px-4 text-sm hover:bg-transparent dark:hover:bg-transparent {active
+					class="relative isolate rounded-full px-5 text-sm hover:bg-transparent dark:hover:bg-transparent {active
 						? 'text-primary-foreground hover:text-primary-foreground'
 						: 'text-muted-foreground hover:text-foreground'}"
 				>
@@ -112,6 +112,12 @@
 							class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary"
 							in:receiveDesktop={{ key: 'pill' }}
 							out:sendDesktop={{ key: 'pill' }}
+						></span>
+						<!-- The accent: a small brand dot marks the current page. Absolutely placed in the button's padding so
+							nothing shifts when the active item changes. -->
+						<span
+							aria-hidden="true"
+							class="pointer-events-none absolute top-1/2 left-2.5 size-1.5 -translate-y-1/2 rounded-full bg-brand dark:bg-[oklch(0.545_0.16_240)]"
 						></span>
 					{/if}
 					{item.label}
@@ -152,6 +158,10 @@
 						class="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary"
 						in:receiveMobile={{ key: 'pill' }}
 						out:sendMobile={{ key: 'pill' }}
+					></span>
+					<span
+						aria-hidden="true"
+						class="pointer-events-none absolute top-1.5 left-1/2 ml-3 size-1.5 rounded-full bg-brand dark:bg-[oklch(0.545_0.16_240)]"
 					></span>
 				{/if}
 				<Icon class="size-5" />
