@@ -26,14 +26,25 @@
 
 	let isPreviewOpen = $state(false);
 
-	const previewResume = () => {
-		const shouldOpenInNewTab = !useDesktopModal || window.matchMedia('(max-width: 639px)').matches;
-
-		if (shouldOpenInNewTab) {
-			window.open(resumeUrl, '_blank', 'noopener,noreferrer');
+	// The control is a real link to the PDF, so it works without JavaScript. With JavaScript, a plain click
+	// opens the dialog (at 640 px and wider, when allowed); in every other case the link's own behaviour
+	// (new tab) is left alone, as are modified clicks (ctrl/cmd/shift/middle).
+	const previewResume = (event: MouseEvent) => {
+		if (
+			event.defaultPrevented ||
+			event.button !== 0 ||
+			event.metaKey ||
+			event.ctrlKey ||
+			event.shiftKey ||
+			event.altKey
+		) {
 			return;
 		}
 
+		const shouldOpenInNewTab = !useDesktopModal || window.matchMedia('(max-width: 639px)').matches;
+		if (shouldOpenInNewTab) return;
+
+		event.preventDefault();
 		isPreviewOpen = true;
 	};
 
@@ -42,7 +53,14 @@
 </script>
 
 <div class={`flex flex-col items-start gap-3 sm:flex-row sm:items-center ${className}`.trim()}>
-	<Button type="button" variant={previewVariant} onclick={previewResume} class="w-full sm:w-auto">
+	<Button
+		href={resumeUrl}
+		target="_blank"
+		rel="noopener noreferrer"
+		variant={previewVariant}
+		onclick={previewResume}
+		class="w-full sm:w-auto"
+	>
 		<EyeIcon class="size-4" />
 		{previewLabel}
 	</Button>

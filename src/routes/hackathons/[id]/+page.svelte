@@ -111,7 +111,7 @@
 							lightboxOpen = true;
 						}}
 						aria-label="Open photo {i + 1} of {images.length}"
-						class="mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-md border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50 [html:not(.js)_&_img]:opacity-100"
+						class="mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-md border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
 					>
 						<EnhancedImage
 							src={image}
