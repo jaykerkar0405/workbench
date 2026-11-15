@@ -51,7 +51,7 @@
 
 {#snippet media()}
 	{#if placeholder}
-		<Skeleton aria-hidden="true" class="absolute inset-0 size-full rounded-none" />
+		<Skeleton aria-hidden="true" class="absolute inset-0 size-full animate-none rounded-none bg-muted" />
 	{:else}
 		<div class={cn(fill && 'size-full', zoom && zoomClass)}>
 			{#if src}

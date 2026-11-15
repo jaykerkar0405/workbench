@@ -44,7 +44,7 @@
 		<Skeleton
 			aria-hidden="true"
 			class={cn(
-				'pointer-events-none absolute inset-0 z-0 hidden h-full w-full rounded-[inherit] in-[.js]:block',
+				'pointer-events-none absolute inset-0 z-0 hidden h-full w-full animate-none rounded-[inherit] bg-muted in-[.js]:block',
 				skeletonClass
 			)}
 		/>
@@ -56,6 +56,10 @@
 		{...restProps}
 		onload={handleLoad}
 		onerror={handleError}
-		class={cn('relative z-10 block transition-opacity duration-300', !isLoaded && 'in-[.js]:opacity-0', className)}
+		class={cn(
+			'relative z-10 block transition-opacity duration-(--dur-2) ease-(--ease-out) motion-reduce:transition-none',
+			!isLoaded && 'in-[.js]:opacity-0',
+			className
+		)}
 	/>
 </div>

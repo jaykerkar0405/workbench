@@ -176,7 +176,7 @@
 />
 
 {#snippet nameWord(word: string, offset: number)}
-	<span data-scene-word class="block sm:inline"
+	<span data-scene-word
 		>{#each [...word] as letter, i (i)}<span
 				class="intro-clip"
 				style:--i={offset + i}
@@ -295,14 +295,13 @@
 				ink width of "Jay Kerkar" in Akt 700 at -0.04em divided by its font size (see NAME_RATIO below). -->
 					<!-- The name is sized so its INK spans the content box: font-size = content width / ratio. Measured in Chromium with a
 				canvas at 1000px, Akt 700, letter-spacing -40px (= -0.04em): "Jay Kerkar" has ink 4323.7 wide, starting 15.6 right of the
-				pen origin (ratio 4.3237, left bearing 0.0156em); "Kerkar" alone has ink 2696.9 wide starting 62.5 in (ratio 2.6969, left
-				bearing 0.0625em). The negative left margin puts the ink, not the advance box, on the left edge; the right ink edge then
+				pen origin (ratio 4.3237, left bearing 0.0156em). The negative left margin puts the ink, not the advance box, on the left edge; the right ink edge then
 				falls on the right edge by construction. Akt's metrics are ascent 0.95em and descent 0.25em, so at line-height 0.8 the
 				baseline is 0.05em above the box bottom, which -mb-[0.05em] cancels: the baseline is exactly the bottom padding
-				(64px) above the bottom of the hero. Below 640px the name is two lines and "Kerkar" is what spans the width. -->
+				(64px) above the bottom of the hero. The name is one line at every width. -->
 					<h1
 						aria-label="Jay Kerkar"
-						class="-mb-[0.05em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237] max-sm:[--bl:0.0625] max-sm:[--ratio:2.6969]"
+						class="-mb-[0.05em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237]"
 					>
 						{@render nameWord('Jay', 0)}&#32;{@render nameWord('Kerkar', 3)}
 					</h1>

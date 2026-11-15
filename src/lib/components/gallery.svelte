@@ -206,7 +206,7 @@
 	<div class={cn('flex flex-col gap-4', className)}>
 		<!-- A fixed 16:9 frame: the page never moves when the selection changes. Screenshots are contained, never cropped,
 			with their own 8px corners; what is left of the frame is the mat's own surface. -->
-		<MediaMat ratio={16 / 9} zoom={!isVideo}>
+		<MediaMat ratio={16 / 9} zoom={!playing}>
 			{#if isVideo && videoId}
 				{#if playing}
 					<iframe
@@ -225,7 +225,7 @@
 						variant="ghost"
 						onclick={playVideo}
 						aria-label={`Play video: ${videoTitle}`}
-						class="absolute inset-0 h-full w-full rounded-none hover:bg-black/10 dark:hover:bg-black/10"
+						class="absolute inset-0 h-full w-full rounded-none"
 					>
 						<span class="flex size-14 items-center justify-center rounded-md border bg-background/90 text-foreground">
 							<PlayIcon class="size-6 translate-x-0.5 fill-current" />
