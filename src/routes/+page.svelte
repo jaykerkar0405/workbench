@@ -86,7 +86,7 @@
 		<div class="@container flex flex-1 flex-col">
 			<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
 				<p class="label">Mumbai, India · Full-stack · Web3</p>
-				<MumbaiTime />
+				<MumbaiTime class="shrink-0 whitespace-nowrap" />
 			</div>
 
 			<div class="min-h-4 flex-[7] md:min-h-12"></div>
