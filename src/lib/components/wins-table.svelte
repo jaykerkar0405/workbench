@@ -97,18 +97,18 @@
 	const hide = 'motion-safe:md:in-[.js]:opacity-0';
 	const pending = (step: number) => (printed >= step ? undefined : hide);
 
-	const cell = 'py-0 pr-6 text-left align-top font-normal whitespace-nowrap md:first:pl-3 md:last:pr-3';
+	const cell = 'py-0 pr-4 text-left align-top font-normal whitespace-nowrap md:first:pl-3 md:last:pr-3 xl:pr-6';
 </script>
 
 <div bind:this={root} class={className}>
-	<Terminal title="jay@workbench: ~">
+	<Terminal title="jay@workbench: ~" bodyClass="lg:max-xl:p-6">
 		<p class={cn('whitespace-nowrap', started ? undefined : hide)}>
 			<span class="text-muted-foreground">$</span>
 			{command.slice(0, typed)}<span class="invisible">{command.slice(typed)}</span>
 		</p>
 
 		<div class="-mx-3 max-md:mx-0 md:overflow-x-auto">
-			<table class="w-full border-separate border-spacing-0 text-left whitespace-nowrap">
+			<table class="w-full border-separate border-spacing-0 text-left whitespace-nowrap md:w-max">
 				<caption class="sr-only">Hackathon wins, newest first</caption>
 				<thead class={cn('text-muted-foreground max-md:sr-only', pending(1))}>
 					<tr>

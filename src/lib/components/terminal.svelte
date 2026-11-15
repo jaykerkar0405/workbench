@@ -30,7 +30,12 @@
 		<span class="min-w-0 truncate font-mono text-xs text-muted-foreground">{title}</span>
 	</div>
 
-	<div class={cn('p-6 font-mono text-sm leading-[2] text-foreground [font-variant-ligatures:none] md:p-8', bodyClass)}>
+	<div
+		class={cn(
+			'p-6 font-mono [font-feature-settings:"calt"_0,"liga"_0] text-sm leading-[2] text-foreground [font-variant-ligatures:none] md:p-8',
+			bodyClass
+		)}
+	>
 		{@render children()}
 	</div>
 </div>
