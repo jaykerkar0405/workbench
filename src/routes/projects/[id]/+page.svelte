@@ -213,7 +213,7 @@
 		<div class="mt-(--gap-section) grid gap-10 lg:grid-cols-12 lg:gap-x-6">
 			<aside
 				class={cn(
-					'flex flex-col gap-10 lg:sticky lg:top-24 lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:self-start',
+					'flex flex-col gap-10 lg:sticky lg:top-24 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:self-start xl:col-span-4 xl:col-start-7',
 					!project.videoLink && 'max-lg:hidden'
 				)}
 			>
@@ -249,7 +249,10 @@
 				{/if}
 			</aside>
 
-			<div bind:this={prose} class="prose-log prose max-w-none min-w-0 lg:col-span-7 lg:col-start-1 lg:row-start-1">
+			<div
+				bind:this={prose}
+				class="prose-log prose max-w-none min-w-0 lg:col-span-6 lg:col-start-1 lg:row-start-1 xl:col-span-5"
+			>
 				<ExtendedDescription />
 			</div>
 		</div>
