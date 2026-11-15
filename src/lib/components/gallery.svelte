@@ -93,6 +93,25 @@
 		}
 	});
 
+	// Keyboard focus in the strip. Embla's own watchFocus (on by default) scrolls the focused slide's snap to the start
+	// edge even when the thumbnail is already fully visible, which pushed the video thumbnail off the left edge, so it is
+	// off here. Instead: undo the browser's native scroll of the overflow-hidden viewport (Embla moves a transform and
+	// would not know about it), then scroll the carousel only when the focused thumbnail is not fully in view.
+	const revealFocused = (event: FocusEvent) => {
+		const api = carouselApi;
+		const target = event.target as HTMLElement | null;
+		const slide = target?.closest<HTMLElement>('[data-embla-slide]');
+		if (!api || !slide) return;
+		const root = api.rootNode();
+		root.scrollLeft = 0;
+		const view = root.getBoundingClientRect();
+		// The slide box includes a 16px gutter on its start side; the thumbnail is the part that matters.
+		const thumb = (slide.firstElementChild ?? slide).getBoundingClientRect();
+		if (thumb.left < view.left - 1 || thumb.right > view.right + 1) {
+			api.scrollTo(api.slideNodes().indexOf(slide), prefersReducedMotion.current);
+		}
+	};
+
 	// Below md the strip is a scroll row: keep the selected thumbnail inside it. The row's own scrollLeft is set, not
 	// scrollIntoView, so the page never scrolls vertically; instantly under reduced motion.
 	$effect(() => {
@@ -242,11 +261,11 @@
 		</MediaMat>
 
 		{#if total > 1}
-			<div class="hidden md:block">
+			<div class="hidden md:block" onfocusin={revealFocused}>
 				<!-- With more than five items the arrows get their own space at the two ends (36px plus 8px), never over a thumbnail. -->
 				<Carousel.Root
 					class={cn(total > 5 && 'px-11')}
-					opts={{ align: 'start', dragFree: true }}
+					opts={{ align: 'start', dragFree: true, watchFocus: false }}
 					setApi={(api) => (carouselApi = api)}
 				>
 					<Carousel.Content>
