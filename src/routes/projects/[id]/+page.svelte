@@ -4,7 +4,8 @@
 	import { cn, formatDateRange, viewTransitionName } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
 	import { GithubIcon } from '$lib/components/brand-icons';
-	import { getProjectIcon, loadProjectScreenshots } from '$lib/assets/images';
+	import { getProjectIcon } from '$lib/assets/images';
+	import { projectScreenshots } from '$lib/components/project-screenshots';
 	import { orderedProjects, projectIndex, hackathonFor } from '$lib/components/project-order';
 	import TitleBlock from '$lib/components/title-block.svelte';
 	import SpecSheet from '$lib/components/spec-sheet.svelte';
@@ -12,7 +13,6 @@
 	import PrizeBadge from '$lib/components/prize-badge.svelte';
 	import TeamStack from '$lib/components/team-stack.svelte';
 	import Gallery from '$lib/components/gallery.svelte';
-	import VideoFacade from '$lib/components/video-facade.svelte';
 	import PrevNext from '$lib/components/prev-next.svelte';
 
 	let { data } = $props();
@@ -43,34 +43,8 @@
 
 	const formatNumber = (num: number) => (num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num.toString());
 
-	// Screenshots: reset when the project changes, and ignore a promise that belongs to the previous one.
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let screenshots = $state<any[]>([]);
-	let screenshotsLoading = $state(true);
-
-	$effect(() => {
-		const id = project.id;
-		let stale = false;
-		screenshotsLoading = true;
-		screenshots = [];
-
-		loadProjectScreenshots(id).then(
-			(images) => {
-				if (stale) return;
-				screenshots = images;
-				screenshotsLoading = false;
-			},
-			() => {
-				if (stale) return;
-				screenshots = [];
-				screenshotsLoading = false;
-			}
-		);
-
-		return () => {
-			stale = true;
-		};
-	});
+	// Known at render time (see project-screenshots.ts), so they are in the prerendered HTML and nothing shifts.
+	const screenshots = $derived(projectScreenshots(project.id));
 
 	// "On this page": built from the rendered prose headings.
 	let prose = $state<HTMLElement>();
@@ -201,24 +175,28 @@
 		wide={{ label: 'Stack', content: project.techStack.length > 0 ? stackCell : undefined }}
 	/>
 
-	{#if screenshotsLoading || screenshots.length > 0}
-		<section class="mt-(--gap-title-content)" aria-label="Screenshots">
+	{#if screenshots.length > 0 || project.videoLink}
+		<section class="mt-(--gap-title-content)" aria-label="Screenshots and demo">
 			{#key project.id}
-				<Gallery images={screenshots} loading={screenshotsLoading} altPrefix="{project.title} screenshot" />
+				<Gallery
+					images={screenshots}
+					altPrefix="{project.title} screenshot"
+					videoUrl={project.videoLink}
+					videoTitle="{project.title} demo"
+				/>
 			{/key}
 		</section>
 	{/if}
 
 	{#if ExtendedDescription}
 		<div class="mt-(--gap-section) grid gap-10 lg:grid-cols-12 lg:gap-x-6">
-			<aside
-				class={cn(
-					'flex flex-col gap-10 lg:sticky lg:top-24 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:self-start xl:col-span-4 xl:col-start-7',
-					!project.videoLink && 'max-lg:hidden'
-				)}
-			>
-				{#if sections.length >= 2}
-					<nav aria-label="On this page" class="hidden lg:block">
+			<!-- The rail only holds "On this page", so a page with fewer than two sections has none. The prose is placed
+				on explicit columns, so a missing rail never moves it. -->
+			{#if sections.length >= 2}
+				<aside
+					class="flex flex-col gap-10 max-lg:hidden lg:sticky lg:top-24 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:self-start xl:col-span-4 xl:col-start-7"
+				>
+					<nav aria-label="On this page">
 						<p class="mb-3 label">On this page</p>
 						<ul class="flex flex-col">
 							{#each sections as section (section.id)}
@@ -237,17 +215,8 @@
 							{/each}
 						</ul>
 					</nav>
-				{/if}
-
-				{#if project.videoLink}
-					<div>
-						<p class="mb-3 label">Demo</p>
-						{#key project.id}
-							<VideoFacade url={project.videoLink} title="{project.title} demo" />
-						{/key}
-					</div>
-				{/if}
-			</aside>
+				</aside>
+			{/if}
 
 			<div
 				bind:this={prose}
@@ -255,13 +224,6 @@
 			>
 				<ExtendedDescription />
 			</div>
-		</div>
-	{:else if project.videoLink}
-		<div class="mt-(--gap-section) max-w-2xl">
-			<p class="mb-3 label">Demo</p>
-			{#key project.id}
-				<VideoFacade url={project.videoLink} title="{project.title} demo" />
-			{/key}
 		</div>
 	{/if}
 
