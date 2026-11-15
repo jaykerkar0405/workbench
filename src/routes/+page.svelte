@@ -11,20 +11,10 @@
 	import Stat from '$lib/components/stat.svelte';
 	import SpecSheet from '$lib/components/spec-sheet.svelte';
 	import ProjectSpotlight from '$lib/components/project-spotlight.svelte';
-	import Terminal from '$lib/components/terminal.svelte';
+	import WinsTable from '$lib/components/wins-table.svelte';
 	import ResumeActions from '$lib/components/resume-actions.svelte';
 	import MumbaiTime from '$lib/components/mumbai-time.svelte';
 	import { GithubIcon, LeetCodeIcon, LinkedInIcon, XBrandIcon } from '$lib/components/brand-icons';
-
-	const achievements = [
-		'$ achievements --list',
-		'🏆 ETHOnline 2025 | Winner — Top 10 / 634 projects (Global)',
-		'🏆 ETHMumbai 2026 | Winner — Main AI Track + BitGo Sponsor Track (National)',
-		'🥇 HackByte 3.0 | Top 10 — 125 teams (Central India)',
-		'🥈 HackX 3.0 | Runner-up — NMIMS Navi Mumbai',
-		'🥈 HackX 4.0 | Runner-up — NMIMS Navi Mumbai',
-		'🥈 GajShield Hack X | Runner-up — KJSSE, Mumbai'
-	];
 
 	const socials = [
 		{ name: 'GitHub', icon: GithubIcon, href: 'https://github.com/jaykerkar0405' },
@@ -37,9 +27,13 @@
 	const sentence = ['Full-stack developer, exploring Web3.', 'Active hackathon participant.'];
 
 	// The three facts, derived. A win is a prize with a rank or a label (the rule the hackathons page uses).
+	// A win is a prize with a rank or a label (the rule the hackathons page and the wins table use).
+	const isWin = (h: (typeof hackathons)[number]) => !!(h.prize && (h.prize.rank || h.prize.label));
+	const winCount = hackathons.filter(isWin).length;
+
 	const facts = [
 		{ value: hackathons.length, label: 'Hackathons' },
-		{ value: hackathons.filter((h) => h.prize && (h.prize.rank || h.prize.label)).length, label: 'Wins' },
+		{ value: winCount, label: 'Wins' },
 		{ value: projects.length, label: 'Projects' }
 	];
 
@@ -188,9 +182,18 @@
 	</div>
 </section>
 
-<section aria-label="Terminal" class={cn(container, 'pt-(--gap-section) pb-(--gap-section)')}>
-	<div class="max-w-2xl">
-		<Terminal title="jay@mumbai: ~/achievements" lines={achievements} />
+<!-- Wins: the second section. A label, title and one derived sentence in columns 1 to 4, the wins table (a terminal) in 5 to 12. -->
+<section aria-labelledby="wins-title" class={cn(container, 'py-(--gap-section)')}>
+	<div class="grid gap-x-6 gap-y-8 lg:grid-cols-12">
+		<div class="lg:col-span-4">
+			<p class="label tabular-nums">01</p>
+			<h2 id="wins-title" class="mt-4 text-section-title">Wins</h2>
+			<p class="mt-4 max-w-sm text-muted-foreground">
+				{winCount} of {hackathons.length} hackathons ended on a podium or a track prize.
+			</p>
+		</div>
+
+		<WinsTable class="lg:col-span-8" />
 	</div>
 </section>
 
@@ -207,7 +210,7 @@
 </section>
 
 <section aria-label="Selected work" class={cn(container, 'py-20 lg:py-28')}>
-	<SectionHeading index="01" title="Selected work">
+	<SectionHeading index="02" title="Selected work">
 		<span class="label tabular-nums">{featuredProjects.length} of {projects.length}</span>
 	</SectionHeading>
 
@@ -240,7 +243,7 @@
 </section>
 
 <section aria-label="Stack" class={cn(container, 'pb-20 lg:pb-28')}>
-	<SectionHeading index="02" title="Stack" />
+	<SectionHeading index="03" title="Stack" />
 
 	<div class="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4" {@attach reveal({ stagger: true })}>
 		{#each stack as group (group.label)}
@@ -257,7 +260,7 @@
 </section>
 
 <section id="about" aria-label="About" class={cn(container, 'pb-20 lg:pb-28')}>
-	<SectionHeading index="03" title="About" />
+	<SectionHeading index="04" title="About" />
 
 	<div class="mt-10 grid gap-12 lg:grid-cols-12 lg:gap-x-6">
 		<div class="lg:sticky lg:top-24 lg:col-span-4 lg:self-start">

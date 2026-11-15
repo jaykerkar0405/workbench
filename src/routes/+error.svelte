@@ -10,22 +10,16 @@
 
 	const message = $derived(messages[page.status] ?? 'Unexpected Error');
 
-	// Anyone can type any path: it is only ever rendered as text, and a long one is shortened in the middle.
-	const MAX_PATH = 80;
-	const shown = $derived.by(() => {
-		const pathname = page.url.pathname;
-		if (pathname.length <= MAX_PATH) return pathname;
-		const keep = MAX_PATH - 1;
-		return `${pathname.slice(0, Math.ceil(keep / 2))}…${pathname.slice(pathname.length - Math.floor(keep / 2))}`;
-	});
+	// Anyone can type any path: it is only ever rendered as text. A long one stays on one line and is cut in the middle by
+	// CSS: the start is a flexible span that gets an ellipsis when it does not fit, the last END characters are fixed, so
+	// the result is always "start…end" at whatever width the terminal has. The full path is the tooltip.
+	const END = 12;
+	const pathname = $derived(page.url.pathname);
+	const long = $derived(pathname.length > END + 4);
+	const start = $derived(long ? pathname.slice(0, -END) : pathname);
+	const end = $derived(long ? pathname.slice(-END) : '');
 
-	// When the path was cut, the full value is available as a tooltip (it never appears in the visible text).
-	const cut = $derived(shown !== page.url.pathname);
-
-	const lines = $derived([`$ cd ${shown}`, `cd: ${message} (${page.status})`]);
-
-	const link =
-		'rounded-sm underline decoration-1 underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
+	const link = 'rounded-sm link-underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 </script>
 
 <svelte:head>
@@ -33,23 +27,32 @@
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
+<!-- The block is centred in the visible area under the header: below lg the layout's bottom padding (the dock's
+	clearance) is taken off the height, so on a phone it never sits under the dock. -->
 <div
-	class="mx-auto max-w-7xl px-5 pt-10 pb-20 md:px-10 lg:flex lg:min-h-[calc(100svh-var(--header-h))] lg:items-center lg:py-16"
+	class="mx-auto flex min-h-[calc(100svh-var(--header-h)-6rem-env(safe-area-inset-bottom))] w-full max-w-7xl items-center px-5 py-10 max-lg:pt-16 md:px-10 lg:grid lg:min-h-[calc(100svh-var(--header-h))] lg:grid-cols-12 lg:gap-x-6"
 >
-	<div class="w-full max-w-2xl" title={cut ? page.url.pathname : undefined}>
+	<div class="w-full min-w-0 lg:col-span-7">
 		<h1 class="sr-only">{page.status} {message}</h1>
 		<p class="mb-4 label" aria-hidden="true">Error {page.status}</p>
 
-		<Terminal title="jay@mumbai: ~" {lines} typing={false}>
-			<p>
-				<span class="text-brand">$</span>
-				<a href="/" class={link} aria-label="Go to the homepage">cd ~</a>
+		<Terminal title="jay@workbench: ~">
+			<p class="flex whitespace-nowrap" title={long ? pathname : undefined}>
+				<span class="text-muted-foreground">$</span>&nbsp;cd&nbsp;<span class="min-w-0 truncate">{start}</span><span
+					class="shrink-0">{end}</span
+				>
 			</p>
-			<p>
-				<span class="text-brand">$</span> ls ~
-				<a href="/projects" class={link} aria-label="Go to projects">projects/</a>
-				<a href="/hackathons" class={link} aria-label="Go to hackathons">hackathons/</a>
+			<p class="whitespace-nowrap">cd: {message} ({page.status})</p>
+			<p class="whitespace-nowrap">
+				<span class="text-muted-foreground">$</span>
+				<span aria-hidden="true" class="cursor-blink text-brand">▊</span>
 			</p>
 		</Terminal>
+
+		<nav aria-label="Where to go" class="mt-6 flex flex-wrap gap-4 font-medium">
+			<a href="/" class={link}>Home</a>
+			<a href="/projects" class={link}>Projects</a>
+			<a href="/hackathons" class={link}>Hackathons</a>
+		</nav>
 	</div>
 </div>
