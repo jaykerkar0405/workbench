@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { navigating } from '$app/state';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
@@ -50,6 +51,24 @@
 	// The previewed project: the last row hovered or focused, or the first row of the current filter.
 	// The project whose transition names a tapped strip tile has taken over from its row, for one navigation.
 	let transferred = $state<string | null>(null);
+
+	// A tapped tile's names are only borrowed for one navigation. When a navigation ends without leaving this page (it
+	// was cancelled or failed) the row gets its names back; so it does if no navigation started at all after the tap.
+	let wasNavigating = false;
+	$effect(() => {
+		if (navigating.to) {
+			wasNavigating = true;
+		} else if (wasNavigating) {
+			wasNavigating = false;
+			transferred = null;
+		}
+	});
+	const borrow = (id: string) => {
+		transferred = id;
+		setTimeout(() => {
+			if (!navigating.to && transferred === id) transferred = null;
+		}, 600);
+	};
 
 	let previewed = $state<string | null>(null);
 	const activeId = $derived(rows.some((p) => p.id === previewed) ? (previewed ?? undefined) : rows[0]?.id);
@@ -156,7 +175,7 @@
 				class="mt-(--gap-title-content) lg:hidden"
 				projects={featuredProjects}
 				{transferred}
-				onactivate={(id) => (transferred = id)}
+				onactivate={borrow}
 			/>
 		{/if}
 

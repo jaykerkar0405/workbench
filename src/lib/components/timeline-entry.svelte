@@ -95,13 +95,17 @@
 			<div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
 				<span class="label">Built</span>
 				{#if projectIcon}
-					<EnhancedImage
-						src={projectIcon}
-						alt=""
-						containerClass="size-5 shrink-0"
-						skeletonClass="rounded-sm"
-						class="size-5 rounded-sm object-cover"
-					/>
+					<!-- The same box as the icon in the projects list rows (1px border, muted fill, 4px corners), so a near-white icon
+						still reads as an icon. -->
+					<div class="size-5 shrink-0 overflow-hidden rounded-sm border bg-muted">
+						<EnhancedImage
+							src={projectIcon}
+							alt=""
+							containerClass="size-full"
+							skeletonClass="rounded-none"
+							class="size-full object-cover"
+						/>
+					</div>
 				{/if}
 				<a
 					href={`/projects/${project.id}`}
