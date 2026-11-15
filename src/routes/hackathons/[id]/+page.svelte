@@ -1,20 +1,17 @@
 <script lang="ts">
 	import Seo from '$lib/components/seo.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { reveal } from '$lib/components/reveal';
 	import { formatDateRange, formatDuration, viewTransitionName } from '$lib/utils';
 	import { getHackathonIcon } from '$lib/assets/images';
 	import { hackathonPhotos } from '$lib/components/hackathon-photos';
 	import { orderedHackathons, hackathonIndex } from '$lib/components/hackathon-order';
-	import { projectIndex } from '$lib/components/project-order';
-	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import TitleBlock from '$lib/components/title-block.svelte';
 	import SpecSheet from '$lib/components/spec-sheet.svelte';
 	import SectionHeading from '$lib/components/section-heading.svelte';
 	import PrizeBadge from '$lib/components/prize-badge.svelte';
-	import TeamStack from '$lib/components/team-stack.svelte';
 	import Lightbox from '$lib/components/lightbox.svelte';
-	import ProjectSpotlight from '$lib/components/project-spotlight.svelte';
+	import PhotoGrid from '$lib/components/photo-grid.svelte';
+	import BuiltHere from '$lib/components/built-here.svelte';
 	import PrevNext from '$lib/components/prev-next.svelte';
 
 	let { data } = $props();
@@ -105,27 +102,14 @@
 				<span class="label tabular-nums">{images.length} {images.length === 1 ? 'photo' : 'photos'}</span>
 			</SectionHeading>
 
-			<div class="mt-(--gap-heading) columns-1 gap-4 md:columns-2 lg:columns-3" {@attach reveal({ stagger: true })}>
-				{#each images as image, i (i)}
-					<button
-						type="button"
-						onclick={() => {
-							lightboxIndex = i;
-							lightboxOpen = true;
-						}}
-						aria-label="Open photo {i + 1} of {images.length}"
-						class="mb-4 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-lg border bg-muted transition-opacity duration-(--dur-1) ease-(--ease-out) outline-none hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
-					>
-						<EnhancedImage
-							src={image}
-							alt=""
-							containerClass="w-full"
-							skeletonClass="rounded-none"
-							class="h-auto w-full"
-						/>
-					</button>
-				{/each}
-			</div>
+			<PhotoGrid
+				class="mt-(--gap-heading)"
+				{images}
+				onopen={(i) => {
+					lightboxIndex = i;
+					lightboxOpen = true;
+				}}
+			/>
 		</section>
 
 		<Lightbox {images} altPrefix="{hackathon.title} photo" bind:open={lightboxOpen} bind:index={lightboxIndex} />
@@ -137,32 +121,8 @@
 
 			<div class="mt-(--gap-heading)">
 				{#key project.id}
-					<ProjectSpotlight {project} index={projectIndex(project.id)} {hackathon} />
+					<BuiltHere {project} members={teamMembersData} />
 				{/key}
-			</div>
-
-			<div class="mt-10">
-				<p class="mb-3 label">Team</p>
-				{#if teamMembersData.length > 0}
-					<TeamStack members={teamMembersData} />
-				{:else if project.teamMembers.length > 0}
-					<ul class="flex flex-wrap gap-x-3 gap-y-1">
-						{#each project.teamMembers as member (member.githubUsername)}
-							<li>
-								<a
-									href={`https://github.com/${member.githubUsername}`}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="rounded-sm link-underline font-mono text-[0.85rem] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-								>
-									@{member.githubUsername}<span class="sr-only"> (opens in a new tab)</span>
-								</a>
-							</li>
-						{/each}
-					</ul>
-				{:else}
-					<span aria-label="No team">—</span>
-				{/if}
 			</div>
 		</section>
 	{/if}
