@@ -652,6 +652,21 @@
 			html.js:has([data-scene-track]) [data-scene-word] {
 				width: fit-content;
 			}
+
+			/* Two lines: "Jay" over "Kerkar" travel to "Jay Kerkar" on one line. On straight paths over the same range their
+			   boxes would cross, so "Jay" travels over the first 70% of the scene and "Kerkar" over the last 70%; each keeps
+			   one linear progress for its translate and scale. The swap still happens at 1 for both. */
+			html.js:has([data-scene-track]) [data-scene-word]:nth-of-type(1) {
+				animation-range:
+					0px calc(var(--scene) * 0.7),
+					0px var(--scene);
+			}
+
+			html.js:has([data-scene-track]) [data-scene-word]:nth-of-type(2) {
+				animation-range:
+					calc(var(--scene) * 0.3) var(--scene),
+					0px var(--scene);
+			}
 		}
 	}
 }
