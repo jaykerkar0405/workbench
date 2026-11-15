@@ -13,6 +13,7 @@
 	import ProjectSpotlight from '$lib/components/project-spotlight.svelte';
 	import Terminal from '$lib/components/terminal.svelte';
 	import ResumeActions from '$lib/components/resume-actions.svelte';
+	import MumbaiTime from '$lib/components/mumbai-time.svelte';
 	import { GithubIcon, LeetCodeIcon, LinkedInIcon, XBrandIcon } from '$lib/components/brand-icons';
 
 	const achievements = [
@@ -32,9 +33,15 @@
 		{ name: 'LeetCode', icon: LeetCodeIcon, href: 'https://leetcode.com/u/jaykerkar0405' }
 	];
 
-	// One CSS entrance shared by the hero's two columns: runs from the prerendered HTML, not under reduced motion.
-	const enter =
-		'motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-(--dur-3) motion-safe:ease-(--ease-out)';
+	// The sentence, in its two halves (the text is exactly: Full-stack developer, exploring Web3. Active hackathon participant.).
+	const sentence = ['Full-stack developer, exploring Web3.', 'Active hackathon participant.'];
+
+	// The three facts, derived. A win is a prize with a rank or a label (the rule the hackathons page uses).
+	const facts = [
+		{ value: hackathons.length, label: 'Hackathons' },
+		{ value: hackathons.filter((h) => h.prize && (h.prize.rank || h.prize.label)).length, label: 'Wins' },
+		{ value: projects.length, label: 'Projects' }
+	];
 
 	const cgpa = 9.87;
 
@@ -66,76 +73,124 @@
 	description="Full-stack developer specializing in scalable web applications, mobile development, and Web3 solutions. Explore my projects, hackathon wins, and technical expertise in modern frameworks."
 />
 
-<section class="relative lg:flex lg:min-h-[calc(100svh-var(--header-h))] lg:items-center" aria-label="Introduction">
-	<div class="dot-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
+<!-- The hero at rest (V14): type and space only. A top band (status line, Mumbai time), a middle band (the sentence, the
+	actions, three derived facts) and the name on one line, sized so its ink spans columns 1 to 12. The hero is one screen
+	tall (min-height, so it grows instead of overlapping on a short viewport) and the name's baseline is 64px above the
+	bottom of the screen, or above the mobile dock's top edge below lg. Nothing animates here: V17 (the scroll transition)
+	and V18 (the load sequence) come later. -->
+<section
+	aria-label="Introduction"
+	class="flex min-h-[calc(100svh-var(--header-h))] [--clear:calc(4.5rem+env(safe-area-inset-bottom))] lg:[--clear:0px]"
+>
+	<div class="relative mx-auto flex w-full max-w-7xl flex-col px-5 pt-6 pb-[calc(var(--clear)+4rem)] md:px-10 md:pt-8">
+		<div class="@container flex flex-1 flex-col">
+			<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+				<p class="label">Mumbai, India · Full-stack · Web3</p>
+				<MumbaiTime />
+			</div>
 
-	<div class="mx-auto w-full max-w-7xl px-5 py-12 md:px-10 lg:py-16">
-		<div class="grid gap-12 xl:grid-cols-12 xl:items-center xl:gap-x-6">
-			<div class={cn('xl:col-span-7', enter)}>
-				<p class="mb-6 flex items-center gap-2.5 label">
-					<span aria-hidden="true" class="size-1.5 rounded-full bg-brand motion-safe:animate-pulse"></span>
-					Mumbai, India · Full-stack · Web3
-				</p>
+			<div class="min-h-4 flex-[7] md:min-h-12"></div>
 
-				<h1 class="text-display">
-					<span class="block">Jay</span>
-					<span class="block">Kerkar</span>
-				</h1>
-
-				<p class="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-					Full-stack developer specializing in scalable web applications, mobile development, and Web3 solutions.
-					Explore my projects, hackathon wins, and technical expertise in modern frameworks.
-				</p>
-
-				<div class="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
-					<Button href="/projects" size="lg" class="group/cta rounded-md">
-						View projects
-						<span
-							aria-hidden="true"
-							class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/cta:translate-x-1 motion-safe:group-focus-visible/cta:translate-x-1"
-							>→</span
+			<div class="grid gap-x-6 gap-y-8 md:grid-cols-12">
+				<div class="md:col-span-6">
+					<!-- Each sentence is kept whole from xl up, so the line breaks after "Web3." there; below that it balances. -->
+					<p class="text-[1.75rem] leading-[1.3] text-balance text-foreground">
+						<span class="xl:whitespace-nowrap">{sentence[0]}</span>&#32;<span class="xl:whitespace-nowrap"
+							>{sentence[1]}</span
 						>
-					</Button>
-					<ResumeActions previewVariant="link" showDownload={false} />
-				</div>
+					</p>
 
-				<Tooltip.Provider>
-					<ul class="mt-6 -ml-2 flex items-center gap-1">
-						{#each socials as social (social.name)}
-							<li>
-								<Tooltip.Root>
-									<Tooltip.Trigger>
-										{#snippet child({ props })}
-											<Button
-												{...props}
-												href={social.href}
-												target="_blank"
-												rel="noopener noreferrer"
-												variant="ghost"
-												size="icon-lg"
-												class="rounded-md text-muted-foreground hover:text-foreground"
-												aria-label="Jay Kerkar on {social.name}"
-											>
-												<svg viewBox={social.icon.viewBox} fill="currentColor" class="size-5" aria-hidden="true">
-													{#each social.icon.paths as d (d)}
-														<path {d} />
-													{/each}
-												</svg>
-											</Button>
-										{/snippet}
-									</Tooltip.Trigger>
-									<Tooltip.Content>{social.name}</Tooltip.Content>
-								</Tooltip.Root>
+					<ul class="mt-6 grid w-fit grid-cols-[2ch_auto] gap-x-3 gap-y-1 label tabular-nums md:hidden">
+						{#each facts as fact (fact.label)}
+							<li class="contents">
+								<span class="text-right text-foreground">{fact.value}</span>
+								<span>{fact.label}</span>
 							</li>
 						{/each}
 					</ul>
-				</Tooltip.Provider>
+
+					<div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 md:mt-8">
+						<Button href="/projects" size="lg" class="group/cta rounded-md">
+							View projects
+							<span
+								aria-hidden="true"
+								class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/cta:translate-x-1 motion-safe:group-focus-visible/cta:translate-x-1"
+								>→</span
+							>
+						</Button>
+						<ResumeActions previewVariant="link" showDownload={false} />
+
+						<Tooltip.Provider>
+							<ul class="flex items-center gap-1">
+								{#each socials as social (social.name)}
+									<li>
+										<Tooltip.Root>
+											<Tooltip.Trigger>
+												{#snippet child({ props })}
+													<Button
+														{...props}
+														href={social.href}
+														target="_blank"
+														rel="noopener noreferrer"
+														variant="ghost"
+														size="icon-lg"
+														class="rounded-md text-muted-foreground hover:text-foreground"
+														aria-label="Jay Kerkar on {social.name}"
+													>
+														<svg viewBox={social.icon.viewBox} fill="currentColor" class="size-5" aria-hidden="true">
+															{#each social.icon.paths as d (d)}
+																<path {d} />
+															{/each}
+														</svg>
+													</Button>
+												{/snippet}
+											</Tooltip.Trigger>
+											<Tooltip.Content>{social.name}</Tooltip.Content>
+										</Tooltip.Root>
+									</li>
+								{/each}
+							</ul>
+						</Tooltip.Provider>
+					</div>
+				</div>
+
+				<ul
+					class="hidden grid-cols-[2ch_auto] content-start gap-x-3 gap-y-1 label tabular-nums md:col-span-3 md:col-start-10 md:grid md:pt-2"
+				>
+					{#each facts as fact (fact.label)}
+						<li class="contents">
+							<span class="text-right text-foreground">{fact.value}</span>
+							<span>{fact.label}</span>
+						</li>
+					{/each}
+				</ul>
 			</div>
 
-			<div class={cn('max-w-2xl xl:col-span-5 xl:max-w-none', enter)}>
-				<Terminal title="jay@mumbai: ~/achievements" lines={achievements} />
-			</div>
+			<div class="min-h-12 flex-[3] md:min-h-16"></div>
+
+			<!-- Sized so the ink of the name spans the content box: font-size = content width / ratio, where ratio is the
+				ink width of "Jay Kerkar" in Akt 700 at -0.04em divided by its font size (see NAME_RATIO below). -->
+			<!-- The name is sized so its INK spans the content box: font-size = content width / ratio. Measured in Chromium with a
+				canvas at 1000px, Akt 700, letter-spacing -40px (= -0.04em): "Jay Kerkar" has ink 4323.7 wide, starting 15.6 right of the
+				pen origin (ratio 4.3237, left bearing 0.0156em); "Kerkar" alone has ink 2696.9 wide starting 62.5 in (ratio 2.6969, left
+				bearing 0.0625em). The negative left margin puts the ink, not the advance box, on the left edge; the right ink edge then
+				falls on the right edge by construction. Akt's metrics are ascent 0.95em and descent 0.25em, so at line-height 0.8 the
+				baseline is 0.05em above the box bottom, which -mb-[0.05em] cancels: the baseline is exactly the bottom padding
+				(64px) above the bottom of the hero. Below 640px the name is two lines and "Kerkar" is what spans the width. -->
+			<h1
+				class="-mb-[0.05em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237] max-sm:[--bl:0.0625] max-sm:[--ratio:2.6969]"
+			>
+				<span class="block sm:inline">Jay</span>&#32;<span class="block sm:inline">Kerkar</span>
+			</h1>
 		</div>
+
+		<p aria-hidden="true" class="absolute bottom-[calc(var(--clear)+1.5rem)] label">Scroll ↓</p>
+	</div>
+</section>
+
+<section aria-label="Terminal" class={cn(container, 'pt-(--gap-section) pb-(--gap-section)')}>
+	<div class="max-w-2xl">
+		<Terminal title="jay@mumbai: ~/achievements" lines={achievements} />
 	</div>
 </section>
 
