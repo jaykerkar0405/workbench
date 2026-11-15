@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { cn } from '$lib/utils';
+	import { browser } from '$app/environment';
 	import Seo from '$lib/components/seo.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Button } from '$lib/components/ui/button';
@@ -63,6 +64,84 @@
 	];
 
 	const container = 'mx-auto max-w-7xl px-5 md:px-10';
+
+	// The scroll scene (V17) runs only where CSS scroll-driven animations exist and motion is allowed; layout.css gates its
+	// rules on the same two conditions (plus html.js and the track's attribute). Otherwise the page is the static hero.
+	const sceneSupported =
+		browser && CSS.supports('animation-timeline: scroll()') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	let track = $state<HTMLElement | null>(null);
+	let winsTable = $state<{ play: () => void } | null>(null);
+
+	// JavaScript only supplies end values; the motion itself is CSS. After the fonts load (and on resize) each word of the
+	// name gets the translation and scale that put its baseline-left corner on the matching word of the header wordmark.
+	$effect(() => {
+		if (!sceneSupported || !track) return;
+		const stage = track.querySelector<HTMLElement>('[data-scene-stage]');
+		const words = [...track.querySelectorAll<HTMLElement>('[data-scene-word]')];
+		const targets = [...document.querySelectorAll<HTMLElement>('[data-wordmark-word]')];
+		if (!stage || words.length !== targets.length || !targets.length) return;
+
+		// The bottom edge of a zero-size inline-block is the baseline of its line.
+		const baselineOf = (el: HTMLElement) => {
+			const strut = document.createElement('span');
+			strut.style.cssText = 'display:inline-block;width:0;height:0';
+			el.append(strut);
+			const y = strut.getBoundingClientRect().bottom;
+			strut.remove();
+			return y;
+		};
+
+		const measure = () => {
+			const pinTop = parseFloat(getComputedStyle(stage).top) || 0;
+			// Measure the words at rest: no animation, so no transform.
+			for (const w of words) w.style.animation = 'none';
+			const stageTop = stage.getBoundingClientRect().top;
+			const rest = words.map((w) => {
+				const r = w.getBoundingClientRect();
+				return {
+					left: r.left,
+					bottom: r.bottom - stageTop + pinTop,
+					base: baselineOf(w) - stageTop + pinTop,
+					size: parseFloat(getComputedStyle(w).fontSize)
+				};
+			});
+			for (const w of words) w.style.removeProperty('animation');
+			words.forEach((w, i) => {
+				const t = targets[i];
+				const tr = t.getBoundingClientRect();
+				const tBase = baselineOf(t);
+				const k = parseFloat(getComputedStyle(t).fontSize) / rest[i].size;
+				// Scaling about the box's bottom-left corner O moves the baseline-left point B to O + k(B - O); translate the rest.
+				w.style.setProperty('--tx', `${tr.left - rest[i].left}px`);
+				w.style.setProperty('--ty', `${tBase - rest[i].bottom - k * (rest[i].base - rest[i].bottom)}px`);
+				w.style.setProperty('--k', String(k));
+			});
+		};
+
+		measure();
+		document.fonts.ready.then(measure);
+		window.addEventListener('resize', measure);
+		return () => window.removeEventListener('resize', measure);
+	});
+
+	// The wins table prints when the scene completes. The sentinel sits at the scroll distance of the scene; it stops
+	// intersecting (above the viewport) when the scroll passes it. play() is idempotent, so scrolling back changes nothing.
+	$effect(() => {
+		if (!sceneSupported || !track || !winsTable) return;
+		const sentinel = track.querySelector('[data-scene-sentinel]');
+		if (!sentinel) return;
+		const observer = new IntersectionObserver((entries) => {
+			const e = entries[entries.length - 1];
+			if (e && !e.isIntersecting && e.boundingClientRect.top < 0) {
+				// Below 768px the table is shown at once (its own rule), so there is nothing to print.
+				if (matchMedia('(min-width: 768px)').matches) winsTable?.play();
+				observer.disconnect();
+			}
+		});
+		observer.observe(sentinel);
+		return () => observer.disconnect();
+	});
 </script>
 
 <Seo
@@ -75,130 +154,147 @@
 	tall (min-height, so it grows instead of overlapping on a short viewport) and the name's baseline is 64px above the
 	bottom of the screen, or above the mobile dock's top edge below lg. Nothing animates here: V17 (the scroll transition)
 	and V18 (the load sequence) come later. -->
-<section
-	aria-label="Introduction"
-	class="flex min-h-[calc(100svh-var(--header-h))] [--clear:calc(4.5rem+env(safe-area-inset-bottom))] lg:[--clear:0px]"
->
-	<div class="relative mx-auto flex w-full max-w-7xl flex-col px-5 pt-6 pb-[calc(var(--clear)+4rem)] md:px-10 md:pt-8">
-		<div class="@container flex flex-1 flex-col">
-			<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-				<p class="label">Mumbai, India · Full-stack · Web3</p>
-				<MumbaiTime class="shrink-0 whitespace-nowrap" />
-			</div>
+<!-- The scene's markup (V17): a track, a sticky stage, and a spacer. Without the scene's CSS these are three plain blocks and
+	the page is V14's static hero followed by the wins section. See the scene block in layout.css. -->
+<div bind:this={track} data-scene-track>
+	<div data-scene-stage>
+		<section
+			aria-label="Introduction"
+			class="flex min-h-[calc(100svh-var(--header-h))] [--clear:calc(4.5rem+env(safe-area-inset-bottom))] lg:[--clear:0px]"
+		>
+			<div
+				class="relative mx-auto flex w-full max-w-7xl flex-col px-5 pt-6 pb-[calc(var(--clear)+4rem)] md:px-10 md:pt-8"
+			>
+				<div class="@container flex flex-1 flex-col">
+					<div data-scene-band class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+						<p class="label">Mumbai, India · Full-stack · Web3</p>
+						<MumbaiTime class="shrink-0 whitespace-nowrap" />
+					</div>
 
-			<div class="min-h-4 flex-[7] md:min-h-12"></div>
+					<div class="min-h-4 flex-[7] md:min-h-12"></div>
 
-			<div class="grid gap-x-6 gap-y-8 md:grid-cols-12">
-				<div class="md:col-span-6">
-					<!-- Each sentence is kept whole from xl up, so the line breaks after "Web3." there; below that it balances. -->
-					<p class="text-[1.75rem] leading-[1.3] text-balance text-foreground">
-						<span class="xl:whitespace-nowrap">{sentence[0]}</span>&#32;<span class="xl:whitespace-nowrap"
-							>{sentence[1]}</span
-						>
-					</p>
+					<div data-scene-band class="grid gap-x-6 gap-y-8 md:grid-cols-12">
+						<div class="md:col-span-6">
+							<!-- Each sentence is kept whole from xl up, so the line breaks after "Web3." there; below that it balances. -->
+							<p class="text-[1.75rem] leading-[1.3] text-balance text-foreground">
+								<span class="xl:whitespace-nowrap">{sentence[0]}</span>&#32;<span class="xl:whitespace-nowrap"
+									>{sentence[1]}</span
+								>
+							</p>
 
-					<ul class="mt-6 grid w-fit grid-cols-[2ch_auto] gap-x-3 gap-y-1 label tabular-nums md:hidden">
-						{#each facts as fact (fact.label)}
-							<li class="contents">
-								<span class="text-right text-foreground">{fact.value}</span>
-								<span>{fact.label}</span>
-							</li>
-						{/each}
-					</ul>
-
-					<div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 md:mt-8">
-						<Button href="/projects" size="lg" class="group/cta rounded-md">
-							View projects
-							<span
-								aria-hidden="true"
-								class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/cta:translate-x-1 motion-safe:group-focus-visible/cta:translate-x-1"
-								>→</span
-							>
-						</Button>
-						<ResumeActions previewVariant="link" showDownload={false} />
-
-						<Tooltip.Provider>
-							<ul class="flex items-center gap-1">
-								{#each socials as social (social.name)}
-									<li>
-										<Tooltip.Root>
-											<Tooltip.Trigger>
-												{#snippet child({ props })}
-													<Button
-														{...props}
-														href={social.href}
-														target="_blank"
-														rel="noopener noreferrer"
-														variant="ghost"
-														size="icon-lg"
-														class="rounded-md text-muted-foreground hover:text-foreground"
-														aria-label="Jay Kerkar on {social.name}"
-													>
-														<svg viewBox={social.icon.viewBox} fill="currentColor" class="size-5" aria-hidden="true">
-															{#each social.icon.paths as d (d)}
-																<path {d} />
-															{/each}
-														</svg>
-													</Button>
-												{/snippet}
-											</Tooltip.Trigger>
-											<Tooltip.Content>{social.name}</Tooltip.Content>
-										</Tooltip.Root>
+							<ul class="mt-6 grid w-fit grid-cols-[2ch_auto] gap-x-3 gap-y-1 label tabular-nums md:hidden">
+								{#each facts as fact (fact.label)}
+									<li class="contents">
+										<span class="text-right text-foreground">{fact.value}</span>
+										<span>{fact.label}</span>
 									</li>
 								{/each}
 							</ul>
-						</Tooltip.Provider>
+
+							<div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 md:mt-8">
+								<Button href="/projects" size="lg" class="group/cta rounded-md">
+									View projects
+									<span
+										aria-hidden="true"
+										class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/cta:translate-x-1 motion-safe:group-focus-visible/cta:translate-x-1"
+										>→</span
+									>
+								</Button>
+								<ResumeActions previewVariant="link" showDownload={false} />
+
+								<Tooltip.Provider>
+									<ul class="flex items-center gap-1">
+										{#each socials as social (social.name)}
+											<li>
+												<Tooltip.Root>
+													<Tooltip.Trigger>
+														{#snippet child({ props })}
+															<Button
+																{...props}
+																href={social.href}
+																target="_blank"
+																rel="noopener noreferrer"
+																variant="ghost"
+																size="icon-lg"
+																class="rounded-md text-muted-foreground hover:text-foreground"
+																aria-label="Jay Kerkar on {social.name}"
+															>
+																<svg
+																	viewBox={social.icon.viewBox}
+																	fill="currentColor"
+																	class="size-5"
+																	aria-hidden="true"
+																>
+																	{#each social.icon.paths as d (d)}
+																		<path {d} />
+																	{/each}
+																</svg>
+															</Button>
+														{/snippet}
+													</Tooltip.Trigger>
+													<Tooltip.Content>{social.name}</Tooltip.Content>
+												</Tooltip.Root>
+											</li>
+										{/each}
+									</ul>
+								</Tooltip.Provider>
+							</div>
+						</div>
+
+						<ul
+							class="hidden grid-cols-[2ch_auto] content-start gap-x-3 gap-y-1 label tabular-nums md:col-span-3 md:col-start-10 md:grid md:pt-2"
+						>
+							{#each facts as fact (fact.label)}
+								<li class="contents">
+									<span class="text-right text-foreground">{fact.value}</span>
+									<span>{fact.label}</span>
+								</li>
+							{/each}
+						</ul>
 					</div>
-				</div>
 
-				<ul
-					class="hidden grid-cols-[2ch_auto] content-start gap-x-3 gap-y-1 label tabular-nums md:col-span-3 md:col-start-10 md:grid md:pt-2"
-				>
-					{#each facts as fact (fact.label)}
-						<li class="contents">
-							<span class="text-right text-foreground">{fact.value}</span>
-							<span>{fact.label}</span>
-						</li>
-					{/each}
-				</ul>
-			</div>
+					<div class="min-h-12 flex-[3] md:min-h-16"></div>
 
-			<div class="min-h-12 flex-[3] md:min-h-16"></div>
-
-			<!-- Sized so the ink of the name spans the content box: font-size = content width / ratio, where ratio is the
+					<!-- Sized so the ink of the name spans the content box: font-size = content width / ratio, where ratio is the
 				ink width of "Jay Kerkar" in Akt 700 at -0.04em divided by its font size (see NAME_RATIO below). -->
-			<!-- The name is sized so its INK spans the content box: font-size = content width / ratio. Measured in Chromium with a
+					<!-- The name is sized so its INK spans the content box: font-size = content width / ratio. Measured in Chromium with a
 				canvas at 1000px, Akt 700, letter-spacing -40px (= -0.04em): "Jay Kerkar" has ink 4323.7 wide, starting 15.6 right of the
 				pen origin (ratio 4.3237, left bearing 0.0156em); "Kerkar" alone has ink 2696.9 wide starting 62.5 in (ratio 2.6969, left
 				bearing 0.0625em). The negative left margin puts the ink, not the advance box, on the left edge; the right ink edge then
 				falls on the right edge by construction. Akt's metrics are ascent 0.95em and descent 0.25em, so at line-height 0.8 the
 				baseline is 0.05em above the box bottom, which -mb-[0.05em] cancels: the baseline is exactly the bottom padding
 				(64px) above the bottom of the hero. Below 640px the name is two lines and "Kerkar" is what spans the width. -->
-			<h1
-				class="-mb-[0.05em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237] max-sm:[--bl:0.0625] max-sm:[--ratio:2.6969]"
-			>
-				<span class="block sm:inline">Jay</span>&#32;<span class="block sm:inline">Kerkar</span>
-			</h1>
-		</div>
+					<h1
+						class="-mb-[0.05em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237] max-sm:[--bl:0.0625] max-sm:[--ratio:2.6969]"
+					>
+						<span data-scene-word class="block sm:inline">Jay</span>&#32;<span data-scene-word class="block sm:inline"
+							>Kerkar</span
+						>
+					</h1>
+				</div>
 
-		<p aria-hidden="true" class="absolute bottom-[calc(var(--clear)+1.5rem)] label">Scroll ↓</p>
+				<p data-scene-cue aria-hidden="true" class="absolute bottom-[calc(var(--clear)+1.5rem)] label">Scroll ↓</p>
+			</div>
+		</section>
+
+		<!-- Wins: the second section. A label, title and one derived sentence in columns 1 to 4, the wins table (a terminal) in 5 to 12. -->
+		<section data-scene-wins aria-labelledby="wins-title" class={cn(container, 'py-(--gap-section)')}>
+			<div class="grid gap-x-6 gap-y-8 lg:grid-cols-12">
+				<div class="lg:col-span-4">
+					<p class="label tabular-nums">01</p>
+					<h2 id="wins-title" class="mt-4 text-section-title">Wins</h2>
+					<p class="mt-4 max-w-sm text-muted-foreground">
+						{winCount} of {hackathons.length} hackathons ended on a podium or a track prize.
+					</p>
+				</div>
+
+				<WinsTable bind:this={winsTable} autoplay={!sceneSupported} class="lg:col-span-8" />
+			</div>
+		</section>
 	</div>
-</section>
-
-<!-- Wins: the second section. A label, title and one derived sentence in columns 1 to 4, the wins table (a terminal) in 5 to 12. -->
-<section aria-labelledby="wins-title" class={cn(container, 'py-(--gap-section)')}>
-	<div class="grid gap-x-6 gap-y-8 lg:grid-cols-12">
-		<div class="lg:col-span-4">
-			<p class="label tabular-nums">01</p>
-			<h2 id="wins-title" class="mt-4 text-section-title">Wins</h2>
-			<p class="mt-4 max-w-sm text-muted-foreground">
-				{winCount} of {hackathons.length} hackathons ended on a podium or a track prize.
-			</p>
-		</div>
-
-		<WinsTable class="lg:col-span-8" />
-	</div>
-</section>
+	<div data-scene-spacer aria-hidden="true"></div>
+	<div data-scene-sentinel aria-hidden="true"></div>
+</div>
 
 <!-- Doors: two panels, one link each, with a hairline above, below and between. No heading; the numbered sections resume after. -->
 <section aria-label="Browse" class={container}>

@@ -529,6 +529,205 @@
 	}
 }
 
+/* Home scene (V17): the hero name docks into the header as the page scrolls.
+   The hero's track holds a sticky stage (the wins section, in flow, plus the hero laid over it) and a spacer; the scene
+   plays over --scene of scrolling (70svh, 40svh below 640px), tied to the root scroll position (scroll(root)) and so
+   reversible. Everything is on the root scroll timeline, with ranges as fractions of --scene: the name 0 to 1, the bands
+   0 to 0.35, the wins section 0.35 to 0.85, the header's bar 0.85 to 1, and the swap at exactly 1. Only opacity and transform
+   (translate, scale) animate, plus discrete steps of z-index and visibility that never show: the stage is above the header
+   until the scene ends (so the name travels over it) and the header above the stage afterwards (so content scrolls under it; both stay under dialogs, which are z-50);
+   a hidden band cannot be clicked.
+   Gate: scroll-driven animations are supported, motion is allowed, JavaScript has run (html.js), and the home track is in
+   the page. Outside it none of these rules apply and the page is the static hero. The end values (--tx, --ty, --k) are
+   set on each word of the name by a small script in +page.svelte. */
+@supports (animation-timeline: scroll()) {
+	@media (prefers-reduced-motion: no-preference) {
+		html.js:has([data-scene-track]) {
+			--scene: 70svh;
+		}
+
+		@media (max-width: 639.98px) {
+			html.js:has([data-scene-track]) {
+				--scene: 40svh;
+			}
+		}
+
+		html.js:has([data-scene-track]) {
+			[data-scene-track] {
+				position: relative;
+			}
+
+			[data-scene-stage] {
+				position: sticky;
+				top: var(--header-h);
+				z-index: 45;
+			}
+
+			[data-scene-spacer] {
+				height: var(--scene);
+			}
+
+			[data-scene-sentinel] {
+				position: absolute;
+				top: calc(var(--scene) - var(--header-h) - 2px);
+				left: 0;
+				width: 1px;
+				height: 1px;
+				pointer-events: none;
+			}
+
+			/* The hero lies over the wins section, from the top of the stage. */
+			[data-scene-stage] > section:first-child {
+				position: absolute;
+				inset-inline: 0;
+				top: 0;
+				z-index: 1;
+				pointer-events: none;
+			}
+
+			[data-scene-band] {
+				pointer-events: auto;
+				animation: scene-band linear both;
+				animation-timeline: scroll(root);
+				animation-range: 0px calc(var(--scene) * 0.35);
+			}
+
+			[data-scene-cue] {
+				animation: scene-cue linear both;
+				animation-timeline: scroll(root);
+				animation-range: 0px calc(var(--scene) * 0.05);
+			}
+
+			[data-scene-word] {
+				transform-origin: 0 100%;
+				animation:
+					scene-word linear both,
+					scene-swap-out steps(1, end) both;
+				animation-timeline: scroll(root), scroll(root);
+				animation-range:
+					0px var(--scene),
+					0px var(--scene);
+			}
+
+			[data-scene-wins] {
+				position: relative;
+				z-index: 0;
+				animation: scene-wins linear both;
+				animation-timeline: scroll(root);
+				animation-range: calc(var(--scene) * 0.35) calc(var(--scene) * 0.85);
+			}
+
+			[data-site-header] {
+				animation: scene-header-z steps(1, end) both;
+				animation-timeline: scroll(root);
+				animation-range: 0px var(--scene);
+			}
+
+			[data-header-bar],
+			[data-header-hairline] {
+				animation: scene-fade-in linear both;
+				animation-timeline: scroll(root);
+				animation-range: calc(var(--scene) * 0.85) var(--scene);
+			}
+
+			[data-wordmark] {
+				animation: scene-swap-in steps(1, end) both;
+				animation-timeline: scroll(root);
+				animation-range: 0px var(--scene);
+			}
+
+			/* The mobile dock stays above the stage (and below dialogs, which are z-50). */
+			[data-site-dock] {
+				z-index: 49;
+			}
+		}
+
+		@media (min-width: 640px) {
+			html.js:has([data-scene-track]) [data-scene-word] {
+				display: inline-block;
+			}
+		}
+
+		@media (max-width: 639.98px) {
+			html.js:has([data-scene-track]) [data-scene-word] {
+				width: fit-content;
+			}
+		}
+	}
+}
+
+@keyframes scene-band {
+	to {
+		opacity: 0;
+		translate: 0 -24px;
+		visibility: hidden;
+	}
+}
+
+@keyframes scene-cue {
+	to {
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+
+@keyframes scene-word {
+	from {
+		translate: 0 0;
+		scale: 1;
+	}
+	to {
+		translate: var(--tx, 0px) var(--ty, 0px);
+		scale: var(--k, 1);
+	}
+}
+
+@keyframes scene-swap-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes scene-swap-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes scene-wins {
+	from {
+		opacity: 0;
+		translate: 0 40%;
+		visibility: hidden;
+	}
+	to {
+		opacity: 1;
+		translate: 0 0;
+		visibility: visible;
+	}
+}
+
+@keyframes scene-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes scene-header-z {
+	from {
+		z-index: 40;
+	}
+	to {
+		z-index: 49;
+	}
+}
+
 /* View transitions (see onNavigate in src/routes/+layout.svelte).
    The root snapshot (everything not separately named: main and the footer) crossfades in
    --dur-page (160 ms). The header and mobile dock are named so they stay pinned: only the new snapshot
