@@ -19,7 +19,7 @@
 	 * One row of the projects list. The title link is the row's only link and covers the whole row (stretched link), so
 	 * there is one tab stop per row. From lg the row is one line: index, icon and title (and FEATURED), the event, an
 	 * arrow; the description, tags and links live in the preview panel. Below lg it is two lines with the description.
-	 * `active` is the previewed row (it keeps the fill), `tabbable` is the roving tab stop of the list.
+	 * `active` is the previewed row (it keeps the fill from lg up, where the preview panel exists), `tabbable` is the roving tab stop of the list.
 	 */
 	let {
 		project,
@@ -62,7 +62,7 @@
 		};
 	}}
 	class={cn(
-		'group/row relative grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 rounded-md px-3 py-3 transition-colors duration-(--dur-1) ease-(--ease-out) hover:bg-muted has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 data-active:bg-muted lg:h-full lg:grid-cols-[2.5rem_minmax(0,1fr)_auto_1.25rem] lg:py-0',
+		'group/row relative grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 rounded-md px-3 py-3 transition-colors duration-(--dur-1) ease-(--ease-out) hover:bg-muted has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 lg:h-full lg:grid-cols-[2.5rem_minmax(0,1fr)_auto_1.25rem] lg:py-0 lg:data-active:bg-muted',
 		className
 	)}
 >

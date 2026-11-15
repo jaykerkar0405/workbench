@@ -4,6 +4,7 @@
 	import { fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { prefersReducedMotion } from 'svelte/motion';
+	import { MediaQuery } from 'svelte/reactivity';
 	import Seo from '$lib/components/seo.svelte';
 	import { reveal } from '$lib/components/reveal';
 	import {
@@ -63,12 +64,15 @@
 	// Every duration collapses to zero for reduced motion.
 	const ms = (n: number) => (prefersReducedMotion.current ? 0 : n);
 
+	// The preview panel (and with it the roving tab stop) exists from lg. Below it every row link is a tab stop.
+	const wide = new MediaQuery('min-width: 1024px', false);
+
 	// Keyboard: one tab stop in the list (the previewed row). Arrow keys, Home and End move focus between rows, which
 	// updates the preview; the next Tab leaves the list and lands in the preview panel, acting on the project arrowed to.
 	let list = $state<HTMLElement>();
 	const onkeydown = async (event: KeyboardEvent) => {
 		const keys = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
-		if (!keys.includes(event.key) || !list) return;
+		if (!wide.current || !keys.includes(event.key) || !list) return;
 		const links = [...list.querySelectorAll<HTMLElement>('[data-main-link]')];
 		const current = links.findIndex((link) => link === document.activeElement);
 		if (current === -1) return;
@@ -162,7 +166,7 @@
 								hackathon={hackathonFor(project)}
 								featured={featuredIds.has(project.id)}
 								active={project.id === activeId}
-								tabbable={project.id === activeId}
+								tabbable={!wide.current || project.id === activeId}
 								onpreview={() => (previewed = project.id)}
 							/>
 						</li>
