@@ -5,20 +5,26 @@
 	import TimelineEntry from '$lib/components/timeline-entry.svelte';
 	import { orderedHackathons, hackathonsByYear, hackathonIndex, projectFor } from '$lib/components/hackathon-order';
 
-	const hours = orderedHackathons.reduce((total, h) => total + h.duration, 0);
-	const wins = orderedHackathons.filter((h) => h.prize).length;
-	const cities = Object.keys(
-		Object.fromEntries(orderedHackathons.filter((h) => h.location !== 'Online').map((h) => [h.location, true]))
-	).length;
+	// A win is an event with a prize that has a rank or a label (the same test the badge uses).
+	const isWin = (h: (typeof orderedHackathons)[number]) => !!(h.prize && (h.prize.rank || h.prize.label));
+	const wins = orderedHackathons.filter(isWin).length;
+	// Distinct places, as written in `location`, not counting Online.
+	const cities = new Set(orderedHackathons.filter((h) => h.location !== 'Online').map((h) => h.location)).size;
 
 	const stats = [
 		{ value: orderedHackathons.length, label: 'Events' },
-		{ value: wins, label: 'Podiums & track wins' },
-		{ value: hours, label: 'Hours hacked' },
-		{ value: cities, label: 'Cities' }
+		{ value: wins, label: 'Wins' },
+		{ value: cities, label: 'Cities' },
+		{ value: hackathonsByYear.length, label: 'Years' }
 	];
 
 	const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+	// "6 events · 3 wins" for a year; the wins part is left out when there are none.
+	const yearLine = (items: typeof orderedHackathons) => {
+		const n = items.filter(isWin).length;
+		return [plural(items.length, 'event', 'events'), ...(n > 0 ? [plural(n, 'win', 'wins')] : [])].join(' · ');
+	};
 </script>
 
 <Seo
@@ -26,33 +32,32 @@
 	description="Jay Kerkar's hackathon journey — 12+ hackathons including ETHOnline winner, ETHMumbai AI track winner, and multiple runner-up finishes across national and global competitions."
 />
 
-<div class="mx-auto max-w-7xl px-5 pt-12 pb-20 md:px-10 lg:pt-16 lg:pb-28">
+<div class="mx-auto max-w-7xl px-5 pt-(--gap-header-title) pb-(--gap-section) md:px-10">
 	<header>
 		<h1 class="text-page-title">Hackathons</h1>
 
-		<div class="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 border-y py-8 md:grid-cols-4 lg:mt-14">
+		<div class="mt-(--gap-title-content) grid grid-cols-2 gap-x-6 gap-y-8 border-y py-8 md:grid-cols-4">
 			{#each stats as stat (stat.label)}
 				<Stat value={stat.value} label={stat.label} />
 			{/each}
 		</div>
 	</header>
 
-	<div class="mt-16 flex flex-col gap-16 lg:mt-24 lg:gap-28">
+	<div class="mt-(--gap-section) flex flex-col gap-(--gap-section)">
 		{#each hackathonsByYear as group (group.year)}
 			<section aria-labelledby={`year-${group.year}`} class="lg:grid lg:grid-cols-12 lg:gap-x-6">
+				<!-- Below lg a sticky mono bar under the 56px header; from lg a solid numeral in the first two columns. -->
 				<div
-					class="sticky top-14 z-20 bg-background py-3 lg:top-24 lg:col-span-2 lg:row-start-1 lg:self-start lg:bg-transparent lg:py-0"
+					class="sticky top-14 z-20 -mx-5 bg-background px-5 py-3 md:-mx-10 md:px-10 lg:top-24 lg:col-span-2 lg:row-start-1 lg:mx-0 lg:self-start lg:bg-transparent lg:p-0"
 				>
 					<h2 id={`year-${group.year}`}>
-						<span class="label text-foreground tabular-nums lg:hidden"
-							>{group.year} · {plural(group.items.length, 'event', 'events')}</span
-						>
+						<span class="label text-foreground tabular-nums lg:hidden">{group.year} · {yearLine(group.items)}</span>
 						<span
-							class="hidden text-[clamp(3rem,6vw,5rem)] leading-none font-bold tracking-tighter text-transparent tabular-nums [-webkit-text-stroke:1px_var(--foreground)] lg:block"
+							class="hidden text-[2.5rem] leading-none font-bold tracking-tighter text-foreground tabular-nums lg:block"
 							>{group.year}</span
 						>
 					</h2>
-					<p class="mt-3 hidden label tabular-nums lg:block">{plural(group.items.length, 'event', 'events')}</p>
+					<p class="mt-3 hidden label tabular-nums lg:block">{yearLine(group.items)}</p>
 				</div>
 
 				<div class="relative mt-6 pl-7 lg:contents">
@@ -66,7 +71,7 @@
 
 					<ol class="[--node-x:24.5px] lg:col-span-9 lg:col-start-4 lg:row-start-1 lg:[--node-x:12px]">
 						{#each group.items as hackathon (hackathon.id)}
-							<li class="border-t py-10 first:border-t-0 first:pt-0 last:pb-0" {@attach reveal()}>
+							<li class="border-t py-6 first:border-t-0 first:pt-2 last:pb-2" {@attach reveal()}>
 								<TimelineEntry {hackathon} index={hackathonIndex(hackathon.id)} project={projectFor(hackathon)} />
 							</li>
 						{/each}
