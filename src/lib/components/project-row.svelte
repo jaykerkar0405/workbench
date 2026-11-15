@@ -18,7 +18,7 @@
 	/*
 	 * One row of the projects list. The title link is the row's only link and covers the whole row (stretched link), so
 	 * there is one tab stop per row. From lg the row is one line: index, icon and title (and FEATURED), the event, an
-	 * arrow; the description, tags and links live in the preview panel. Below lg it is two lines with the description.
+	 * arrow; the description, tags and links live in the preview panel. Below lg it is two lines with the description (and, from md, the event on line one).
 	 * `active` is the previewed row (it keeps the fill from lg up, where the preview panel exists), `tabbable` is the roving tab stop of the list.
 	 */
 	let {
@@ -62,7 +62,7 @@
 		};
 	}}
 	class={cn(
-		'group/row relative grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 rounded-md px-3 py-3 transition-colors duration-(--dur-1) ease-(--ease-out) hover:bg-muted has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 lg:h-full lg:grid-cols-[2.5rem_minmax(0,1fr)_auto_1.25rem] lg:py-0 lg:data-active:bg-muted',
+		'group/row relative grid grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1 rounded-md px-3 py-4 transition-colors duration-(--dur-1) ease-(--ease-out) hover:bg-muted has-[[data-main-link]:focus-visible]:ring-3 has-[[data-main-link]:focus-visible]:ring-ring/50 md:grid-cols-[auto_minmax(0,1fr)_auto_1.25rem] lg:h-full lg:grid-cols-[2.5rem_minmax(0,1fr)_auto_1.25rem] lg:py-0 lg:data-active:bg-muted',
 		className
 	)}
 >
@@ -101,15 +101,15 @@
 	</div>
 
 	{#if hackathon}
-		<span class="text-right label whitespace-nowrap max-lg:hidden">{eventLabel(hackathon)}</span>
+		<span class="text-right label whitespace-nowrap max-md:hidden">{eventLabel(hackathon)}</span>
 	{:else}
-		<span class="max-lg:hidden"></span>
+		<span class="max-md:hidden"></span>
 	{/if}
 
 	<ArrowRightIcon
 		aria-hidden="true"
-		class="pointer-events-none size-5 shrink-0 text-muted-foreground transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-focus-within/row:translate-x-1 motion-safe:group-hover/row:translate-x-1 max-lg:col-start-3 max-lg:row-start-1"
+		class="pointer-events-none size-5 shrink-0 text-muted-foreground transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-focus-within/row:translate-x-1 motion-safe:group-hover/row:translate-x-1 max-md:col-start-3 max-md:row-start-1"
 	/>
 
-	<p class="col-span-2 col-start-2 text-sm text-muted-foreground lg:hidden">{project.shortDescription}</p>
+	<p class="col-span-2 col-start-2 text-sm text-muted-foreground md:col-span-3 lg:hidden">{project.shortDescription}</p>
 </div>

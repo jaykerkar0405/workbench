@@ -18,6 +18,7 @@
 	import { segmentedContainer, segmentedIndicator, segmentedItem } from '$lib/components/segmented';
 	import ProjectRow from '$lib/components/project-row.svelte';
 	import ProjectPreview from '$lib/components/project-preview.svelte';
+	import FeaturedStrip from '$lib/components/featured-strip.svelte';
 
 	const withHackathon = ordered.filter((p) => p.hackathonId);
 	const withLive = ordered.filter((p) => p.deployedLink);
@@ -25,11 +26,11 @@
 
 	type FilterKey = 'all' | 'featured' | 'hackathon' | 'live';
 
-	const filters: { key: FilterKey; label: string; count: number }[] = [
-		{ key: 'all', label: 'All', count: ordered.length },
-		{ key: 'featured', label: 'Featured', count: featuredProjects.length },
-		{ key: 'hackathon', label: 'Hackathon builds', count: withHackathon.length },
-		{ key: 'live', label: 'Live', count: withLive.length }
+	const filters: { key: FilterKey; label: string; short: string; count: number }[] = [
+		{ key: 'all', label: 'All', short: 'All', count: ordered.length },
+		{ key: 'featured', label: 'Featured', short: 'Featured', count: featuredProjects.length },
+		{ key: 'hackathon', label: 'Hackathon builds', short: 'Hackathon', count: withHackathon.length },
+		{ key: 'live', label: 'Live', short: 'Live', count: withLive.length }
 	];
 
 	let filter = $state<FilterKey>('all');
@@ -57,9 +58,13 @@
 
 	const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
-	const summary = `${plural(ordered.length, 'project', 'projects')} · ${withHackathon.length} built at ${
-		withHackathon.length === 1 ? 'a hackathon' : 'hackathons'
-	} · ${featuredProjects.length} featured`;
+	// The count line, in parts: the first and last stay in one piece, so the line breaks at a "·" (and balances) and
+	// never leaves a word like "FEATURED" alone on the second line.
+	const summaryParts = [
+		plural(ordered.length, 'project', 'projects'),
+		`${withHackathon.length} built at ${withHackathon.length === 1 ? 'a hackathon' : 'hackathons'}`,
+		`${featuredProjects.length} featured`
+	];
 
 	// Every duration collapses to zero for reduced motion.
 	const ms = (n: number) => (prefersReducedMotion.current ? 0 : n);
@@ -100,16 +105,19 @@
 	<header class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
 		<div class="flex flex-col gap-4">
 			<h1 class="text-page-title">Projects</h1>
-			<p class="label tabular-nums">{summary}</p>
+			<p class="label [text-wrap:balance] tabular-nums">
+				<span class="whitespace-nowrap">{summaryParts[0]}</span> · {summaryParts[1]} ·
+				<span class="whitespace-nowrap">{summaryParts[2]}</span>
+			</p>
 		</div>
 
-		<div class="-m-1 max-w-full [scrollbar-width:none] overflow-x-auto p-1 lg:overflow-visible">
+		<div class="w-full lg:w-auto">
 			<ToggleGroup.Root
 				type="single"
 				aria-label="Filter projects"
 				spacing={1}
 				{@attach segmentedIndicator}
-				class={cn(segmentedContainer, 'relative inline-flex h-9 w-max items-center')}
+				class={cn(segmentedContainer, 'relative flex h-9 w-full items-center lg:inline-flex lg:w-max')}
 				bind:value={
 					() => filter,
 					(next) => {
@@ -121,13 +129,16 @@
 				{#each filters as item (item.key)}
 					<ToggleGroup.Item
 						value={item.key}
+						aria-label={`${item.label}, ${item.count}`}
 						class={cn(
 							segmentedItem,
-							'h-6.5 min-w-0 gap-2 px-4 hover:bg-transparent data-[state=on]:hover:bg-foreground'
+							'h-6.5 min-w-fit flex-1 gap-1.5 px-2 hover:bg-transparent data-[state=on]:hover:bg-foreground min-[480px]:gap-2 min-[480px]:px-3 lg:flex-none lg:px-4'
 						)}
 					>
-						{item.label}
-						<span class="font-mono text-xs tabular-nums opacity-70">{item.count}</span>
+						<!-- Short labels under 480px; the accessible name above is always the long one with its count. -->
+						<span aria-hidden="true" class="min-[480px]:hidden">{item.short}</span>
+						<span aria-hidden="true" class="max-[479px]:hidden">{item.label}</span>
+						<span aria-hidden="true" class="font-mono text-xs tabular-nums opacity-70">{item.count}</span>
 					</ToggleGroup.Item>
 				{/each}
 			</ToggleGroup.Root>
@@ -137,7 +148,16 @@
 	</header>
 
 	{#if rows.length > 0}
-		<div class="mt-(--gap-title-content) grid gap-x-6 lg:grid-cols-12 lg:items-start">
+		{#if filter === 'all'}
+			<FeaturedStrip class="mt-(--gap-title-content) lg:hidden" projects={featuredProjects} />
+		{/if}
+
+		<div
+			class={cn(
+				'grid gap-x-6 lg:mt-(--gap-title-content) lg:grid-cols-12 lg:items-start',
+				filter === 'all' ? 'mt-8' : 'mt-(--gap-title-content)'
+			)}
+		>
 			<section class="lg:col-span-7" aria-label="Project index">
 				<p id="list-help" class="sr-only">
 					Use the up and down arrow keys to move between projects and change the preview. Tab moves on to the preview.
