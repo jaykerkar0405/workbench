@@ -320,9 +320,14 @@
 	line-height: 1.7;
 }
 
-/* Text keeps a readable measure even when the column is wider. */
+/* Text keeps a readable measure (about 68 characters at 16px) even when the column is wider. A rem value, because
+   ch depends on the font's 0 glyph and in Akt 70ch is as wide as the whole column. Code, tables and media are not capped. */
+.prose-log {
+	--prose-measure: 30rem;
+}
+
 .prose-log > :is(p, ul, ol, blockquote, h1, h2, h3, h4, hr) {
-	max-width: 70ch;
+	max-width: var(--prose-measure);
 }
 
 .prose-log :is(h1, h2, h3, h4) {
