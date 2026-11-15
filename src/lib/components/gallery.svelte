@@ -26,7 +26,7 @@
 </script>
 
 <script lang="ts">
-	import type { ComponentProps } from 'svelte';
+	import { tick, type ComponentProps } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { cn } from '$lib/utils';
@@ -77,6 +77,7 @@
 
 	let lightboxOpen = $state(false);
 	let carouselApi = $state<CarouselApi>();
+	let rowViewport = $state<HTMLElement | null>(null);
 
 	const fadeMs = () => (prefersReducedMotion.current ? 0 : 260);
 
@@ -90,6 +91,26 @@
 		if (slide && (slide.left < view.left - 1 || slide.right > view.right + 1)) {
 			carouselApi.scrollTo(selected, prefersReducedMotion.current);
 		}
+	});
+
+	// Below md the strip is a scroll row: keep the selected thumbnail inside it. The row's own scrollLeft is set, not
+	// scrollIntoView, so the page never scrolls vertically; instantly under reduced motion.
+	$effect(() => {
+		void selected;
+		const row = rowViewport;
+		if (!row) return;
+		tick().then(() => {
+			const item = row.querySelector<HTMLElement>('[aria-current="true"]');
+			if (!item) return;
+			const box = row.getBoundingClientRect();
+			const rect = item.getBoundingClientRect();
+			let left = row.scrollLeft;
+			if (rect.left < box.left) left += rect.left - box.left - 4;
+			else if (rect.right > box.right) left += rect.right - box.right + 4;
+			if (left !== row.scrollLeft) {
+				row.scrollTo({ left, behavior: prefersReducedMotion.current ? 'instant' : 'smooth' });
+			}
+		});
 	});
 
 	// The selection is a 2px brand outline, drawn inside the thumbnail (the carousel clips whatever sits outside it).
@@ -242,7 +263,7 @@
 				</Carousel.Root>
 			</div>
 
-			<ScrollArea.Root orientation="horizontal" class="md:hidden">
+			<ScrollArea.Root orientation="horizontal" class="md:hidden" bind:viewportRef={rowViewport}>
 				<div class="flex w-max gap-2 p-0.5 pb-3">
 					{#each indices as i (i)}
 						<div class="w-28 shrink-0">
