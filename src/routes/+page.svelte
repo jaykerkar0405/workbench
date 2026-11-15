@@ -65,10 +65,36 @@
 
 	const container = 'mx-auto max-w-7xl px-5 md:px-10';
 
+	// The name, one box per letter so the load sequence can lift each letter on its own. The browser does not kern across
+	// boxes, so each letter carries the kerning of the pair it starts, in em: advance("ab") - advance("a") - advance("b") in
+	// Akt 700 (measured with a canvas at 1000px; letter-spacing is applied by each box and is not part of this number).
+	const kerning: Record<string, number> = { ay: -0.04, Ke: -0.06, ka: -0.04 };
+	const kernAfter = (word: string, i: number) => {
+		const k = kerning[word.slice(i, i + 2)];
+		return k ? `${k}em` : undefined;
+	};
+
 	// The scroll scene (V17) runs only where CSS scroll-driven animations exist and motion is allowed; layout.css gates its
 	// rules on the same two conditions (plus html.js and the track's attribute). Otherwise the page is the static hero.
 	const sceneSupported =
 		browser && CSS.supports('animation-timeline: scroll()') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	// The load sequence (V18) is switched on before first paint by app.html (html.intro) and runs in CSS, so it never waits for
+	// this script. Here it is only cleaned up: the class comes off when the sequence is over (under a second), or at once, which
+	// cancels the animations and leaves the final state, if the visitor scrolls, touches or types during it.
+	$effect(() => {
+		const root = document.documentElement;
+		if (!root.classList.contains('intro')) return;
+		const events = ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'] as const;
+		const end = () => {
+			root.classList.remove('intro');
+			clearTimeout(timer);
+			for (const e of events) window.removeEventListener(e, end);
+		};
+		const timer = setTimeout(end, 1100);
+		for (const e of events) window.addEventListener(e, end, { passive: true });
+		return end;
+	});
 
 	let track = $state<HTMLElement | null>(null);
 	let winsTable = $state<{ play: () => void } | null>(null);
@@ -148,6 +174,16 @@
 	title="Jay Kerkar | Full-Stack Developer – Web, Mobile & Web3 Solutions"
 	description="Full-stack developer specializing in scalable web applications, mobile development, and Web3 solutions. Explore my projects, hackathon wins, and technical expertise in modern frameworks."
 />
+
+{#snippet nameWord(word: string, offset: number)}
+	<span data-scene-word class="block sm:inline"
+		>{#each [...word] as letter, i (i)}<span
+				class="intro-clip"
+				style:--i={offset + i}
+				style:margin-right={kernAfter(word, i)}><span class="intro-letter">{letter}</span></span
+			>{/each}</span
+	>
+{/snippet}
 
 <!-- The hero at rest (V14): type and space only. A top band (status line, Mumbai time), a middle band (the sentence, the
 	actions, three derived facts) and the name on one line, sized so its ink spans columns 1 to 12. The hero is one screen
@@ -265,15 +301,16 @@
 				baseline is 0.05em above the box bottom, which -mb-[0.05em] cancels: the baseline is exactly the bottom padding
 				(64px) above the bottom of the hero. Below 640px the name is two lines and "Kerkar" is what spans the width. -->
 					<h1
+						aria-label="Jay Kerkar"
 						class="-mb-[0.05em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237] max-sm:[--bl:0.0625] max-sm:[--ratio:2.6969]"
 					>
-						<span data-scene-word class="block sm:inline">Jay</span>&#32;<span data-scene-word class="block sm:inline"
-							>Kerkar</span
-						>
+						{@render nameWord('Jay', 0)}&#32;{@render nameWord('Kerkar', 3)}
 					</h1>
 				</div>
 
-				<p data-scene-cue aria-hidden="true" class="absolute bottom-[calc(var(--clear)+1.5rem)] label">Scroll ↓</p>
+				<p data-scene-cue aria-hidden="true" class="absolute bottom-[calc(var(--clear)+1.5rem)] label">
+					<span data-intro-cue>Scroll ↓</span>
+				</p>
 			</div>
 		</section>
 
@@ -312,7 +349,9 @@
 
 <!-- The headings below drop SectionHeading's own rule and top padding: the rows' hairlines already close the section above. -->
 <section aria-label="Toolkit" class={cn(container, 'py-(--gap-section)')}>
-	<SectionHeading index="02" title="Toolkit" class="[&>[data-slot=separator]]:hidden [&>div]:pt-0" />
+	<div {@attach reveal()}>
+		<SectionHeading index="02" title="Toolkit" class="[&>[data-slot=separator]]:hidden [&>div]:pt-0" />
+	</div>
 
 	<dl class="mt-(--gap-heading) border-t" {@attach reveal({ stagger: true })}>
 		{#each toolkit as group (group.label)}
@@ -331,7 +370,9 @@
 </section>
 
 <section id="about" aria-label="About" class={cn(container, 'pb-(--gap-section)')}>
-	<SectionHeading index="03" title="About" class="[&>[data-slot=separator]]:hidden [&>div]:pt-0" />
+	<div {@attach reveal()}>
+		<SectionHeading index="03" title="About" class="[&>[data-slot=separator]]:hidden [&>div]:pt-0" />
+	</div>
 
 	<div class="mt-(--gap-heading) grid gap-12 lg:grid-cols-12 lg:gap-x-6">
 		<div class="lg:sticky lg:top-24 lg:col-span-4 lg:self-start">

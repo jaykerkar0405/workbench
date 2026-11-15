@@ -8,6 +8,7 @@
 	import TitleBlock from '$lib/components/title-block.svelte';
 	import SpecSheet from '$lib/components/spec-sheet.svelte';
 	import SectionHeading from '$lib/components/section-heading.svelte';
+	import { reveal } from '$lib/components/reveal';
 	import PrizeBadge from '$lib/components/prize-badge.svelte';
 	import Lightbox from '$lib/components/lightbox.svelte';
 	import PhotoGrid from '$lib/components/photo-grid.svelte';
@@ -98,9 +99,11 @@
 
 	{#if showPhotos}
 		<section class="mt-(--gap-section)" aria-label="Photos">
-			<SectionHeading index="01" title="Photos">
-				<span class="label tabular-nums">{images.length} {images.length === 1 ? 'photo' : 'photos'}</span>
-			</SectionHeading>
+			<div {@attach reveal()}>
+				<SectionHeading index="01" title="Photos">
+					<span class="label tabular-nums">{images.length} {images.length === 1 ? 'photo' : 'photos'}</span>
+				</SectionHeading>
+			</div>
 
 			<PhotoGrid
 				class="mt-(--gap-heading)"
@@ -117,7 +120,9 @@
 
 	{#if project}
 		<section class="mt-(--gap-section)" aria-label="Built here">
-			<SectionHeading index={builtIndex} title="Built here" />
+			<div {@attach reveal()}>
+				<SectionHeading index={builtIndex} title="Built here" />
+			</div>
 
 			<div class="mt-(--gap-heading)">
 				{#key project.id}

@@ -43,7 +43,7 @@
 									class={cn(
 										badgeVariants({ variant: 'outline' }),
 										tagClass,
-										'cursor-help outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50'
+										'cursor-help outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
 									)}
 								>
 									+{hidden.length}

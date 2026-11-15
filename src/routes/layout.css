@@ -743,6 +743,51 @@
 	}
 }
 
+/* Home load sequence (V18), on a full load of "/" only: app.html adds html.intro before first paint (see there for the
+   conditions) and the animations below are plain CSS from the first frame, so nothing waits for JavaScript. The letters of the
+   name rise from behind a clip, 25ms apart (letter 0 at 0ms, the last of nine at 200ms, 300ms each: 500ms in all); the bands
+   fade in together from 250ms to 650ms; "SCROLL" at 700ms. Only opacity and translate, and only on elements the scroll scene
+   does not animate: the letters sit inside the scene's word spans and the fades are on the bands' children and on a span inside
+   the cue. Every animation ends at the element's normal state, so removing the class (the page does, at the end or on the first
+   scroll or key press) leaves nothing applied. The clip is only applied while the class is present, and reaches 0.2em below the
+   box (the descender of "y" is under the baseline) and 0.1em above and beside it. */
+.intro-clip,
+.intro-letter {
+	display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html.intro {
+		.intro-clip {
+			clip-path: inset(-0.1em -0.15em -0.2em -0.15em);
+		}
+
+		.intro-letter {
+			animation: intro-rise 300ms var(--ease-out) calc(var(--i) * 25ms) backwards;
+		}
+
+		[data-scene-band] > * {
+			animation: intro-fade var(--dur-3) linear 250ms backwards;
+		}
+
+		[data-intro-cue] {
+			animation: intro-fade var(--dur-2) linear 700ms backwards;
+		}
+	}
+}
+
+@keyframes intro-rise {
+	from {
+		translate: 0 1.1em;
+	}
+}
+
+@keyframes intro-fade {
+	from {
+		opacity: 0;
+	}
+}
+
 /* View transitions (see onNavigate in src/routes/+layout.svelte).
    The root snapshot (everything not separately named: main and the footer) crossfades in
    --dur-page (160 ms). The header and mobile dock are named so they stay pinned: only the new snapshot
@@ -850,6 +895,30 @@ html:not(.js) .animate-pulse {
 
 	[data-slot='scroll-area-scrollbar'] [data-slot='scroll-area-thumb'] {
 		border-radius: var(--radius-sm);
+	}
+}
+
+/* Button press (§6.4): scale 0.98 over 100ms. The shadcn button presses by 1px (active:translate-y-px) with a 150ms
+   transition-all; the ui/ file is not edited, so the translation is cancelled here and the press scales instead. Menu
+   triggers (aria-haspopup) are not pressed by the ui/ rule either. Under reduced motion nothing moves. */
+@media (prefers-reduced-motion: no-preference) {
+	@layer utilities {
+		[data-slot='button'] {
+			transition-duration: 100ms;
+		}
+
+		[data-slot='button']:active:not([aria-haspopup]) {
+			--tw-translate-y: 0px !important;
+			scale: 0.98;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	@layer utilities {
+		[data-slot='button']:active:not([aria-haspopup]) {
+			--tw-translate-y: 0px !important;
+		}
 	}
 }
 
