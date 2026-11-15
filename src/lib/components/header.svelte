@@ -79,7 +79,7 @@
 
 <!-- The bar: the header element itself, edge to edge, sticky so it stays in normal flow (no padding on any page). It holds
 	the page colour at 85% with a 12px blur, and a hairline whose opacity follows the scroll position. -->
-<header data-site-header class="sticky top-0 z-40 h-(--header-h) w-full [view-transition-name:site-header]">
+<header data-site-header class="sticky top-0 z-40 h-(--header-h) w-full">
 	<!-- The bar's fill and blur live on their own layer so the home scene can fade them in without touching the content. -->
 	<div
 		data-header-bar
@@ -93,43 +93,47 @@
 		style:opacity={hairline}
 	></div>
 
-	<div
-		class="mx-auto flex h-full max-w-7xl items-center justify-between px-5 md:px-10 lg:grid lg:grid-cols-[1fr_auto_1fr]"
-	>
-		<a
-			href="/"
-			aria-label="Jay Kerkar, home"
-			onclick={goTop}
-			class="relative flex h-9 items-center gap-2.5 justify-self-start rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+	<!-- The view-transition name is on this wrapper, not on the header: a named ancestor is a backdrop root, which would
+		stop the bar's blur from seeing the page behind it (readable text showed through the bar). -->
+	<div class="h-full [view-transition-name:site-header]">
+		<div
+			class="mx-auto flex h-full max-w-7xl items-center justify-between px-5 md:px-10 lg:grid lg:grid-cols-[1fr_auto_1fr]"
 		>
-			<EnhancedImage src={logo} alt="" class="size-8 rounded-sm" skeletonClass="rounded-sm" />
-			<!-- Two spans with a real space, so the home scene can land each word of the hero name on its own word. The
-				tracking matches the hero name (-0.04em) so the swap at the end of the scene is invisible. -->
-			<span data-wordmark class="text-lg font-bold tracking-[-0.04em]"
-				><span data-wordmark-word>Jay</span>&#32;<span data-wordmark-word>Kerkar</span></span
+			<a
+				href="/"
+				aria-label="Jay Kerkar, home"
+				onclick={goTop}
+				class="relative flex h-9 items-center gap-2.5 justify-self-start rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
 			>
-		</a>
+				<EnhancedImage src={logo} alt="" class="size-8 rounded-sm" skeletonClass="rounded-sm" />
+				<!-- Two spans with a real space, so the home scene can land each word of the hero name on its own word. The
+				tracking matches the hero name (-0.04em) so the swap at the end of the scene is invisible. -->
+				<span data-wordmark class="text-lg font-bold tracking-[-0.04em]"
+					><span data-wordmark-word>Jay</span>&#32;<span data-wordmark-word>Kerkar</span></span
+				>
+			</a>
 
-		<nav
-			aria-label="Primary"
-			{@attach segmentedIndicator}
-			class={cn(segmentedContainer, 'relative hidden h-9 items-center lg:flex')}
-		>
-			{#each navigationItems as item (item.href)}
-				<a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class={segmentedItem}>
-					{item.label}
-				</a>
-			{/each}
-		</nav>
+			<nav
+				aria-label="Primary"
+				{@attach segmentedIndicator}
+				class={cn(segmentedContainer, 'relative hidden h-9 items-center lg:flex')}
+			>
+				{#each navigationItems as item (item.href)}
+					<a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class={segmentedItem}>
+						{item.label}
+					</a>
+				{/each}
+			</nav>
 
-		<div class="flex h-9 items-center gap-1 justify-self-end">
-			<SearchCommand />
+			<div class="flex h-9 items-center gap-1 justify-self-end">
+				<SearchCommand />
 
-			<Button onclick={toggleTheme} variant="ghost" size="icon" class="relative size-9 rounded-md">
-				<SunIcon class="size-[1.15rem] scale-100 rotate-0 dark:scale-0 dark:-rotate-90" />
-				<MoonIcon class="absolute size-[1.15rem] scale-0 rotate-90 dark:scale-100 dark:rotate-0" />
-				<span class="sr-only">Toggle theme</span>
-			</Button>
+				<Button onclick={toggleTheme} variant="ghost" size="icon" class="relative size-9 rounded-md">
+					<SunIcon class="size-[1.15rem] scale-100 rotate-0 dark:scale-0 dark:-rotate-90" />
+					<MoonIcon class="absolute size-[1.15rem] scale-0 rotate-90 dark:scale-100 dark:rotate-0" />
+					<span class="sr-only">Toggle theme</span>
+				</Button>
+			</div>
 		</div>
 	</div>
 </header>
