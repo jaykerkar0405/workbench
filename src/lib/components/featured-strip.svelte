@@ -11,7 +11,8 @@
 -->
 <script lang="ts">
 	import type { Attachment } from 'svelte/attachments';
-	import { cn } from '$lib/utils';
+	import { flushSync } from 'svelte';
+	import { cn, viewTransitionName } from '$lib/utils';
 	import type { Project } from '$lib/projects/types';
 	import { hackathonFor } from '$lib/components/project-order';
 	import { projectScreenshots } from '$lib/components/project-screenshots';
@@ -19,7 +20,30 @@
 	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import MediaMat from '$lib/components/media-mat.svelte';
 
-	let { projects, class: className }: { projects: Project[]; class?: string } = $props();
+	/*
+	 * The tiles carry no view-transition-name until one is activated: `transferred` is the project whose names have been
+	 * handed over from its list row to its tile for the navigation that is starting (the page sets it through `onactivate`
+	 * and the row for that project drops its names). flushSync makes the DOM say so before SvelteKit's onNavigate captures
+	 * the old page for the transition. The tile's title carries `project-title-<id>`; the mat carries no name (a 16:10
+	 * screenshot morphing into the 56px icon looked wrong, see the report), so the icon comes in with the root crossfade.
+	 */
+	let {
+		projects,
+		transferred = null,
+		onactivate,
+		class: className
+	}: {
+		projects: Project[];
+		transferred?: string | null;
+		onactivate?: (id: string) => void;
+		class?: string;
+	} = $props();
+
+	const activate = (event: MouseEvent, id: string) => {
+		if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		onactivate?.(id);
+		flushSync();
+	};
 
 	// Keyboard focus on a tile that is only partly in view: browsers do not always scroll such a tile into view, so the
 	// strip does it itself, to the snap position (the tile's left edge on the content edge). Instant under reduced motion.
@@ -55,6 +79,7 @@
 		<li class="w-[min(80%,20rem)] shrink-0 snap-start md:w-80">
 			<a
 				href={`/projects/${project.id}`}
+				onclick={(event) => activate(event, project.id)}
 				class="group/tile block rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
 			>
 				<MediaMat ratio={16 / 10} zoom>
@@ -71,7 +96,14 @@
 					{/if}
 				</MediaMat>
 
-				<p class="mt-3 text-lg leading-tight font-semibold">{project.title}</p>
+				<p
+					class="mt-3 w-fit text-lg leading-tight font-semibold"
+					style:view-transition-name={transferred === project.id
+						? viewTransitionName('project-title', project.id)
+						: undefined}
+				>
+					{project.title}
+				</p>
 				{#if hackathon}
 					<p class="mt-1 label">{eventLabel(hackathon)}</p>
 				{/if}

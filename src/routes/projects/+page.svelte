@@ -48,6 +48,9 @@
 	const shown = $derived(rows.length);
 
 	// The previewed project: the last row hovered or focused, or the first row of the current filter.
+	// The project whose transition names a tapped strip tile has taken over from its row, for one navigation.
+	let transferred = $state<string | null>(null);
+
 	let previewed = $state<string | null>(null);
 	const activeId = $derived(rows.some((p) => p.id === previewed) ? (previewed ?? undefined) : rows[0]?.id);
 
@@ -149,7 +152,12 @@
 
 	{#if rows.length > 0}
 		{#if filter === 'all'}
-			<FeaturedStrip class="mt-(--gap-title-content) lg:hidden" projects={featuredProjects} />
+			<FeaturedStrip
+				class="mt-(--gap-title-content) lg:hidden"
+				projects={featuredProjects}
+				{transferred}
+				onactivate={(id) => (transferred = id)}
+			/>
 		{/if}
 
 		<div
@@ -185,6 +193,7 @@
 								index={projectIndex(project.id)}
 								hackathon={hackathonFor(project)}
 								featured={featuredIds.has(project.id)}
+								shareTransition={project.id !== transferred}
 								active={project.id === activeId}
 								tabbable={!wide.current || project.id === activeId}
 								onpreview={() => (previewed = project.id)}
