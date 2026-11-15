@@ -25,9 +25,12 @@
 	const icon = $derived(getProjectIcon(project.id));
 	const hackathon = $derived(hackathonFor(project));
 
+	// Previous / next wrap around: the previous of the first is the last, the next of the last is the first.
+	// With fewer than two projects there is nothing to go to, so neither side is given.
 	const position = $derived(orderedProjects.findIndex((p) => p.id === project.id));
-	const previous = $derived(position > 0 ? orderedProjects[position - 1] : undefined);
-	const next = $derived(position >= 0 ? orderedProjects[position + 1] : undefined);
+	const count = orderedProjects.length;
+	const previous = $derived(position >= 0 && count > 1 ? orderedProjects[(position - 1 + count) % count] : undefined);
+	const next = $derived(position >= 0 && count > 1 ? orderedProjects[(position + 1) % count] : undefined);
 
 	const side = (p: (typeof orderedProjects)[number]) => ({
 		href: `/projects/${p.id}`,
@@ -152,7 +155,7 @@
 
 <Seo title="{project.title} | Projects | Jay Kerkar" description={project.shortDescription} />
 
-<div class="mx-auto max-w-7xl px-5 pt-10 pb-20 md:px-10 lg:pt-14 lg:pb-28">
+<div class="mx-auto max-w-7xl px-5 pt-(--gap-header-title) pb-[calc(var(--gap-section)-2rem)] md:px-10">
 	<TitleBlock
 		parent={{ label: 'Projects', href: '/projects' }}
 		title={project.title}
@@ -185,7 +188,7 @@
 	</TitleBlock>
 
 	<SpecSheet
-		class="mt-12 lg:mt-16"
+		class="mt-(--gap-title-content)"
 		columns={4}
 		items={[
 			{ label: 'Event', content: eventCell },
@@ -196,7 +199,7 @@
 	/>
 
 	{#if screenshotsLoading || screenshots.length > 0}
-		<section class="mt-12 lg:mt-16" aria-label="Screenshots">
+		<section class="mt-(--gap-title-content)" aria-label="Screenshots">
 			{#key project.id}
 				<Gallery images={screenshots} loading={screenshotsLoading} altPrefix="{project.title} screenshot" />
 			{/key}
@@ -204,7 +207,7 @@
 	{/if}
 
 	{#if ExtendedDescription}
-		<div class="mt-16 grid gap-10 lg:mt-24 lg:grid-cols-12 lg:gap-x-6">
+		<div class="mt-(--gap-section) grid gap-10 lg:grid-cols-12 lg:gap-x-6">
 			<aside
 				class={cn(
 					'flex flex-col gap-10 lg:sticky lg:top-24 lg:col-span-4 lg:col-start-9 lg:row-start-1 lg:self-start',
@@ -243,12 +246,12 @@
 				{/if}
 			</aside>
 
-			<div bind:this={prose} class="prose-log prose max-w-none min-w-0 lg:col-span-8 lg:col-start-1 lg:row-start-1">
+			<div bind:this={prose} class="prose-log prose max-w-none min-w-0 lg:col-span-7 lg:col-start-1 lg:row-start-1">
 				<ExtendedDescription />
 			</div>
 		</div>
 	{:else if project.videoLink}
-		<div class="mt-16 max-w-2xl lg:mt-24">
+		<div class="mt-(--gap-section) max-w-2xl">
 			<p class="mb-3 label">Demo</p>
 			{#key project.id}
 				<VideoFacade url={project.videoLink} title="{project.title} demo" />
@@ -258,7 +261,7 @@
 
 	<div bind:this={endMarker} aria-hidden="true"></div>
 
-	<PrevNext class="mt-20 lg:mt-28" prev={previous && side(previous)} next={next && side(next)} />
+	<PrevNext class="mt-(--gap-section)" prev={previous && side(previous)} next={next && side(next)} />
 </div>
 
 {#snippet eventCell()}

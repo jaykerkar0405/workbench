@@ -26,11 +26,7 @@
 	<div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 pt-6 sm:flex-nowrap">
 		<span class="shrink-0 label tabular-nums" aria-hidden="true">{index}</span>
 
-		<svelte:element
-			this={level === 2 ? 'h2' : 'h3'}
-			{id}
-			class="min-w-0 text-2xl font-semibold tracking-tight md:text-3xl"
-		>
+		<svelte:element this={level === 2 ? 'h2' : 'h3'} {id} class="min-w-0 text-section-title">
 			{title}
 		</svelte:element>
 

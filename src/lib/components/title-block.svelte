@@ -6,7 +6,7 @@
 
 	let {
 		icon,
-		meta,
+		badge,
 		title,
 		parent,
 		summary,
@@ -18,7 +18,7 @@
 	}: {
 		title: string;
 		class?: string;
-		meta?: Snippet;
+		badge?: Snippet;
 		summary?: string;
 		actions?: Snippet;
 		iconFit?: 'cover' | 'contain';
@@ -29,7 +29,8 @@
 	} = $props();
 </script>
 
-<header class={cn('flex flex-col gap-8', className)}>
+<!-- One left-aligned column: breadcrumb, icon and title (with the badge on the title's last baseline), summary, actions. -->
+<header class={cn('flex flex-col', className)}>
 	<Breadcrumb.Root>
 		<Breadcrumb.List class="gap-2 font-mono text-xs tracking-[0.06em] uppercase">
 			<Breadcrumb.Item>
@@ -42,44 +43,45 @@
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
 
-	<div class="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
-		<div class="flex min-w-0 flex-col gap-4">
-			<div class="flex items-center gap-4 md:gap-5">
-				{#if icon}
-					<div
-						class="size-14 shrink-0 overflow-hidden rounded-md border bg-muted"
-						style:view-transition-name={iconTransitionName}
-					>
-						<EnhancedImage
-							src={icon}
-							alt=""
-							containerClass="size-14"
-							skeletonClass="rounded-md"
-							class={cn('size-14', iconFit === 'contain' ? 'object-contain' : 'object-cover')}
-						/>
-					</div>
-				{/if}
-
-				<h1 class="min-w-0 text-page-title wrap-break-word" style:view-transition-name={titleTransitionName}>
-					{title}
-				</h1>
-			</div>
-
-			{#if meta}
-				<div class="flex flex-wrap items-center gap-x-4 gap-y-2">
-					{@render meta()}
+	<div class="mt-6 flex items-start gap-4 md:mt-8 md:gap-5">
+		{#if icon}
+			<!-- The wrapper has the title's font size and line height, so h-lh is exactly one title line: the icon is
+				centred on the title's first line, however many lines the title wraps to. -->
+			<div class="flex h-lh shrink-0 items-center text-page-title">
+				<div
+					class="size-14 shrink-0 overflow-hidden rounded-md border bg-muted"
+					style:view-transition-name={iconTransitionName}
+				>
+					<EnhancedImage
+						src={icon}
+						alt=""
+						containerClass="size-14"
+						skeletonClass="rounded-md"
+						class={cn('size-14', iconFit === 'contain' ? 'object-contain' : 'object-cover')}
+					/>
 				</div>
-			{/if}
-
-			{#if summary}
-				<p class="max-w-2xl text-xl text-muted-foreground">{summary}</p>
-			{/if}
-		</div>
-
-		{#if actions}
-			<div class="flex shrink-0 flex-wrap items-center gap-3">
-				{@render actions()}
 			</div>
 		{/if}
+
+		<!-- The badge follows the title on the baseline of its last line. It is not inside the <h1>, so the heading's name
+			and its view transition stay the title alone. When it does not fit it wraps under the title's left edge. -->
+		<div class="flex min-w-0 flex-1 flex-wrap items-baseline-last gap-x-4 gap-y-3">
+			<h1 class="min-w-0 text-page-title wrap-break-word" style:view-transition-name={titleTransitionName}>
+				{title}
+			</h1>
+			{#if badge}
+				{@render badge()}
+			{/if}
+		</div>
 	</div>
+
+	{#if summary}
+		<p class="mt-4 max-w-2xl text-lead">{summary}</p>
+	{/if}
+
+	{#if actions}
+		<div class="mt-6 flex flex-wrap items-center gap-3">
+			{@render actions()}
+		</div>
+	{/if}
 </header>

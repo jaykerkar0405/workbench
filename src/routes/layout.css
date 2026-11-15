@@ -335,20 +335,20 @@
 
 .prose-log h1 {
 	font-size: 1.75rem;
-	margin-top: 3.5rem;
+	margin-top: 3rem;
 	margin-bottom: 1rem;
 }
 
 .prose-log h2 {
 	font-size: 1.5rem;
-	margin-top: 3rem;
-	margin-bottom: 0.875rem;
+	margin-top: 2rem;
+	margin-bottom: 0.75rem;
 }
 
 .prose-log h3 {
 	font-size: 1.25rem;
-	margin-top: 2rem;
-	margin-bottom: 0.625rem;
+	margin-top: 1.5rem;
+	margin-bottom: 0.5rem;
 }
 
 .prose-log > :first-child {

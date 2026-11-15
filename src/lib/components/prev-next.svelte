@@ -30,7 +30,7 @@
 		aria-label={`${word === 'Prev' ? 'Previous' : 'Next'}: ${side.title}`}
 		class={cn(
 			'group/pn flex min-w-0 flex-col gap-3 rounded-sm py-8 outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
-			dir === 'next' && 'items-end text-right'
+			dir === 'next' && 'sm:items-end sm:text-right'
 		)}
 	>
 		<span class="flex items-center gap-2 label tabular-nums" aria-hidden="true">
@@ -49,7 +49,7 @@
 			{/if}
 		</span>
 
-		<span class={cn('flex max-w-full min-w-0 items-center gap-3', dir === 'next' && 'flex-row-reverse')}>
+		<span class={cn('flex max-w-full min-w-0 items-center gap-3', dir === 'next' && 'sm:flex-row-reverse')}>
 			{#if side.icon}
 				<EnhancedImage
 					src={side.icon}
@@ -67,22 +67,26 @@
 	</a>
 {/snippet}
 
+<!-- Below sm the halves stack, both left-aligned, with a hairline between them, so it reads as a short list. From sm
+	up they sit side by side, the next one right-aligned, with the vertical rule between them (only when both exist). -->
 <nav aria-label="Previous and next" class={cn('w-full', className)}>
 	<Separator />
 
-	<div class="grid sm:grid-cols-[1fr_auto_1fr] sm:gap-x-8">
-		<div class="min-w-0">
-			{#if prev}
+	<div class={cn('grid', prev && next && 'sm:grid-cols-[1fr_auto_1fr] sm:gap-x-8')}>
+		{#if prev}
+			<div class="min-w-0">
 				{@render half(prev, 'prev')}
-			{/if}
-		</div>
+			</div>
+		{/if}
 
-		<Separator orientation="vertical" class="hidden sm:block" />
+		{#if prev && next}
+			<Separator orientation="vertical" class="hidden sm:block" />
+		{/if}
 
-		<div class="min-w-0">
-			{#if next}
+		{#if next}
+			<div class={cn('min-w-0', prev && 'max-sm:border-t')}>
 				{@render half(next, 'next')}
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</div>
 </nav>
