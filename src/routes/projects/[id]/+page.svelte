@@ -24,6 +24,8 @@
 
 	const icon = $derived(getProjectIcon(project.id));
 	const hackathon = $derived(hackathonFor(project));
+	// The same test as the badge itself: a prize with neither a rank nor a label is no result.
+	const hasPrize = $derived(!!(hackathon?.prize && (hackathon.prize.rank || hackathon.prize.label)));
 
 	// Previous / next wrap around: the previous of the first is the last, the next of the last is the first.
 	// With fewer than two projects there is nothing to go to, so neither side is given.
@@ -189,13 +191,14 @@
 
 	<SpecSheet
 		class="mt-(--gap-title-content)"
-		columns={4}
+		variant="facts"
 		items={[
-			{ label: 'Event', content: eventCell },
-			{ label: 'Result', content: resultCell },
-			{ label: 'Stack', content: stackCell },
-			{ label: 'Team', content: teamCell }
+			{ label: 'Event', content: hackathon ? eventCell : undefined },
+			{ label: 'Dates', value: hackathon ? formatDateRange(hackathon.timestamp, hackathon.duration) : undefined },
+			{ label: 'Result', content: hasPrize ? resultCell : undefined },
+			{ label: 'Team', content: project.teamMembers.length > 0 ? teamCell : undefined }
 		]}
+		wide={{ label: 'Stack', content: project.techStack.length > 0 ? stackCell : undefined }}
 	/>
 
 	{#if screenshotsLoading || screenshots.length > 0}
@@ -266,20 +269,13 @@
 
 {#snippet eventCell()}
 	{#if hackathon}
-		<div class="flex flex-col gap-1">
-			<a href={`/hackathons/${hackathon.id}`} class="w-fit rounded-sm link-underline">{hackathon.title}</a>
-			<span class="label tabular-nums">{formatDateRange(hackathon.timestamp, hackathon.duration)}</span>
-		</div>
-	{:else}
-		<span aria-label="No event">—</span>
+		<a href={`/hackathons/${hackathon.id}`} class="w-fit rounded-sm link-underline">{hackathon.title}</a>
 	{/if}
 {/snippet}
 
 {#snippet resultCell()}
-	{#if hackathon?.prize && (hackathon.prize.rank || hackathon.prize.label)}
+	{#if hackathon}
 		<PrizeBadge prize={hackathon.prize} />
-	{:else}
-		<span aria-label="No result">—</span>
 	{/if}
 {/snippet}
 
@@ -288,24 +284,5 @@
 {/snippet}
 
 {#snippet teamCell()}
-	{#if teamMembersData.length > 0}
-		<TeamStack members={teamMembersData} />
-	{:else if project.teamMembers.length > 0}
-		<ul class="flex flex-wrap gap-x-3 gap-y-1">
-			{#each project.teamMembers as member (member.githubUsername)}
-				<li>
-					<a
-						href={`https://github.com/${member.githubUsername}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="rounded-sm link-underline font-mono text-[0.85rem] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-					>
-						@{member.githubUsername}<span class="sr-only"> (opens in a new tab)</span>
-					</a>
-				</li>
-			{/each}
-		</ul>
-	{:else}
-		<span aria-label="No team">—</span>
-	{/if}
+	<TeamStack members={teamMembersData} usernames={project.teamMembers.map((member) => member.githubUsername)} />
 {/snippet}

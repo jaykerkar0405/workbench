@@ -11,7 +11,13 @@
 		profileUrl: string;
 	};
 
-	let { members, class: className }: { members: Member[]; class?: string } = $props();
+	// `members` is the GitHub data (avatar, name). `usernames` is the fallback for when that data is missing: the
+	// same people as plain links, so the component still says who is on the team.
+	let {
+		members,
+		usernames = [],
+		class: className
+	}: { members: Member[]; usernames?: string[]; class?: string } = $props();
 
 	const initials = (name: string) =>
 		name
@@ -21,7 +27,11 @@
 			.map((part) => part[0]?.toUpperCase())
 			.join('');
 
-	const firstNames = $derived(members.map((m) => m.name.split(/\s+/)[0]).join(', '));
+	const count = $derived(members.length > 0 ? members.length : usernames.length);
+	const countLabel = $derived(`${count} ${count === 1 ? 'person' : 'people'}`);
+
+	const linkClass =
+		'rounded-sm link-underline text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50';
 </script>
 
 {#if members.length > 0}
@@ -41,18 +51,24 @@
 									role={undefined}
 									aria-haspopup={undefined}
 									aria-expanded={undefined}
-									aria-label={`${member.name} on GitHub`}
+									aria-label={`${member.name} on GitHub (opens in a new tab)`}
 									class="block rounded-full outline-none focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/50"
 								>
-									<Avatar.Root class="size-8 ring-2 ring-background">
-										<Avatar.Image src={member.avatar} alt="" width={32} height={32} loading="lazy" />
-										<Avatar.Fallback class="text-[0.7rem] font-medium">{initials(member.name)}</Avatar.Fallback>
+									<!-- The 2px ring in the background colour is a cut-out between overlapping avatars, not a border. -->
+									<Avatar.Root class="size-7 ring-2 ring-background">
+										<Avatar.Image src={member.avatar} alt="" width={28} height={28} loading="lazy" />
+										<Avatar.Fallback class="text-[0.65rem] font-medium">{initials(member.name)}</Avatar.Fallback>
 									</Avatar.Root>
 								</a>
 							{/snippet}
 						</HoverCard.Trigger>
 
-						<HoverCard.Content side="bottom" align="start" class="flex w-64 items-center gap-3 p-3">
+						<!-- The default zoom and 8px slide are replaced by a fade and a 4px rise over 180ms; none of it under reduced motion. -->
+						<HoverCard.Content
+							side="bottom"
+							align="start"
+							class="flex w-64 items-center gap-3 p-3 duration-180 ease-(--ease-out) motion-reduce:animate-none! data-open:zoom-in-100! data-[side=bottom]:data-open:slide-in-from-bottom-1 data-closed:zoom-out-100! data-[side=bottom]:data-closed:slide-out-to-bottom-1"
+						>
 							<Avatar.Root class="size-12 shrink-0">
 								<Avatar.Image src={member.avatar} alt="" width={48} height={48} loading="lazy" />
 								<Avatar.Fallback>{initials(member.name)}</Avatar.Fallback>
@@ -60,15 +76,9 @@
 
 							<div class="flex min-w-0 flex-col gap-1">
 								<p class="truncate font-semibold">{member.name}</p>
-								<p class="truncate font-mono text-[0.78rem] text-muted-foreground">@{member.username}</p>
-								<p class="label tabular-nums">{member.followers} followers</p>
-								<a
-									href={member.profileUrl}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="w-fit rounded-sm link-underline text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-								>
-									Profile ↗
+								<p class="truncate text-sm text-muted-foreground">@{member.username}</p>
+								<a href={member.profileUrl} target="_blank" rel="noopener noreferrer" class={cn('w-fit', linkClass)}>
+									Profile ↗<span class="sr-only"> (opens in a new tab)</span>
 								</a>
 							</div>
 						</HoverCard.Content>
@@ -77,8 +87,25 @@
 			{/each}
 		</ul>
 
-		{#if members.length <= 3}
-			<span class="text-sm text-muted-foreground">{firstNames}</span>
-		{/if}
+		<span class="label tabular-nums">{countLabel}</span>
+	</div>
+{:else if usernames.length > 0}
+	<!-- Inline, so the count and the names fill each line instead of the whole list dropping under the count. -->
+	<div class={cn('text-sm leading-5', className)}>
+		<span class="mr-3 label tabular-nums">{countLabel}</span>
+		<ul class="inline">
+			{#each usernames as username (username)}
+				<li class="mr-3 inline">
+					<a
+						href={`https://github.com/${username}`}
+						target="_blank"
+						rel="noopener noreferrer"
+						class={cn('text-muted-foreground hover:text-foreground', linkClass)}
+					>
+						{username}<span class="sr-only"> (opens in a new tab)</span>
+					</a><wbr />
+				</li>
+			{/each}
+		</ul>
 	</div>
 {/if}
