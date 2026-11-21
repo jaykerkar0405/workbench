@@ -36,7 +36,7 @@
 	<header>
 		<h1 class="text-page-title">Hackathons</h1>
 
-		<div class="mt-(--gap-title-content) grid grid-cols-2 gap-x-6 gap-y-8 border-y py-8 md:grid-cols-4">
+		<div class="bleed mt-(--gap-title-content) grid grid-cols-2 gap-x-6 gap-y-8 border-y py-8 md:grid-cols-4">
 			{#each stats as stat (stat.label)}
 				<Stat value={stat.value} label={stat.label} />
 			{/each}

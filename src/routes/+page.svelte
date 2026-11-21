@@ -335,7 +335,7 @@
 
 <!-- Doors: two panels, one link each, with a hairline above, below and between. No heading; the numbered sections resume after. -->
 <section aria-label="Browse" class={container}>
-	<div class="grid border-y md:grid-cols-2" {@attach reveal()}>
+	<div class="-mx-5 grid border-y md:-mx-10 md:grid-cols-2" {@attach reveal()}>
 		<Door href="/projects" count={projects.length} title="Projects" latest={latestProjects} />
 		<Door
 			href="/hackathons"

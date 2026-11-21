@@ -54,6 +54,12 @@
 <ModeWatcher themeColors={{ dark: '#000000', light: '#ffffff' }} />
 
 <div class="relative max-lg:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+	<div
+		aria-hidden="true"
+		data-frame
+		class="pointer-events-none fixed inset-y-0 left-1/2 z-0 hidden w-full max-w-7xl -translate-x-1/2 border-x min-[1360px]:block"
+	></div>
+
 	<Header />
 
 	<main>

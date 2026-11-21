@@ -214,6 +214,16 @@
 	}
 }
 
+@utility bleed {
+	margin-inline: -1.25rem;
+	padding-inline: 1.25rem;
+
+	@media (min-width: 768px) {
+		margin-inline: -2.5rem;
+		padding-inline: 2.5rem;
+	}
+}
+
 @utility label {
 	font-family: var(--font-mono);
 	font-size: 0.75rem;

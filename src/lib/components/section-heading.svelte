@@ -24,7 +24,9 @@
 
 <div class={cn('w-full', className)}>
 	{#if rule}
-		<Separator />
+		<div class="-mx-5 md:-mx-10">
+			<Separator />
+		</div>
 	{/if}
 
 	<div class={cn('flex flex-wrap items-baseline gap-x-4 gap-y-2', rule ? 'pt-6' : 'pt-0', 'sm:flex-nowrap')}>

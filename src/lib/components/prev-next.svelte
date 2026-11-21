@@ -70,7 +70,9 @@
 <!-- Below sm the halves stack, both left-aligned, with a hairline between them, so it reads as a short list. From sm
 	up they sit side by side, the next one right-aligned, with the vertical rule between them (only when both exist). -->
 <nav aria-label="Previous and next" class={cn('w-full', className)}>
-	<Separator />
+	<div class="-mx-5 md:-mx-10">
+		<Separator />
+	</div>
 
 	<div class={cn('grid', prev && next && 'sm:grid-cols-[1fr_auto_1fr] sm:gap-x-8')}>
 		{#if prev}

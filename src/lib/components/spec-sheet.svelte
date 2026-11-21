@@ -50,7 +50,7 @@
 </script>
 
 {#if variant === 'facts'}
-	<dl class={cn('border-y', className)}>
+	<dl class={cn('bleed border-y', className)}>
 		{#if shown.length > 0}
 			<!-- Below lg: two columns with hairlines. On desktop, each rule sits in the middle of the 24px gutter. -->
 			<div class="grid grid-cols-2 lg:grid-cols-12 lg:gap-x-6">
@@ -103,7 +103,7 @@
 		{/each}
 	</dl>
 {:else}
-	<dl class={cn('grid grid-cols-1 border-y', columns !== 1 && 'sm:grid-cols-2', gridClass[columns], className)}>
+	<dl class={cn('bleed grid grid-cols-1 border-y', columns !== 1 && 'sm:grid-cols-2', gridClass[columns], className)}>
 		{#each shown as item, i (`${item.label}-${i}`)}
 			<div
 				class={cn(

@@ -20,7 +20,7 @@
 	{href}
 	aria-label={`${title}, ${count}. Latest: ${latest.join(', ')}`}
 	class={cn(
-		'group/door relative block p-6 transition-colors duration-(--dur-1) ease-(--ease-out) outline-none hover:bg-muted focus-visible:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid md:p-8',
+		'group/door relative block px-5 py-6 transition-colors duration-(--dur-1) ease-(--ease-out) outline-none hover:bg-muted focus-visible:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring focus-visible:outline-solid md:px-10 md:py-8',
 		className
 	)}
 >
@@ -34,7 +34,7 @@
 
 	<span
 		aria-hidden="true"
-		class="absolute top-6 right-6 text-xl text-muted-foreground transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/door:translate-x-1 motion-safe:group-focus-visible/door:translate-x-1 md:top-8 md:right-8"
+		class="absolute top-6 right-5 text-xl text-muted-foreground transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/door:translate-x-1 motion-safe:group-focus-visible/door:translate-x-1 md:top-8 md:right-10"
 		>→</span
 	>
 </a>
