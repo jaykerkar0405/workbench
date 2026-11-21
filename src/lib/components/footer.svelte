@@ -1,62 +1,146 @@
 <script lang="ts">
-	import { navigationItems } from '$lib/config/navigation';
+	import { page } from '$app/state';
+	import { cn } from '$lib/utils';
+	import { reveal } from '$lib/components/reveal';
+	import ResumeActions from '$lib/components/resume-actions.svelte';
 
 	const currentYear = new Date().getFullYear();
+
+	const linkedInUrl = 'https://in.linkedin.com/in/jaykerkar0405';
+
+	const socials = [
+		{ name: 'GitHub', href: 'https://github.com/jaykerkar0405' },
+		{ name: 'LinkedIn', href: linkedInUrl },
+		{ name: 'X', href: 'https://x.com/jaykerkar0405' },
+		{ name: 'LeetCode', href: 'https://leetcode.com/u/jaykerkar0405' }
+	];
+
+	// The sign-off is the homepage's; every other route gets the compact row only. The footer lives in the layout and
+	// persists across routes, so the variant follows the current path (also correct in each route's prerendered HTML).
+	const isHome = $derived(page.url.pathname === '/');
+
+	// Mumbai local time, whatever the visitor's own zone is. IST has no DST and a whole-minute offset,
+	// so a minute boundary in UTC is also one in IST.
+	const timeZone = 'Asia/Kolkata';
+	const clockFormat = new Intl.DateTimeFormat('en-GB', {
+		timeZone,
+		hour: '2-digit',
+		minute: '2-digit',
+		hourCycle: 'h23'
+	});
+	const stampFormat = new Intl.DateTimeFormat('sv-SE', {
+		timeZone,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+		hourCycle: 'h23'
+	});
+
+	// Stays null until mounted so the prerendered HTML and the hydrated DOM agree.
+	let time = $state<string | null>(null);
+	let stamp = $state('');
+
+	$effect(() => {
+		const update = () => {
+			const now = new Date();
+			time = clockFormat.format(now);
+			stamp = `${stampFormat.format(now).replace(' ', 'T')}+05:30`;
+		};
+
+		update();
+
+		let interval: ReturnType<typeof setInterval> | undefined;
+		const timeout = setTimeout(
+			() => {
+				update();
+				interval = setInterval(update, 60_000);
+			},
+			60_000 - (Date.now() % 60_000)
+		);
+
+		return () => {
+			clearTimeout(timeout);
+			clearInterval(interval);
+		};
+	});
+
+	const link =
+		'group/link cursor-pointer rounded-sm link-underline text-sm font-medium text-muted-foreground outline-none transition-colors duration-(--dur-1) ease-(--ease-out) hover:text-foreground focus-visible:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50';
+	const arrowBase =
+		'inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-focus-visible/link:-translate-y-0.5 motion-safe:group-hover/link:-translate-y-0.5';
+	// ↗ moves 2px up and right; ↑ moves 2px up.
+	const arrowOut = cn(
+		arrowBase,
+		'motion-safe:group-focus-visible/link:translate-x-0.5 motion-safe:group-hover/link:translate-x-0.5'
+	);
 </script>
 
-<footer aria-label="Footer" class="w-full border-accent bg-background pb-33 lg:pb-0">
-	<div class="mx-auto max-w-7xl px-6 md:px-16 xl:px-8">
-		<div class="grid grid-cols-1 items-center gap-8 pt-10 pb-4 md:grid-cols-2">
-			<nav aria-label="Footer Navigation">
-				<ul class="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 lg:items-start lg:justify-start">
-					{#each navigationItems as item}
+<footer aria-label="Footer" class="w-full border-t">
+	<div class="mx-auto max-w-7xl px-5 md:px-10">
+		{#if isHome}
+			<!-- items-baseline-last: the actions sit on the baseline of the heading's last line, not on a box edge. -->
+			<div
+				class="grid gap-8 py-(--gap-section) lg:grid-cols-[1fr_auto] lg:items-baseline-last lg:gap-x-12"
+				{@attach reveal()}
+			>
+				<div>
+					<p class="mb-4 label">Get in touch</p>
+					<h2 class="text-page-title">Let’s build something.</h2>
+				</div>
+
+				<div class="flex flex-wrap items-baseline gap-x-6 gap-y-3 lg:flex-nowrap">
+					<!-- The buttons' first flex item is their icon, so the browser reports the icon's bottom edge as the button's
+						baseline, 4px below the text baseline. The 4px offset puts their text on the heading's baseline. -->
+					<ResumeActions class="relative top-1" />
+					<a
+						href={linkedInUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="group/link rounded-sm link-underline text-sm font-medium whitespace-nowrap outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+					>
+						Message me on LinkedIn <span aria-hidden="true" class={arrowOut}>↗</span>
+						<span class="sr-only">(opens in a new tab)</span>
+					</a>
+				</div>
+			</div>
+		{/if}
+
+		<div
+			class={cn(
+				'flex flex-wrap items-baseline justify-between gap-x-4 gap-y-4 pt-6 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-x-6 lg:pb-6',
+				isHome && 'border-t'
+			)}
+		>
+			<p class="label tabular-nums">© {currentYear} Jay Kerkar</p>
+
+			<nav aria-label="Social links" class="order-first w-full lg:order-none lg:w-auto">
+				<ul class="flex flex-wrap gap-x-6 gap-y-2">
+					{#each socials as social (social.name)}
 						<li>
-							<a
-								href={item.href}
-								class="rounded-sm font-medium underline-offset-10 transition-colors duration-200 outline-none hover:underline focus:text-foreground focus:underline focus-visible:ring-2 focus-visible:ring-accent/70"
-							>
-								{item.label}
+							<a href={social.href} target="_blank" rel="noopener noreferrer" class={link}>
+								{social.name}
+								<span aria-hidden="true" class={arrowOut}>↗</span>
+								<span class="sr-only">(opens in a new tab)</span>
 							</a>
 						</li>
 					{/each}
 				</ul>
 			</nav>
 
-			<div class="flex flex-col items-center gap-2 text-left md:items-end md:text-right">
-				<p
-					class="flex items-center gap-2 text-center text-base font-semibold tracking-tight text-foreground lg:text-right"
-				>
-					Built with ❤️ and
-					<a
-						target="_blank"
-						aria-label="SvelteKit"
-						rel="noopener noreferrer"
-						href="https://svelte.dev/docs/kit/introduction"
-						class="inline-flex items-center gap-1.5 rounded-sm underline-offset-4 transition-colors duration-200 outline-none hover:underline focus:underline focus-visible:ring-2 focus-visible:ring-accent/70"
+			<div class="flex items-baseline gap-4 lg:justify-self-end">
+				<!-- The invisible sizer reserves the width of the full time, so nothing moves when the clock appears. -->
+				<p class="inline-grid label tabular-nums">
+					<span aria-hidden="true" class="invisible col-start-1 row-start-1 select-none">Mumbai · 00:00 IST</span>
+					<span class="col-start-1 row-start-1"
+						>Mumbai · {#if time}<time datetime={stamp}>{time}</time>{/if} IST</span
 					>
-						<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="size-5">
-							<title>SvelteKit</title>
-							<path
-								fill="currentColor"
-								d="M10.354 21.125a4.44 4.44 0 0 1-4.765-1.767 4.109 4.109 0 0 1-.703-3.107 3.898 3.898 0 0 1 .134-.522l.105-.321.287.21a7.21 7.21 0 0 0 2.186 1.092l.208.063-.02.208a1.253 1.253 0 0 0 .226.83 1.337 1.337 0 0 0 1.435.533 1.231 1.231 0 0 0 .343-.15l5.59-3.562a1.164 1.164 0 0 0 .524-.778 1.242 1.242 0 0 0-.211-.937 1.338 1.338 0 0 0-1.435-.533 1.23 1.23 0 0 0-.343.15l-2.133 1.36a4.078 4.078 0 0 1-1.135.499 4.44 4.44 0 0 1-4.765-1.766 4.108 4.108 0 0 1-.702-3.108 3.855 3.855 0 0 1 1.742-2.582l5.589-3.563a4.072 4.072 0 0 1 1.135-.499 4.44 4.44 0 0 1 4.765 1.767 4.109 4.109 0 0 1 .703 3.107 3.943 3.943 0 0 1-.134.522l-.105.321-.286-.21a7.204 7.204 0 0 0-2.187-1.093l-.208-.063.02-.207a1.255 1.255 0 0 0-.226-.831 1.337 1.337 0 0 0-1.435-.532 1.231 1.231 0 0 0-.343.15L8.62 9.368a1.162 1.162 0 0 0-.524.778 1.24 1.24 0 0 0 .211.937 1.338 1.338 0 0 0 1.435.533 1.235 1.235 0 0 0 .344-.151l2.132-1.36a4.067 4.067 0 0 1 1.135-.498 4.44 4.44 0 0 1 4.765 1.766 4.108 4.108 0 0 1 .702 3.108 3.857 3.857 0 0 1-1.742 2.583l-5.589 3.562a4.072 4.072 0 0 1-1.135.499m10.358-17.95C18.484-.015 14.082-.96 10.9 1.068L5.31 4.63a6.412 6.412 0 0 0-2.896 4.295 6.753 6.753 0 0 0 .666 4.336 6.43 6.43 0 0 0-.96 2.396 6.833 6.833 0 0 0 1.168 5.167c2.229 3.19 6.63 4.135 9.812 2.108l5.59-3.562a6.41 6.41 0 0 0 2.896-4.295 6.756 6.756 0 0 0-.665-4.336 6.429 6.429 0 0 0 .958-2.396 6.831 6.831 0 0 0-1.167-5.168Z"
-							/>
-						</svg>
-					</a>
 				</p>
+				<button type="button" onclick={() => window.scrollTo({ top: 0 })} class={link}>
+					Top <span aria-hidden="true" class={arrowBase}>↑</span>
+				</button>
 			</div>
-		</div>
-
-		<div class="w-full border-t-2 border-accent pt-4 pb-6">
-			<p class="text-center text-sm text-muted-foreground">
-				© {currentYear}
-				<a
-					href="/"
-					class="rounded-sm font-semibold text-foreground underline-offset-10 transition-colors duration-200 outline-none hover:text-foreground hover:underline focus:underline focus-visible:ring-2 focus-visible:ring-accent/70"
-				>
-					Jay Kerkar
-				</a>
-				. All rights reserved.
-			</p>
 		</div>
 	</div>
 </footer>

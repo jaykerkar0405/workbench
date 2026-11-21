@@ -22,7 +22,7 @@ export default defineConfig(
 			'no-undef': 'off',
 			'svelte/no-navigation-without-resolve': ['error', { ignoreLinks: true }]
 		},
-		languageOptions: { globals: { ...globals.browser, ...globals.node } },
+		languageOptions: { globals: { ...globals.browser, ...globals.node } }
 	},
 	{
 		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
@@ -31,7 +31,7 @@ export default defineConfig(
 				svelteConfig,
 				parser: ts.parser,
 				projectService: true,
-				extraFileExtensions: ['.svelte'],
+				extraFileExtensions: ['.svelte']
 			}
 		}
 	}

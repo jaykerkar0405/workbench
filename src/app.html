@@ -44,6 +44,29 @@
 		<link rel="me" href="https://linkedin.com/in/jaykerkar0405" />
 		<link rel="me" href="https://discord.com/users/jaykerkar0405" />
 
+		<!-- Marks JS as available before first paint (scroll-reveal hidden states are scoped to html.js). It also decides, before
+			first paint, whether the home load sequence runs (html.intro): only on a fresh full load of "/" (not a reload or a
+			back/forward), without a hash, with motion allowed, and once per session. If storage is unavailable it does not run. -->
+		<script>
+			(function () {
+				var root = document.documentElement;
+				root.classList.add('js');
+				try {
+					var nav = performance.getEntriesByType('navigation')[0];
+					if (
+						location.pathname === '/' &&
+						!location.hash &&
+						(!nav || nav.type === 'navigate') &&
+						matchMedia('(prefers-reduced-motion: no-preference)').matches &&
+						!sessionStorage.getItem('intro')
+					) {
+						sessionStorage.setItem('intro', '1');
+						root.classList.add('intro');
+					}
+				} catch (e) {}
+			})();
+		</script>
+
 		%sveltekit.head%
 	</head>
 

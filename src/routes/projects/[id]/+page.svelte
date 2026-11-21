@@ -1,481 +1,320 @@
 <script lang="ts">
-	import {
-		X,
-		Zap,
-		Star,
-		Video,
-		Users,
-		Layers,
-		ChevronUp,
-		ChevronLeft,
-		ChevronRight,
-		ExternalLink
-	} from 'lucide-svelte';
-	import { onMount } from 'svelte';
-	import { siGithub } from 'simple-icons';
-	import { fly } from 'svelte/transition';
+	import { tick } from 'svelte';
 	import Seo from '$lib/components/seo.svelte';
-	import { hackathons } from '$lib/hackathons';
+	import { cn, formatDateRange, viewTransitionName } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import * as Carousel from '$lib/components/ui/carousel';
-	import HackathonCard from '$lib/components/hackathon-card.svelte';
-	import EnhancedImage from '$lib/components/enhanced-image.svelte';
-	import type { CarouselAPI } from '$lib/components/ui/carousel/context';
-	import { getProjectIcon, loadProjectScreenshots } from '$lib/assets/images';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+	import { GithubIcon } from '$lib/components/brand-icons';
+	import { getProjectIcon } from '$lib/assets/images';
+	import { projectScreenshots } from '$lib/components/project-screenshots';
+	import { orderedProjects, projectIndex, hackathonFor } from '$lib/components/project-order';
+	import TitleBlock from '$lib/components/title-block.svelte';
+	import SpecSheet from '$lib/components/spec-sheet.svelte';
+	import TagList from '$lib/components/tag-list.svelte';
+	import PrizeBadge from '$lib/components/prize-badge.svelte';
+	import TeamStack from '$lib/components/team-stack.svelte';
+	import Gallery from '$lib/components/gallery.svelte';
+	import PrevNext from '$lib/components/prev-next.svelte';
 
 	let { data } = $props();
 
-	let screenshots = $state<any[]>([]);
 	const project = $derived(data.project);
 	const repoData = $derived(data.repoData);
-	const icon = $derived(getProjectIcon(project.id));
 	const teamMembersData = $derived(data.teamMembersData || []);
 	const ExtendedDescription = $derived(data.ExtendedDescription);
 
-	$effect(() => {
-		loadProjectScreenshots(project.id).then((imgs) => {
-			screenshots = imgs;
-		});
+	const icon = $derived(getProjectIcon(project.id));
+	const hackathon = $derived(hackathonFor(project));
+	// The same test as the badge itself: a prize with neither a rank nor a label is no result.
+	const hasPrize = $derived(!!(hackathon?.prize && (hackathon.prize.rank || hackathon.prize.label)));
+
+	// Previous / next wrap around: the previous of the first is the last, the next of the last is the first.
+	// With fewer than two projects there is nothing to go to, so neither side is given.
+	const position = $derived(orderedProjects.findIndex((p) => p.id === project.id));
+	const count = orderedProjects.length;
+	const previous = $derived(position >= 0 && count > 1 ? orderedProjects[(position - 1 + count) % count] : undefined);
+	const next = $derived(position >= 0 && count > 1 ? orderedProjects[(position + 1) % count] : undefined);
+
+	const side = (p: (typeof orderedProjects)[number]) => ({
+		href: `/projects/${p.id}`,
+		title: p.title,
+		index: projectIndex(p.id),
+		icon: getProjectIcon(p.id)
 	});
-	const hackathon = $derived(
-		project.hackathonId ? (hackathons.find((h) => h.id === project.hackathonId) ?? null) : null
-	);
 
-	let fullHeight = $state(0);
-	let mounted = $state(false);
-	let leftColHeight = $state(0);
-	let isExpanded = $state(false);
-	let needsExpansion = $state(false);
-	let carouselApi = $state<CarouselAPI | undefined>();
-	let selectedImageIndex = $state<number | null>(null);
-	let descColRef: HTMLDivElement | undefined = $state();
-	let leftColRef: HTMLDivElement | undefined = $state();
-	let carouselRef: HTMLDivElement | undefined = $state();
+	const formatNumber = (num: number) => (num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num.toString());
 
-	const openImageModal = (index: number) => {
-		selectedImageIndex = index;
-	};
+	// Known at render time (see project-screenshots.ts), so they are in the prerendered HTML and nothing shifts.
+	const screenshots = $derived(projectScreenshots(project.id));
 
-	const closeImageModal = () => {
-		selectedImageIndex = null;
-	};
+	// "On this page": built from the rendered prose headings.
+	let prose = $state<HTMLElement>();
+	let endMarker = $state<HTMLElement>();
+	let sections = $state<{ id: string; text: string }[]>([]);
+	let currentId = $state<string | null>(null);
 
-	const navigateImage = (direction: 'prev' | 'next') => {
-		if (selectedImageIndex === null) return;
-		if (direction === 'prev') {
-			selectedImageIndex = selectedImageIndex === 0 ? screenshots.length - 1 : selectedImageIndex - 1;
-		} else {
-			selectedImageIndex = selectedImageIndex === screenshots.length - 1 ? 0 : selectedImageIndex + 1;
+	const slugify = (text: string) =>
+		text
+			.toLowerCase()
+			.normalize('NFKD')
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '') || 'section';
+
+	$effect(() => {
+		// Re-run when the project (and therefore the rendered prose) changes.
+		void project.id;
+		void ExtendedDescription;
+		const root = prose;
+		if (!root) {
+			sections = [];
+			currentId = null;
+			return;
 		}
-	};
 
-	onMount(() => {
-		mounted = true;
-	});
+		let observer: IntersectionObserver | undefined;
+		let cancelled = false;
 
-	$effect(() => {
-		if (carouselRef && carouselApi) {
-			const handleWheel = (e: WheelEvent) => {
-				e.preventDefault();
-				const api = carouselApi;
-				if (!api) return;
-				if (e.deltaX > 0) {
-					api.scrollNext();
-				} else if (e.deltaX < 0) {
-					api.scrollPrev();
+		tick().then(() => {
+			if (cancelled) return;
+
+			const headings = [...root.querySelectorAll<HTMLElement>('h1, h2')];
+			const used: Record<string, true> = {};
+
+			for (const heading of headings) {
+				let id = heading.id || slugify(heading.textContent ?? '');
+				let candidate = id;
+				for (let n = 2; candidate in used; n += 1) candidate = `${id}-${n}`;
+				id = candidate;
+				used[id] = true;
+				heading.id = id;
+
+				// The page's real <h1> is the title block; prose <h1>s are section headings.
+				if (heading.tagName === 'H1') {
+					heading.setAttribute('role', 'heading');
+					heading.setAttribute('aria-level', '2');
 				}
+			}
+
+			sections = headings.map((h) => ({ id: h.id, text: h.textContent?.trim() ?? '' }));
+
+			// Ids only exist after mount, so a pasted /projects/<id>#<section> link is scrolled to here, once.
+			if (location.hash.length > 1) {
+				document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({ block: 'start' });
+			}
+			if (headings.length < 2) {
+				currentId = null;
+				return;
+			}
+
+			const update = () => {
+				const line = window.innerHeight * 0.35;
+				const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+				let active = headings[0];
+				for (const heading of headings) {
+					if (heading.getBoundingClientRect().top <= line) active = heading;
+				}
+				if (atBottom) active = headings[headings.length - 1];
+				currentId = active.id;
 			};
 
-			carouselRef.addEventListener('wheel', handleWheel, { passive: false });
+			observer = new IntersectionObserver(update, { rootMargin: '-96px 0px -60% 0px', threshold: [0, 1] });
+			for (const heading of headings) observer.observe(heading);
+			if (endMarker) observer.observe(endMarker);
+			update();
+		});
 
-			return () => {
-				carouselRef?.removeEventListener('wheel', handleWheel);
-			};
-		}
+		return () => {
+			cancelled = true;
+			observer?.disconnect();
+		};
 	});
 
-	$effect(() => {
-		if (leftColRef && descColRef) {
-			const leftCol = leftColRef;
-			const descCol = descColRef;
-			const checkHeight = () => {
-				const leftHeight = leftCol.offsetHeight - 9.3;
-				const descHeight = descCol.scrollHeight;
-				leftColHeight = leftHeight;
-				fullHeight = descHeight;
-				needsExpansion = descHeight > leftHeight;
-			};
-			checkHeight();
-			const resizeObserver = new ResizeObserver(checkHeight);
-			resizeObserver.observe(leftCol);
-			resizeObserver.observe(descCol);
-			return () => resizeObserver.disconnect();
-		}
-	});
+	const railIndicator = (wrapper: HTMLDivElement) => {
+		const marker = wrapper.querySelector<HTMLElement>('[data-rail-marker]');
+		if (!marker) return;
 
-	const formatNumber = (num: number) => {
-		if (num >= 1000) {
-			return `${(num / 1000).toFixed(1)}k`;
-		}
-		return num.toString();
-	};
+		let readyFrame = 0;
+		let cancelled = false;
+		const measure = () => {
+			const link = wrapper.querySelector<HTMLAnchorElement>('a[aria-current="true"]');
+			if (!link?.offsetHeight) {
+				marker.style.opacity = '0';
+				marker.removeAttribute('data-ready');
+				cancelAnimationFrame(readyFrame);
+				return;
+			}
 
-	const brandColor = (hex: string) => {
-		const normalized = hex.toLowerCase();
-		if (normalized === '000000' || normalized === 'ffffff') return 'currentColor';
-		return `#${hex}`;
+			marker.style.setProperty('--rail-y', `${link.offsetTop + 4}px`);
+			marker.style.setProperty('--rail-h', `${link.offsetHeight - 8}px`);
+			marker.style.opacity = '1';
+
+			// Paint the first measured position before enabling transitions.
+			if (!marker.hasAttribute('data-ready')) {
+				cancelAnimationFrame(readyFrame);
+				readyFrame = requestAnimationFrame(() => {
+					readyFrame = requestAnimationFrame(() => marker.setAttribute('data-ready', ''));
+				});
+			}
+		};
+
+		// A new size changes the geometry of the same item, so it should stay beside the link.
+		const snap = () => {
+			marker.removeAttribute('data-ready');
+			measure();
+		};
+
+		$effect(() => {
+			void currentId;
+			void sections;
+			measure();
+		});
+
+		window.addEventListener('resize', snap);
+		document.fonts.ready.then(() => {
+			if (!cancelled) snap();
+		});
+
+		return () => {
+			cancelled = true;
+			cancelAnimationFrame(readyFrame);
+			window.removeEventListener('resize', snap);
+		};
 	};
 </script>
 
 <Seo title="{project.title} | Projects | Jay Kerkar" description={project.shortDescription} />
 
-{#key mounted}
-	<div class="container mx-auto max-w-7xl px-4 py-12">
-		<div class="mb-8" in:fly={{ y: -20, duration: 600, delay: 0 }}>
-			<div class="flex flex-wrap items-start justify-between gap-4">
-				<div class="flex items-start gap-4">
-					{#if icon}
-						<EnhancedImage
-							src={icon}
-							alt={project.title}
-							skeletonClass="rounded-lg"
-							class="size-15 rounded-lg border border-border object-cover"
-						/>
-					{/if}
-
-					<div class="-mt-1 flex flex-col lg:gap-1">
-						<h1 class="text-[1.675rem] font-bold">{project.title}</h1>
-						<p class="text-[0.9rem] text-muted-foreground">{project.shortDescription}</p>
-					</div>
-				</div>
-
-				<div class="flex flex-col gap-4">
-					{#if project.hackathonId}
-						<a href="/hackathons/{project.hackathonId}" class="lg:hidden">
-							<Button variant="outline" class="gap-2">
-								<Zap class="size-4" />
-								{hackathon ? `Built at ${hackathon.title}` : 'Built at hackathon'}
-							</Button>
-						</a>
-					{/if}
-
-					<div class="flex flex-wrap items-center gap-3">
-						{#if repoData?.stargazers_count !== undefined && repoData.stargazers_count !== null}
-							<a
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label="GitHub stars"
-								href={`${project.githubLink}/stargazers`}
-							>
-								<Button variant="outline" class="gap-2">
-									<Star class="size-4" />
-									{formatNumber(repoData.stargazers_count)}
-								</Button>
-							</a>
-						{/if}
-
-						{#if project.deployedLink}
-							<a target="_blank" rel="noopener noreferrer" href={project.deployedLink}>
-								<Button variant="outline" size="icon" aria-label="View deployed site">
-									<ExternalLink class="size-4" />
-								</Button>
-							</a>
-						{/if}
-
-						<a href={project.githubLink} target="_blank" rel="noopener noreferrer">
-							<Button size="icon" aria-label="View on GitHub">
-								<svg class="size-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-									<path d={siGithub.path} />
-								</svg>
-							</Button>
-						</a>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		{#if screenshots.length > 0}
-			<div bind:this={carouselRef} class="mb-8" in:fly={{ y: -20, duration: 600, delay: 150 }}>
-				<Carousel.Root opts={{ align: 'start' }} class="w-full" setApi={(api) => (carouselApi = api)}>
-					<Carousel.Content class="-ml-2 md:-ml-4">
-						{#each screenshots as screenshot, i}
-							<Carousel.Item class="basis-full pl-2 md:basis-1/2 md:pl-4 lg:basis-1/3">
-								<Card
-									tabindex={0}
-									onclick={() => openImageModal(i)}
-									class="cursor-pointer overflow-hidden py-0"
-									onkeydown={(e) => {
-										if (e.key === 'Enter' || e.key === ' ') openImageModal(i);
-									}}
-								>
-									<CardContent class="p-0">
-										<div class="relative">
-											<EnhancedImage
-												src={screenshot}
-												alt="{project.title} Screenshot {i + 1}"
-												skeletonClass="aspect-video w-full rounded-lg"
-												class="aspect-video w-full rounded-lg object-cover transition-transform hover:scale-105"
-											/>
-										</div>
-									</CardContent>
-								</Card>
-							</Carousel.Item>
-						{/each}
-					</Carousel.Content>
-					<Carousel.Previous class="left-2 bg-background! lg:-left-12" />
-					<Carousel.Next class="right-2 bg-background! lg:-right-12" />
-				</Carousel.Root>
-			</div>
-		{/if}
-
-		<div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-			<div bind:this={leftColRef} class="flex flex-col gap-5" in:fly={{ y: -20, duration: 600, delay: 300 }}>
-				{#if project.videoLink}
-					<Card>
-						<CardHeader>
-							<CardTitle class="flex items-center gap-2 text-lg">
-								<Video class="size-5" />
-								Demo
-							</CardTitle>
-						</CardHeader>
-
-						<CardContent class="-mt-2 p-0">
-							<div class="aspect-video w-full px-6">
-								<iframe
-									allowfullscreen
-									class="h-full w-full rounded-lg"
-									title="{project.title} Demo Video"
-									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-									src={project.videoLink.replace('youtu.be/', 'www.youtube.com/embed/').replace('watch?v=', 'embed/')}
-								></iframe>
-							</div>
-						</CardContent>
-					</Card>
-				{/if}
-
-				<Card>
-					<CardHeader>
-						<CardTitle class="flex items-center gap-2 text-lg">
-							<Layers class="size-5" />
-							Tech Stack
-						</CardTitle>
-					</CardHeader>
-
-					<CardContent class="-mt-2 py-0"
-						><div
-							style="scrollbar-gutter: stable;"
-							class="tech-stack-scroll w-full overflow-x-auto overflow-y-hidden rounded-xl border border-border bg-secondary/30"
-						>
-							<Tooltip.Provider>
-								<div class="flex items-center justify-between gap-3 px-4 py-3">
-									{#each project.techStack as tech (tech.title)}
-										<Tooltip.Root>
-											<Tooltip.Trigger
-												aria-label={tech.title}
-												class="flex size-9 shrink-0 items-center justify-center rounded-lg transition-transform hover:scale-110"
-											>
-												<svg
-													width="26"
-													height="26"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													xmlns="http://www.w3.org/2000/svg"
-													style="color: {brandColor(tech.hex)}"
-												>
-													<path d={tech.path} />
-												</svg>
-											</Tooltip.Trigger>
-											<Tooltip.Content>
-												<p class="font-medium">{tech.title}</p>
-											</Tooltip.Content>
-										</Tooltip.Root>
-									{/each}
-								</div>
-							</Tooltip.Provider>
-						</div>
-					</CardContent>
-				</Card>
-
-				{#if hackathon}
-					<div class="hidden lg:block">
-						<HackathonCard {hackathon} />
-					</div>
-				{/if}
-
-				<Card>
-					<CardHeader>
-						<CardTitle class="flex items-center gap-2 text-lg">
-							<Users class="size-5" />
-							Team
-						</CardTitle>
-					</CardHeader>
-
-					<CardContent class="-mt-2 py-0">
-						<div class="grid gap-4">
-							{#each teamMembersData as member}
-								<a
-									target="_blank"
-									href={member.profileUrl}
-									rel="noopener noreferrer"
-									class="flex items-center gap-4 rounded-lg border border-border bg-secondary/30 p-4 transition-colors hover:bg-secondary/50"
-								>
-									<img src={member.avatar} alt={member.name} class="size-12 rounded-full border-2 border-border" />
-									<div class="flex flex-col gap-1">
-										<span class="font-semibold">{member.name}</span>
-										<span class="text-sm text-muted-foreground">@{member.username}</span>
-									</div>
-								</a>
-							{/each}
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-
-			<div class="lg:col-span-2" in:fly={{ y: -20, duration: 600, delay: 450 }}>
-				<Card class="relative py-1">
-					<CardContent class="p-0">
-						<div class="relative">
-							<div
-								style:max-height={isExpanded ? `${fullHeight}px` : `${leftColHeight}px`}
-								class="overflow-hidden transition-all duration-700 ease-in-out"
-							>
-								<div
-									bind:this={descColRef}
-									class="prose max-w-none p-8 prose-zinc dark:prose-invert prose-headings:font-bold prose-h1:mt-0 prose-h1:mb-6 prose-h1:text-3xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:text-2xl prose-h3:mt-8 prose-h3:mb-3 prose-h3:text-xl prose-p:text-base prose-p:leading-7 prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80 prose-strong:font-semibold prose-code:rounded prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-sm prose-code:before:content-[''] prose-code:after:content-[''] prose-ul:my-4 prose-li:my-2 prose-hr:my-8 prose-hr:border-border"
-								>
-									<ExtendedDescription />
-								</div>
-							</div>
-
-							{#if needsExpansion && !isExpanded}
-								<div
-									class="pointer-events-none absolute inset-x-0 -bottom-1 h-32 rounded-xl bg-linear-to-t from-background via-background/95 to-transparent backdrop-blur-[px] transition-opacity duration-700"
-								></div>
-							{/if}
-
-							{#if needsExpansion}
-								<div class="flex justify-center {isExpanded ? 'pt-4 pb-4' : 'absolute inset-x-0 bottom-4'}">
-									<Button
-										variant="default"
-										onclick={() => (isExpanded = !isExpanded)}
-										class="relative z-10 gap-2 shadow-lg backdrop-blur-sm transition-all duration-300"
-									>
-										{isExpanded ? 'Show Less' : 'See More'}
-										<div
-											class="transition-transform duration-300"
-											style:transform={isExpanded ? 'rotate(0deg)' : 'rotate(180deg)'}
-										>
-											<ChevronUp class="size-4" />
-										</div>
-									</Button>
-								</div>
-							{/if}
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-		</div>
-	</div>
-{/key}
-
-<svelte:window
-	onkeydown={(e) => {
-		if (selectedImageIndex === null) return;
-		if (e.key === 'Escape') closeImageModal();
-		if (e.key === 'ArrowLeft') navigateImage('prev');
-		if (e.key === 'ArrowRight') navigateImage('next');
-	}}
-/>
-
-{#if selectedImageIndex !== null}
+{#if ExtendedDescription}
 	<div
-		role="button"
-		tabindex="-1"
-		onclick={closeImageModal}
-		onkeydown={(e) => {
-			if (e.key === 'Enter' || e.key === ' ') closeImageModal();
-		}}
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
-	>
-		<button
-			aria-label="Close"
-			onclick={closeImageModal}
-			class="absolute top-4 right-4 z-10 cursor-pointer rounded-full border border-white/30 bg-black/60 p-2 shadow-lg backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80"
-		>
-			<X class="size-5 text-white" />
-		</button>
-
-		{#if screenshots.length > 1}
-			<button
-				onclick={(e) => {
-					e.stopPropagation();
-					navigateImage('prev');
-				}}
-				aria-label="Previous image"
-				class="absolute left-4 z-10 rounded-full border border-white/30 bg-black/60 p-3 shadow-lg backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80"
-			>
-				<ChevronLeft class="size-5 cursor-pointer text-white" />
-			</button>
-
-			<button
-				onclick={(e) => {
-					e.stopPropagation();
-					navigateImage('next');
-				}}
-				aria-label="Next image"
-				class="absolute right-4 z-10 rounded-full border border-white/30 bg-black/60 p-3 shadow-lg backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80"
-			>
-				<ChevronRight class="size-5 cursor-pointer text-white" />
-			</button>
-		{/if}
-
-		<div
-			role="presentation"
-			class="max-h-[90vh] max-w-[90vw]"
-			onclick={(e) => e.stopPropagation()}
-			onkeydown={(e) => e.stopPropagation()}
-		>
-			<EnhancedImage
-				src={screenshots[selectedImageIndex]}
-				containerClass="max-h-[90vh] max-w-[90vw]"
-				skeletonClass="h-[70vh] w-[70vw] rounded-lg"
-				class="max-h-[90vh] w-auto rounded-lg object-contain"
-				alt="{project.title} Screenshot {selectedImageIndex + 1}"
-			/>
-			{#if screenshots.length > 1}
-				<div class="mt-4 text-center text-sm text-white/70">
-					{selectedImageIndex + 1} / {screenshots.length}
-				</div>
-			{/if}
-		</div>
-	</div>
+		aria-hidden="true"
+		data-read-progress
+		class="pointer-events-none fixed inset-x-0 top-[calc(var(--header-h)-1px)] z-40 hidden h-px origin-left bg-brand"
+	></div>
 {/if}
 
-<style>
-	.tech-stack-scroll {
-		scrollbar-gutter: stable;
-		scrollbar-width: thin;
-		scrollbar-color: transparent transparent;
-	}
-	.tech-stack-scroll::-webkit-scrollbar {
-		width: 6px;
-		height: 6px;
-	}
-	.tech-stack-scroll:hover,
-	.tech-stack-scroll:focus-within {
-		scrollbar-color: hsl(var(--border)) transparent;
-	}
-	.tech-stack-scroll::-webkit-scrollbar-track {
-		background: transparent;
-	}
-	.tech-stack-scroll::-webkit-scrollbar-thumb {
-		background: transparent;
-		border-radius: 3px;
-	}
-	.tech-stack-scroll:hover::-webkit-scrollbar-thumb,
-	.tech-stack-scroll:focus-within::-webkit-scrollbar-thumb {
-		background: hsl(var(--border));
-	}
-</style>
+<div class="mx-auto max-w-7xl px-5 pt-(--gap-header-title) pb-[calc(var(--gap-section)-2rem)] md:px-10">
+	<TitleBlock
+		parent={{ label: 'Projects', href: '/projects' }}
+		title={project.title}
+		summary={project.shortDescription}
+		{icon}
+		iconTransitionName={viewTransitionName('project-icon', project.id)}
+		titleTransitionName={viewTransitionName('project-title', project.id)}
+	>
+		{#snippet actions()}
+			{#if repoData}
+				<span class="label tabular-nums">
+					<span aria-hidden="true">★ {formatNumber(repoData.stargazers_count)}</span>
+					<span class="sr-only">{formatNumber(repoData.stargazers_count)} GitHub stars</span>
+				</span>
+			{/if}
+
+			{#if project.deployedLink}
+				<Button href={project.deployedLink} target="_blank" rel="noopener noreferrer" class="rounded-md">Live ↗</Button>
+			{/if}
+
+			<Button href={project.githubLink} target="_blank" rel="noopener noreferrer" variant="outline" class="rounded-md">
+				<svg viewBox={GithubIcon.viewBox} fill="currentColor" class="size-4" aria-hidden="true">
+					{#each GithubIcon.paths as d (d)}
+						<path {d} />
+					{/each}
+				</svg>
+				GitHub ↗
+			</Button>
+		{/snippet}
+	</TitleBlock>
+
+	<SpecSheet
+		class="mt-(--gap-title-content)"
+		variant="facts"
+		items={[
+			{ label: 'Event', content: hackathon ? eventCell : undefined },
+			{ label: 'Dates', value: hackathon ? formatDateRange(hackathon.timestamp, hackathon.duration) : undefined },
+			{ label: 'Result', content: hasPrize ? resultCell : undefined }
+		]}
+		wideRows={[
+			{ label: 'Stack', content: project.techStack.length > 0 ? stackCell : undefined },
+			{ label: 'Team', content: project.teamMembers.length > 0 ? teamCell : undefined }
+		]}
+	/>
+
+	{#if screenshots.length > 0 || project.videoLink}
+		<section class="mt-(--gap-title-content)" aria-label="Screenshots and demo">
+			{#key project.id}
+				<Gallery
+					images={screenshots}
+					altPrefix="{project.title} screenshot"
+					videoUrl={project.videoLink}
+					videoTitle="{project.title} demo"
+				/>
+			{/key}
+		</section>
+	{/if}
+
+	{#if ExtendedDescription}
+		<div class="mt-(--gap-section) grid gap-10 lg:grid-cols-12 lg:gap-x-6">
+			<!-- The rail only holds "On this page", so a page with fewer than two sections has none. The prose is placed
+				on explicit columns, so a missing rail never moves it. -->
+			{#if sections.length >= 2}
+				<aside
+					class="flex flex-col gap-10 max-lg:hidden lg:sticky lg:top-24 lg:col-span-3 lg:col-start-1 lg:row-start-1 lg:self-start"
+				>
+					<nav aria-label="On this page">
+						<p class="mb-3 label">On this page</p>
+						<div class="relative" {@attach railIndicator}>
+							<span
+								aria-hidden="true"
+								data-rail-marker
+								class="pointer-events-none absolute top-0 left-0 w-0.5 bg-brand opacity-0 motion-safe:data-[ready]:transition-[translate,height] motion-safe:data-[ready]:duration-(--dur-2) motion-safe:data-[ready]:ease-(--ease-out)"
+								style="height: var(--rail-h, 0px); translate: 0 var(--rail-y, 0px)"
+							></span>
+							<ul class="relative flex flex-col">
+								{#each sections as section (section.id)}
+									<li>
+										<a
+											href={`#${section.id}`}
+											aria-current={currentId === section.id ? 'true' : undefined}
+											class={cn(
+												'relative block rounded-sm py-1.5 pl-4 text-sm text-pretty transition-colors duration-(--dur-1) ease-(--ease-out) outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50',
+												currentId === section.id ? 'text-foreground' : 'text-muted-foreground'
+											)}
+										>
+											{section.text}
+										</a>
+									</li>
+								{/each}
+							</ul>
+						</div>
+					</nav>
+				</aside>
+			{/if}
+
+			<div bind:this={prose} class="prose-log prose max-w-none min-w-0 lg:col-span-9 lg:col-start-4 lg:row-start-1">
+				<ExtendedDescription />
+			</div>
+		</div>
+	{/if}
+
+	<div bind:this={endMarker} aria-hidden="true"></div>
+
+	<PrevNext class="mt-(--gap-section)" prev={previous && side(previous)} next={next && side(next)} />
+</div>
+
+{#snippet eventCell()}
+	{#if hackathon}
+		<a href={`/hackathons/${hackathon.id}`} class="w-fit rounded-sm link-underline">{hackathon.title}</a>
+	{/if}
+{/snippet}
+
+{#snippet resultCell()}
+	{#if hackathon}
+		<PrizeBadge prize={hackathon.prize} />
+	{/if}
+{/snippet}
+
+{#snippet stackCell()}
+	<TagList items={project.techStack} />
+{/snippet}
+
+{#snippet teamCell()}
+	<TeamStack members={teamMembersData} usernames={project.teamMembers.map((member) => member.githubUsername)} />
+{/snippet}

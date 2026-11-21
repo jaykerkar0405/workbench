@@ -1,4 +1,4 @@
-const VERSION = 'portfolio-v1';
+const VERSION = 'workbench-v1';
 const PAGE_CACHE = `${VERSION}-pages`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const IMMUTABLE_CACHE = `${VERSION}-immutable`;

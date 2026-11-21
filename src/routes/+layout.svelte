@@ -1,21 +1,65 @@
 <script lang="ts">
 	import './layout.css';
 	import { ModeWatcher } from 'mode-watcher';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, onNavigate } from '$app/navigation';
 	import Header from '$lib/components/header.svelte';
 	import Footer from '$lib/components/footer.svelte';
-	import ScrollToTop from '$lib/components/scroll-to-top.svelte';
 
 	let { children } = $props();
 
-	afterNavigate(() => {
+	onNavigate((navigation) => {
+		if (
+			navigation.willUnload ||
+			typeof document.startViewTransition !== 'function' ||
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+			navigation.from?.url?.pathname === navigation.to?.url?.pathname
+		) {
+			return;
+		}
+
+		// html has scroll-behavior: smooth, which would make the scroll reset animate underneath
+		// the frozen snapshot and keep scrolling after the fade ends. Reset instantly while the
+		// transition runs.
+		const root = document.documentElement;
+		root.style.scrollBehavior = 'auto';
+
+		return new Promise<void>((resolve) => {
+			const transition = document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+
+			// A skipped or superseded transition rejects these promises; navigation itself is unaffected.
+			transition.ready.catch(() => {});
+			transition.updateCallbackDone.catch(() => {});
+			transition.finished.catch(() => {}).finally(() => root.style.removeProperty('scroll-behavior'));
+		});
+	});
+
+	// Scroll to the top after a normal navigation. Leave the position alone on back/forward (SvelteKit
+	// restores it), on links that carry a hash (the browser scrolls to the target), and when only the
+	// query or hash changed.
+	afterNavigate((navigation) => {
+		if (
+			navigation.type === 'popstate' ||
+			navigation.to?.url?.hash ||
+			navigation.from?.url?.pathname === navigation.to?.url?.pathname
+		) {
+			return;
+		}
 		window.scrollTo({ top: 0 });
 	});
 </script>
 
-<ModeWatcher />
+<ModeWatcher themeColors={{ dark: '#000000', light: '#ffffff' }} />
 
-<div class="relative">
+<div class="relative max-lg:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+	<div
+		aria-hidden="true"
+		data-frame
+		class="pointer-events-none fixed inset-y-0 left-1/2 z-0 hidden w-full max-w-7xl -translate-x-1/2 border-x min-[1360px]:block"
+	></div>
+
 	<Header />
 
 	<main>
@@ -23,5 +67,4 @@
 	</main>
 
 	<Footer />
-	<ScrollToTop />
 </div>

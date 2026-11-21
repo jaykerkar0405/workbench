@@ -37,11 +37,16 @@
 	};
 </script>
 
+<!-- The hidden state and the skeleton only exist under html.js, so without JavaScript (where the load
+	 event is never handled) the image is simply visible. -->
 <div class={cn('relative', containerClass)}>
 	{#if !isLoaded}
 		<Skeleton
 			aria-hidden="true"
-			class={cn('pointer-events-none absolute inset-0 z-0 h-full w-full rounded-[inherit]', skeletonClass)}
+			class={cn(
+				'pointer-events-none absolute inset-0 z-0 hidden h-full w-full animate-none rounded-[inherit] bg-muted in-[.js]:block',
+				skeletonClass
+			)}
 		/>
 	{/if}
 
@@ -51,6 +56,10 @@
 		{...restProps}
 		onload={handleLoad}
 		onerror={handleError}
-		class={cn('relative z-10 block transition-opacity duration-300', !isLoaded && 'opacity-0', className)}
+		class={cn(
+			'relative z-10 block transition-opacity duration-(--dur-2) ease-(--ease-out) motion-reduce:transition-none',
+			!isLoaded && 'in-[.js]:opacity-0',
+			className
+		)}
 	/>
 </div>

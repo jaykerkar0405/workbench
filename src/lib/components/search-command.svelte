@@ -1,54 +1,33 @@
 <script lang="ts">
 	import Fuse from 'fuse.js';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import type { Pathname } from '$app/types';
 	import { projects } from '$lib/projects';
 	import { hackathons } from '$lib/hackathons';
 	import type { Project } from '$lib/projects/types';
+	import { Kbd } from '$lib/components/ui/kbd';
 	import { Button } from '$lib/components/ui/button';
 	import { navigationItems } from '$lib/config/navigation';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import EnhancedImage from '$lib/components/enhanced-image.svelte';
 	import { getProjectIcon, getHackathonIcon } from '$lib/assets/images';
+	import { GithubIcon, LeetCodeIcon, LinkedInIcon, XBrandIcon } from '$lib/components/brand-icons';
 
-	import StarIcon from '@lucide/svelte/icons/star';
 	import CodeIcon from '@lucide/svelte/icons/code';
 	import TrophyIcon from '@lucide/svelte/icons/trophy';
 	import SearchIcon from '@lucide/svelte/icons/search';
-	import MapPinIcon from '@lucide/svelte/icons/map-pin';
 	import FileTextIcon from '@lucide/svelte/icons/file-text';
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 
-	type SvgIcon = { viewBox: string; paths: string[] };
-
-	const XBrandIcon: SvgIcon = {
-		viewBox: '0 0 24 24',
-		paths: [
-			'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'
-		]
-	};
-
-	const LinkedInIcon: SvgIcon = {
-		viewBox: '0 0 24 24',
-		paths: [
-			'M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z'
-		]
-	};
-
-	const GithubIcon: SvgIcon = {
-		viewBox: '0 0 24 24',
-		paths: [
-			'M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z'
-		]
-	};
-
-	const LeetCodeIcon: SvgIcon = {
-		viewBox: '0 0 24 24',
-		paths: [
-			'M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z'
-		]
-	};
-
 	let open = $state(false);
+
+	// Rendered as ⌘K on the server; switched after mount on non-Apple platforms.
+	let shortcut = $state('⌘K');
+
+	$effect(() => {
+		if (!/Mac|iPhone|iPad/i.test(navigator.userAgent)) shortcut = 'Ctrl K';
+	});
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -59,7 +38,8 @@
 
 	function navigate(path: string) {
 		open = false;
-		goto(path);
+		// Every caller passes an internal absolute path (nav item or /projects/<id>, /hackathons/<id>).
+		goto(resolve(path as Pathname));
 	}
 
 	function openExternal(url: string) {
@@ -174,7 +154,8 @@
 	});
 
 	let cachedSearch = '';
-	let cachedScoreMap = new Map<string, number>();
+	// Plain object, not a Map: a non-reactive memo of the last query's scores (SvelteMap would add reactivity nothing reads).
+	let cachedScoreMap: Record<string, number> = {};
 
 	function fuseFilter(value: string, search: string): number {
 		if (!search) return 1;
@@ -182,108 +163,117 @@
 		if (search !== cachedSearch) {
 			cachedSearch = search;
 			const results = fuse.search(search);
-			cachedScoreMap = new Map<string, number>();
+			cachedScoreMap = {};
 			for (const result of results) {
-				cachedScoreMap.set(result.item.value, 1 - (result.score ?? 0));
+				cachedScoreMap[result.item.value] = 1 - (result.score ?? 0);
 			}
 		}
 
-		return cachedScoreMap.get(value) ?? 0;
+		return cachedScoreMap[value] ?? 0;
 	}
+
+	const pageCount = navigationItems.length + 1;
+	const projectCount = featuredProjects.length + otherProjects.length;
+	const hackathonCount = prizeHackathons.length + otherHackathonsList.length;
+	const socialCount = searchableItems.filter((item) => item.value.startsWith('social-')).length;
+
+	// Slice rather than new Date(): a bare YYYY-MM-DD parses as UTC and can shift year by timezone.
+	const yearOf = (timestamp: string) => timestamp.slice(0, 4);
+
+	const rowClass =
+		'relative h-10 gap-3 overflow-hidden in-data-[slot=dialog-content]:rounded-md! before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 data-selected:before:opacity-100';
+	const metaClass = 'flex shrink-0 items-center gap-1.5 font-mono text-xs tracking-[0.06em] uppercase tabular-nums';
+	const headingClass =
+		'**:[[data-command-group-heading]]:font-mono **:[[data-command-group-heading]]:text-xs **:[[data-command-group-heading]]:font-normal **:[[data-command-group-heading]]:tracking-[0.06em] **:[[data-command-group-heading]]:uppercase';
 </script>
 
 <svelte:document onkeydown={handleKeydown} />
 
-<Button size="icon" class="relative" variant="outline" aria-label="Search (Ctrl+K)" onclick={() => (open = true)}>
-	<SearchIcon class="size-[1.15rem]" />
-	<span class="sr-only">Search</span>
+<Button
+	size="icon"
+	variant="outline"
+	aria-label="Search"
+	aria-keyshortcuts="Control+K Meta+K"
+	onclick={() => (open = true)}
+	class="relative size-9 rounded-md max-lg:border-transparent max-lg:bg-transparent max-lg:hover:bg-muted lg:w-56 lg:justify-start lg:gap-2 lg:px-3 dark:max-lg:border-transparent dark:max-lg:bg-transparent dark:max-lg:hover:bg-muted/50"
+>
+	<SearchIcon class="size-[1.15rem] lg:size-4" />
+	<span class="hidden font-normal text-muted-foreground lg:inline">Search</span>
+	<Kbd class="ml-auto hidden w-10 lg:inline-flex">{shortcut}</Kbd>
 </Button>
 
 <Command.Dialog
 	bind:open
 	filter={fuseFilter}
-	class="sm:max-w-137.5"
 	title="Search Portfolio"
 	description="Search across projects, hackathons, pages, and more."
+	class="top-[14vh] rounded-lg! duration-(--dur-2) ease-(--ease-out) sm:max-w-[min(42rem,calc(100%-2rem))] data-open:zoom-in-100! data-open:slide-in-from-bottom-2 data-closed:duration-(--dur-1) data-closed:zoom-out-100! [&_[data-slot=command-input-wrapper]]:flex [&_[data-slot=command-input-wrapper]]:h-12 [&_[data-slot=command-input-wrapper]]:items-center [&_[data-slot=command-input-wrapper]]:border-b [&_[data-slot=command-input-wrapper]]:px-2 [&_[data-slot=command-input-wrapper]]:pb-0 [&_[data-slot=input-group]]:h-full! [&_[data-slot=input-group]]:border-0 [&_[data-slot=input-group]]:bg-transparent! [&_[data-slot=input-group]]:shadow-none"
 >
 	<Command.Input placeholder="Search projects, hackathons, pages..." />
-	<Command.List>
-		<Command.Empty>No results found.</Command.Empty>
+	<Command.List class="max-h-[min(26rem,60dvh)]">
+		<Command.Empty class="py-8 font-mono text-xs text-muted-foreground">No results found.</Command.Empty>
 
-		<Command.Group heading="Pages">
+		<Command.Group value="pages" heading={`Pages · ${pageCount}`} class={headingClass}>
 			{#each navigationItems as item (item.href)}
-				<Command.Item value={`page-${item.href}`} onSelect={() => navigate(item.href)}>
+				<Command.Item value={`page-${item.href}`} onSelect={() => navigate(item.href)} class={rowClass}>
 					{@const Icon = item.icon}
 					<Icon />
-					<span>{item.label}</span>
+					<span class="min-w-0 flex-1 truncate">{item.label}</span>
+					<Command.Shortcut class={metaClass}>{item.href}</Command.Shortcut>
 				</Command.Item>
 			{/each}
-			<Command.Item value="page-resume" onSelect={() => openExternal('/docs/jay_kerkar_resume.pdf')}>
+			<Command.Item value="page-resume" onSelect={() => openExternal('/docs/jay_kerkar_resume.pdf')} class={rowClass}>
 				<FileTextIcon />
-				<span>Resume</span>
+				<span class="min-w-0 flex-1 truncate">Resume</span>
+				<Command.Shortcut class={metaClass}>PDF ↗</Command.Shortcut>
 			</Command.Item>
 		</Command.Group>
 
 		<Command.Separator />
 
-		<Command.Group heading="Featured Projects">
-			{#each featuredProjects as project (project.id)}
+		<Command.Group value="projects" heading={`Projects · ${projectCount}`} class={headingClass}>
+			{#each [...featuredProjects, ...otherProjects] as project (project.id)}
 				{@const icon = getProjectIcon(project.id)}
-				<Command.Item value={`project-${project.id}`} onSelect={() => navigate(`/projects/${project.id}`)}>
+				<Command.Item
+					value={`project-${project.id}`}
+					onSelect={() => navigate(`/projects/${project.id}`)}
+					class={rowClass}
+				>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
-							alt={project.title}
+							alt=""
 							skeletonClass="rounded"
 							containerClass="size-6 shrink-0"
-							class="size-6 rounded object-cover"
-						/>
-					{:else}
-						<StarIcon />
-					{/if}
-					<div class="flex flex-col">
-						<span>{project.title}</span>
-						<span class="text-xs text-muted-foreground">{project.shortDescription}</span>
-					</div>
-				</Command.Item>
-			{/each}
-		</Command.Group>
-
-		<Command.Separator />
-
-		<Command.Group heading="Projects">
-			{#each otherProjects as project (project.id)}
-				{@const icon = getProjectIcon(project.id)}
-				<Command.Item value={`project-${project.id}`} onSelect={() => navigate(`/projects/${project.id}`)}>
-					{#if icon}
-						<EnhancedImage
-							src={icon}
-							alt={project.title}
-							containerClass="size-6 shrink-0"
-							skeletonClass="rounded"
 							class="size-6 rounded object-cover"
 						/>
 					{:else}
 						<CodeIcon />
 					{/if}
-					<div class="flex flex-col">
-						<span>{project.title}</span>
-						<span class="text-xs text-muted-foreground">{project.shortDescription}</span>
-					</div>
+					<span class="min-w-0 flex-1 truncate">{project.title}</span>
+					<Command.Shortcut class={metaClass}>
+						{#if project.featured}
+							<span>Featured</span>
+						{/if}
+					</Command.Shortcut>
 				</Command.Item>
 			{/each}
 		</Command.Group>
 
 		<Command.Separator />
 
-		<Command.Group heading="Hackathon Wins">
-			{#each prizeHackathons as hackathon (hackathon.id)}
+		<Command.Group value="hackathons" heading={`Hackathons · ${hackathonCount}`} class={headingClass}>
+			{#each [...prizeHackathons, ...otherHackathonsList] as hackathon (hackathon.id)}
 				{@const icon = getHackathonIcon(hackathon.id)}
-				<Command.Item value={`hackathon-${hackathon.id}`} onSelect={() => navigate(`/hackathons/${hackathon.id}`)}>
+				<Command.Item
+					value={`hackathon-${hackathon.id}`}
+					onSelect={() => navigate(`/hackathons/${hackathon.id}`)}
+					class={rowClass}
+				>
 					{#if icon}
 						<EnhancedImage
 							src={icon}
-							alt={hackathon.title}
+							alt=""
 							skeletonClass="rounded"
 							containerClass="size-6 shrink-0"
 							class="size-6 rounded object-contain"
@@ -291,47 +281,26 @@
 					{:else}
 						<TrophyIcon />
 					{/if}
-					<div class="flex flex-col">
-						<span>{hackathon.title}</span>
-						<span class="text-xs text-muted-foreground">
-							{hackathon.prize?.rank ? `${hackathon.prize.rank} Place` : hackathon.prize?.label} · {hackathon.organizer}
-						</span>
-					</div>
+					<span class="min-w-0 flex-1 truncate">{hackathon.title}</span>
+					<Command.Shortcut class={metaClass}>
+						{#if hackathon.prize}
+							<span aria-hidden="true" class="size-1.5 rounded-full bg-brand"></span>
+							<span class="sr-only">Winner</span>
+						{/if}
+						{yearOf(hackathon.timestamp)}
+					</Command.Shortcut>
 				</Command.Item>
 			{/each}
 		</Command.Group>
 
 		<Command.Separator />
 
-		<Command.Group heading="Other Hackathons">
-			{#each otherHackathonsList as hackathon (hackathon.id)}
-				{@const icon = getHackathonIcon(hackathon.id)}
-				<Command.Item value={`hackathon-${hackathon.id}`} onSelect={() => navigate(`/hackathons/${hackathon.id}`)}>
-					{#if icon}
-						<EnhancedImage
-							src={icon}
-							alt={hackathon.title}
-							skeletonClass="rounded"
-							containerClass="size-6 shrink-0"
-							class="size-6 rounded object-contain"
-						/>
-					{:else}
-						<MapPinIcon />
-					{/if}
-					<div class="flex flex-col">
-						<span>{hackathon.title}</span>
-						<span class="text-xs text-muted-foreground">
-							{hackathon.organizer} · {hackathon.location}
-						</span>
-					</div>
-				</Command.Item>
-			{/each}
-		</Command.Group>
-
-		<Command.Separator />
-
-		<Command.Group heading="Socials">
-			<Command.Item value="social-github" onSelect={() => openExternal('https://github.com/jaykerkar0405')}>
+		<Command.Group value="socials" heading={`Socials · ${socialCount}`} class={headingClass}>
+			<Command.Item
+				value="social-github"
+				onSelect={() => openExternal('https://github.com/jaykerkar0405')}
+				class={rowClass}
+			>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -342,12 +311,16 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>GitHub</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">GitHub</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item value="social-linkedin" onSelect={() => openExternal('https://in.linkedin.com/in/jaykerkar0405')}>
+			<Command.Item
+				value="social-linkedin"
+				onSelect={() => openExternal('https://in.linkedin.com/in/jaykerkar0405')}
+				class={rowClass}
+			>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -358,12 +331,12 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>LinkedIn</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">LinkedIn</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item value="social-x" onSelect={() => openExternal('https://x.com/jaykerkar0405')}>
+			<Command.Item value="social-x" onSelect={() => openExternal('https://x.com/jaykerkar0405')} class={rowClass}>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -374,12 +347,16 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>X</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">X</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
-			<Command.Item value="social-leetcode" onSelect={() => openExternal('https://leetcode.com/u/jaykerkar0405')}>
+			<Command.Item
+				value="social-leetcode"
+				onSelect={() => openExternal('https://leetcode.com/u/jaykerkar0405')}
+				class={rowClass}
+			>
 				<svg
 					fill="currentColor"
 					class="size-4 shrink-0"
@@ -390,11 +367,21 @@
 						<path {d} />
 					{/each}
 				</svg>
-				<span>LeetCode</span>
-				<Command.Shortcut>
+				<span class="min-w-0 flex-1 truncate">LeetCode</span>
+				<Command.Shortcut class={metaClass}>
 					<ExternalLinkIcon class="size-3" />
 				</Command.Shortcut>
 			</Command.Item>
 		</Command.Group>
 	</Command.List>
+
+	<div
+		aria-hidden="true"
+		class="-mx-1 -mb-1 hidden items-center gap-4 border-t px-3 py-2 font-mono text-xs text-muted-foreground sm:flex"
+	>
+		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">↑↓</Kbd> navigate</span>
+		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">↵</Kbd> open</span>
+		<span class="inline-flex items-center gap-1.5"><Kbd class="font-mono">esc</Kbd> close</span>
+		<span class="ml-auto tabular-nums">{searchableItems.length} entries</span>
+	</div>
 </Command.Dialog>

@@ -18,29 +18,54 @@
 @import 'tw-animate-css';
 @plugin '@tailwindcss/typography';
 @custom-variant dark (&:is(.dark *));
+/* shadcn-svelte's components are written against shorthand variants (data-open:, data-closed:,
+   data-horizontal:, data-vertical:) that Tailwind v4 reads as "has a data-open attribute". bits-ui
+   sets data-state / data-orientation instead, so define the shorthands against those. Tooltip uses
+   delayed-open / instant-open for its open state. */
+@custom-variant data-open (&:is([data-state='open'], [data-state='delayed-open'], [data-state='instant-open'], [data-open]));
+@custom-variant data-closed (&:is([data-state='closed'], [data-closed]));
+@custom-variant data-horizontal (&:is([data-orientation='horizontal'], [data-horizontal]));
+@custom-variant data-vertical (&:is([data-orientation='vertical'], [data-vertical]));
 
 :root {
 	--font-sans: 'Akt', sans-serif;
 	--font-mono: 'Geist Mono', monospace;
-	--radius: 0.625rem;
+	/* Not a rectangle radius any more: the theme's rounded-* scale below is fixed at 4 / 8 / 12px. This value only
+	   feeds the calc(var(--radius) - Npx) expressions inside ui/ (input-group): 7px makes the -3px one land on 4px. */
+	--radius: 0.4375rem;
 	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
+	--foreground: oklch(0.18 0 0);
+	--surface: oklch(0.985 0 0);
+	--card: var(--surface);
+	--card-foreground: oklch(0.18 0 0);
+	--popover: var(--surface);
+	--popover-foreground: oklch(0.18 0 0);
+	--primary: oklch(0.18 0 0);
+	--primary-foreground: oklch(1 0 0);
+	--secondary: oklch(0.965 0 0);
+	--secondary-foreground: oklch(0.18 0 0);
+	--muted: oklch(0.965 0 0);
+	--muted-foreground: oklch(0.45 0 0);
+	--accent: oklch(0.965 0 0);
+	--accent-foreground: oklch(0.18 0 0);
 	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
+	--border: oklch(0.91 0 0);
+	--input: oklch(0.91 0 0);
+	--ring: var(--brand);
+	--brand: oklch(0.51 0.16 240);
+	--brand-soft: color-mix(in srgb, var(--brand) 8%, var(--background));
+	--brand-foreground: oklch(0.99 0 0);
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+	--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+	--dur-1: 140ms;
+	--dur-2: 260ms;
+	--dur-3: 400ms;
+	--dur-page: 160ms;
+	--header-h: 3.5rem;
+	--gap-section: 4rem;
+	--gap-heading: 1.5rem;
+	--gap-header-title: 2rem;
+	--gap-title-content: 2rem;
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
@@ -58,23 +83,27 @@
 
 .dark {
 	--background: oklch(0 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.15 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.15 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.922 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
+	--foreground: oklch(0.95 0 0);
+	--surface: oklch(0.155 0 0);
+	--card: var(--surface);
+	--card-foreground: oklch(0.95 0 0);
+	--popover: var(--surface);
+	--popover-foreground: oklch(0.95 0 0);
+	--primary: oklch(0.95 0 0);
+	--primary-foreground: oklch(0 0 0);
+	--secondary: oklch(0.215 0 0);
+	--secondary-foreground: oklch(0.95 0 0);
+	--muted: oklch(0.215 0 0);
+	--muted-foreground: oklch(0.72 0 0);
+	--accent: oklch(0.215 0 0);
+	--accent-foreground: oklch(0.95 0 0);
 	--destructive: oklch(0.704 0.191 22.216);
-	--border: oklch(1 0 0 / 10%);
-	--input: oklch(1 0 0 / 15%);
-	--ring: oklch(0.556 0 0);
+	--border: oklch(1 0 0 / 14%);
+	--input: oklch(1 0 0 / 18%);
+	--ring: var(--brand);
+	--brand: oklch(0.8 0.13 225);
+	--brand-soft: color-mix(in srgb, var(--brand) 16%, var(--background));
+	--brand-foreground: oklch(0 0 0);
 	--chart-1: oklch(0.488 0.243 264.376);
 	--chart-2: oklch(0.696 0.17 162.48);
 	--chart-3: oklch(0.769 0.188 70.08);
@@ -90,15 +119,35 @@
 	--sidebar-ring: oklch(0.556 0 0);
 }
 
+@media (min-width: 1024px) {
+	:root {
+		--header-h: 4.5rem;
+	}
+}
+
+@media (min-width: 768px) {
+	:root {
+		--gap-section: 6rem;
+		--gap-heading: 2rem;
+		--gap-header-title: 4rem;
+		--gap-title-content: 3rem;
+	}
+}
+
 @theme inline {
 	--font-sans: var(--font-sans);
 	--font-mono: var(--font-mono);
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+	--radius-xs: 4px;
+	--radius-sm: 4px;
+	--radius-md: 8px;
+	--radius-lg: 12px;
+	--radius-xl: 12px;
+	--radius-2xl: 12px;
+	--radius-3xl: 12px;
+	--radius-4xl: 12px;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+	--color-surface: var(--surface);
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
 	--color-popover: var(--popover);
@@ -115,6 +164,9 @@
 	--color-border: var(--border);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
+	--color-brand: var(--brand);
+	--color-brand-soft: var(--brand-soft);
+	--color-brand-foreground: var(--brand-foreground);
 	--color-chart-1: var(--chart-1);
 	--color-chart-2: var(--chart-2);
 	--color-chart-3: var(--chart-3);
@@ -131,7 +183,14 @@
 }
 
 @layer base {
+	:root {
+		color-scheme: light;
+	}
+	.dark {
+		color-scheme: dark;
+	}
 	html {
+		background-color: var(--background);
 		scroll-behavior: smooth;
 	}
 	* {
@@ -140,6 +199,9 @@
 	body {
 		font-family: var(--font-sans);
 		@apply bg-background text-foreground;
+		font-variant-numeric: tabular-nums;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
 	}
 	pre,
 	kbd,
@@ -147,7 +209,826 @@
 		font-family: var(--font-mono);
 	}
 	::selection {
-		background-color: var(--primary);
-		color: var(--primary-foreground);
+		background-color: var(--brand);
+		color: var(--brand-foreground);
+	}
+}
+
+@utility bleed {
+	margin-inline: -1.25rem;
+	padding-inline: 1.25rem;
+
+	@media (min-width: 768px) {
+		margin-inline: -2.5rem;
+		padding-inline: 2.5rem;
+	}
+}
+
+@utility label {
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--muted-foreground);
+}
+
+@utility text-display {
+	font-size: clamp(3.5rem, 7.222vw, 6.5rem);
+	font-weight: 700;
+	letter-spacing: -0.035em;
+	line-height: 0.9;
+}
+
+@utility text-page-title {
+	font-size: clamp(2.5rem, 4.444vw, 4rem);
+	font-weight: 700;
+	letter-spacing: -0.025em;
+	line-height: 1;
+	text-wrap: balance;
+}
+
+@utility text-section-title {
+	font-size: 1.75rem;
+	font-weight: 600;
+	letter-spacing: -0.02em;
+	line-height: 1.15;
+	text-wrap: balance;
+}
+
+@utility text-item-title {
+	font-size: 1.375rem;
+	font-weight: 600;
+	letter-spacing: -0.015em;
+	line-height: 1.25;
+	text-wrap: balance;
+}
+
+@utility text-lead {
+	font-size: 1.125rem;
+	line-height: 1.6;
+	color: var(--muted-foreground);
+	text-wrap: pretty;
+}
+
+/* Faint dot grid painted on a pseudo-element behind the host's content, so the
+   mask never touches the host's own text. The host must be a positioned element. */
+@utility dot-grid {
+	isolation: isolate;
+	&::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		pointer-events: none;
+		background-image: radial-gradient(
+			circle at center,
+			color-mix(in oklab, var(--foreground) 5%, transparent) 1px,
+			transparent 1px
+		);
+		background-size: 24px 24px;
+		mask-image: radial-gradient(ellipse 80% 90% at 50% 0%, black 30%, transparent 100%);
+	}
+}
+
+/* Terminal block cursor: visible for the first half of the period, hidden for the second, with a hard
+   step rather than a fade. Under reduced motion it stays visible and does not animate. */
+@keyframes cursor-blink {
+	0% {
+		opacity: 1;
+	}
+	50%,
+	100% {
+		opacity: 0;
+	}
+}
+
+@utility cursor-blink {
+	@media (prefers-reduced-motion: no-preference) {
+		animation: cursor-blink 1s steps(1, end) infinite;
+	}
+}
+
+@utility link-underline {
+	background-image: linear-gradient(currentColor, currentColor);
+	background-repeat: no-repeat;
+	background-position: left bottom;
+	background-size: 0% 1px;
+	transition: background-size var(--dur-1) var(--ease-out);
+	&:hover,
+	&:focus-visible {
+		background-size: 100% 1px;
+	}
+}
+
+/* Long-form prose (project and hackathon write-ups). Use together with the typography plugin: `prose prose-log`.
+   Every colour comes from the tokens, so both themes work without prose-invert. */
+.prose-log {
+	--tw-prose-body: var(--foreground);
+	--tw-prose-headings: var(--foreground);
+	--tw-prose-lead: var(--muted-foreground);
+	--tw-prose-links: var(--brand);
+	--tw-prose-bold: var(--foreground);
+	--tw-prose-counters: var(--muted-foreground);
+	--tw-prose-bullets: var(--muted-foreground);
+	--tw-prose-hr: var(--border);
+	--tw-prose-quotes: var(--foreground);
+	--tw-prose-quote-borders: var(--brand);
+	--tw-prose-captions: var(--muted-foreground);
+	--tw-prose-code: var(--foreground);
+	--tw-prose-pre-code: var(--foreground);
+	--tw-prose-pre-bg: var(--muted);
+	--tw-prose-th-borders: var(--border);
+	--tw-prose-td-borders: var(--border);
+	--prose-measure: 43rem;
+	font-size: 1.0625rem;
+	line-height: 1.75;
+}
+
+.prose-log > :is(p, ul, ol, blockquote) {
+	max-width: var(--prose-measure);
+	overflow-wrap: anywhere;
+}
+
+/* Keep the existing measure where the contents rail is hidden. */
+@media (width < 64rem) {
+	.prose-log {
+		--prose-measure: 30rem;
+	}
+
+	.prose-log > :is(h1, h2, h3, h4, hr) {
+		max-width: var(--prose-measure);
+	}
+}
+
+.prose-log :is(h1, h2, h3, h4) {
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+	scroll-margin-top: 7rem;
+	text-wrap: balance;
+}
+
+.prose-log h1 {
+	font-size: 1.75rem;
+	margin-top: 3rem;
+	margin-bottom: 1rem;
+}
+
+.prose-log h2 {
+	font-size: 1.5rem;
+	margin-top: 2rem;
+	margin-bottom: 0.75rem;
+}
+
+.prose-log h3 {
+	font-size: 1.25rem;
+	margin-top: 1.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.prose-log > :first-child {
+	margin-top: 0;
+}
+
+.prose-log :is(p, li) {
+	text-wrap: pretty;
+}
+
+.prose-log a {
+	color: var(--brand);
+	font-weight: 500;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.prose-log strong {
+	font-weight: 600;
+	color: var(--foreground);
+}
+
+.prose-log :not(pre) > code {
+	font-family: var(--font-mono);
+	font-size: 0.875em;
+	font-weight: 400;
+	background-color: var(--muted);
+	border-radius: 0.25rem;
+	padding: 0.15em 0.4em;
+}
+
+.prose-log code::before,
+.prose-log code::after {
+	content: none;
+}
+
+.prose-log pre {
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	line-height: 1.65;
+	background-color: var(--muted);
+	border: 1px solid var(--border);
+	border-radius: 0.5rem;
+	overflow-x: auto;
+	padding: 1rem 1.25rem;
+}
+
+.prose-log pre code {
+	background: none;
+	padding: 0;
+	font-size: inherit;
+}
+
+.prose-log hr {
+	border-color: var(--border);
+	margin-top: 3rem;
+	margin-bottom: 3rem;
+}
+
+.prose-log :is(ul, ol) {
+	padding-inline-start: 1.5rem;
+}
+
+.prose-log li {
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.prose-log blockquote {
+	border-inline-start: 2px solid var(--brand);
+	font-style: normal;
+	font-weight: 400;
+	padding-inline-start: 1rem;
+}
+
+.prose-log blockquote p::before,
+.prose-log blockquote p::after {
+	content: none;
+}
+
+.prose-log :is(img, video, iframe) {
+	max-width: 100%;
+	height: auto;
+}
+
+.prose-log table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+/* Scroll reveal (see src/lib/components/reveal.ts).
+   The attachment sets data-reveal only after deciding the element is below the fold, and
+   removes every reveal attribute once the transition ends. Scoped to html.js so nothing is
+   hidden without JavaScript. Text uses opacity and translate, and masked media uses clip-path. */
+@media (prefers-reduced-motion: no-preference) {
+	html.js [data-reveal=''],
+	html.js [data-reveal='stagger'] > * {
+		opacity: 0;
+		translate: 0 8px;
+		transition:
+			opacity var(--dur-3) var(--ease-out),
+			translate var(--dur-3) var(--ease-out);
+		transition-delay: var(--reveal-delay, 0ms);
+	}
+
+	html.js [data-reveal=''][data-revealed],
+	html.js [data-reveal='stagger'][data-revealed] > * {
+		opacity: 1;
+		translate: 0 0;
+	}
+
+	html.js [data-reveal='stagger'] > :nth-child(2) {
+		transition-delay: calc(var(--reveal-delay, 0ms) + 1 * 30ms);
+	}
+	html.js [data-reveal='stagger'] > :nth-child(3) {
+		transition-delay: calc(var(--reveal-delay, 0ms) + 2 * 30ms);
+	}
+	html.js [data-reveal='stagger'] > :nth-child(4) {
+		transition-delay: calc(var(--reveal-delay, 0ms) + 3 * 30ms);
+	}
+	html.js [data-reveal='stagger'] > :nth-child(5) {
+		transition-delay: calc(var(--reveal-delay, 0ms) + 4 * 30ms);
+	}
+	html.js [data-reveal='stagger'] > :nth-child(6) {
+		transition-delay: calc(var(--reveal-delay, 0ms) + 5 * 30ms);
+	}
+	html.js [data-reveal='stagger'] > :nth-child(n + 7) {
+		transition-delay: calc(var(--reveal-delay, 0ms) + 6 * 30ms);
+	}
+
+	html.js [data-reveal=''][data-reveal-kind='mask'],
+	html.js [data-reveal='stagger'][data-reveal-kind='mask'] > * {
+		opacity: 1;
+		translate: 0 0;
+		clip-path: inset(0 0 100% 0 round var(--reveal-radius, var(--radius-lg)));
+		transition-property: clip-path;
+		transition-duration: 500ms;
+		transition-timing-function: var(--ease-out);
+	}
+
+	html.js [data-reveal=''][data-reveal-kind='mask'][data-revealed],
+	html.js [data-reveal='stagger'][data-reveal-kind='mask'][data-revealed] > * {
+		clip-path: inset(0 0 0 0 round var(--reveal-radius, var(--radius-lg)));
+	}
+}
+
+/* Hackathons timeline. Nodes sit at 0.6 while their entry is hidden by the scroll reveal and grow to 1 when it is
+   revealed. The spine draws as its group scrolls through the viewport: a scroll-driven scaleY whose tip stays
+   about two thirds down the viewport (the view timeline's bottom edge is inset by 34%, and the animation runs
+   from the subject's top reaching that edge to its bottom reaching it; `entry` would be wrong because for a tall
+   subject it only lasts one viewport). Without support, or without JavaScript
+   (the rules are scoped to html.js), or with reduced motion, the line is simply fully drawn. */
+@keyframes timeline-spine {
+	from {
+		transform: scaleY(0);
+	}
+	to {
+		transform: scaleY(1);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html.js [data-timeline-node] {
+		transition: scale var(--dur-2) var(--ease-out);
+	}
+
+	html.js [data-reveal=''] [data-timeline-node] {
+		scale: 0.6;
+	}
+
+	html.js [data-reveal=''][data-revealed] [data-timeline-node] {
+		scale: 1;
+	}
+}
+
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		html.js [data-timeline-spine] {
+			transform-origin: top;
+			animation: timeline-spine linear both;
+			animation-timeline: view(block 0px 34%);
+			animation-range: cover 0% cover calc(100% - 66vh);
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-timeline-spine] {
+		animation: none;
+	}
+}
+
+/* Home scene (V17): the hero name docks into the header as the page scrolls.
+   The hero's track holds a sticky stage (the wins section, in flow, plus the hero laid over it) and a spacer; the scene
+   plays over --scene of scrolling (70svh, 40svh below 640px), tied to the root scroll position (scroll(root)) and so
+   reversible. The intro fades over the first 23% as the name eases away from it.
+   Wins fades in from 60% to 95%, the header bar from 90% to 100%, and the wordmark swaps at the end. Only opacity and transform
+   (translate, scale) animate, plus discrete steps of z-index and visibility that never show: the stage is above the header
+   until the scene ends (so the name travels over it) and the header above the stage afterwards (so content scrolls under it; both stay under dialogs, which are z-50);
+   a hidden band cannot be clicked.
+   Gate: scroll-driven animations are supported, motion is allowed, JavaScript has run (html.js), and the home track is in
+   the page. Outside it none of these rules apply and the page is the static hero. The end values (--tx, --ty, --k) are
+   set on each word of the name by a small script in +page.svelte. */
+@supports (animation-timeline: scroll()) {
+	@media (prefers-reduced-motion: no-preference) {
+		html.js:has([data-scene-track]) {
+			--scene: 70svh;
+		}
+
+		@media (max-width: 639.98px) {
+			html.js:has([data-scene-track]) {
+				--scene: 40svh;
+			}
+		}
+
+		html.js:has([data-scene-track]) {
+			[data-scene-track] {
+				position: relative;
+			}
+
+			[data-scene-stage] {
+				position: sticky;
+				top: var(--header-h);
+				z-index: 45;
+			}
+
+			[data-scene-spacer] {
+				height: var(--scene);
+			}
+
+			/* The hero lies over the wins section, from the top of the stage. */
+			[data-scene-stage] > section:first-child {
+				position: absolute;
+				inset-inline: 0;
+				top: 0;
+				z-index: 1;
+				pointer-events: none;
+			}
+
+			[data-scene-band] {
+				pointer-events: auto;
+				animation: scene-band linear both;
+				animation-timeline: scroll(root);
+				animation-range: 0px calc(var(--scene) * 0.23);
+			}
+
+			[data-scene-cue] {
+				animation: scene-cue linear both;
+				animation-timeline: scroll(root);
+				animation-range: 0px calc(var(--scene) * 0.05);
+			}
+
+			[data-scene-word] {
+				transform-origin: 0 100%;
+				animation:
+					scene-word cubic-bezier(0.5, 0.1, 0.45, 1) both,
+					scene-swap-out steps(1, end) both;
+				animation-timeline: scroll(root), scroll(root);
+				animation-range:
+					0px var(--scene),
+					0px var(--scene);
+			}
+
+			[data-scene-wins] {
+				position: relative;
+				z-index: 0;
+				animation: scene-wins linear both;
+				animation-timeline: scroll(root);
+				animation-range: calc(var(--scene) * 0.6) calc(var(--scene) * 0.95);
+			}
+
+			[data-site-header] {
+				animation: scene-header-z steps(1, end) both;
+				animation-timeline: scroll(root);
+				animation-range: 0px var(--scene);
+			}
+
+			[data-header-bar],
+			[data-header-hairline] {
+				animation: scene-fade-in linear both;
+				animation-timeline: scroll(root);
+				animation-range: calc(var(--scene) * 0.9) var(--scene);
+			}
+
+			[data-wordmark] {
+				animation: scene-swap-in steps(1, end) both;
+				animation-timeline: scroll(root);
+				animation-range: 0px var(--scene);
+			}
+
+			/* The mobile dock stays above the stage (and below dialogs, which are z-50). */
+			[data-site-dock] {
+				z-index: 49;
+			}
+		}
+
+		html.js:has([data-scene-track]) [data-scene-word] {
+			display: inline-block;
+		}
+	}
+}
+
+@keyframes scene-band {
+	to {
+		opacity: 0;
+		translate: 0 -24px;
+		visibility: hidden;
+	}
+}
+
+@keyframes scene-cue {
+	to {
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+
+@keyframes scene-word {
+	from {
+		translate: 0 0;
+		scale: 1;
+	}
+	to {
+		translate: var(--tx, 0px) var(--ty, 0px);
+		scale: var(--k, 1);
+	}
+}
+
+@keyframes scene-swap-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes scene-swap-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes scene-wins {
+	from {
+		opacity: 0;
+		translate: 0 40%;
+		visibility: hidden;
+	}
+	to {
+		opacity: 1;
+		translate: 0 0;
+		visibility: visible;
+	}
+}
+
+@keyframes scene-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes scene-header-z {
+	from {
+		z-index: 40;
+	}
+	to {
+		z-index: 49;
+	}
+}
+
+/* Home load sequence (V18), on a full load of "/" only: app.html adds html.intro before first paint (see there for the
+   conditions) and the animations below are plain CSS from the first frame, so nothing waits for JavaScript. The letters of the
+   name rise from behind a clip, 25ms apart (letter 0 at 0ms, the last of nine at 200ms, 300ms each: 500ms in all); the bands
+   fade in together from 250ms to 650ms; "SCROLL" at 700ms. Only opacity and translate, and only on elements the scroll scene
+   does not animate: the letters sit inside the scene's word spans and the fades are on the bands' children and on a span inside
+   the cue. Every animation ends at the element's normal state, so removing the class (the page does, at the end or on the first
+   scroll or key press) leaves nothing applied. The clip is only applied while the class is present, and reaches 0.2em below the
+   box (the descender of "y" is under the baseline) and 0.1em above and beside it. */
+.intro-clip,
+.intro-letter {
+	display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html.intro {
+		.intro-clip {
+			clip-path: inset(-0.1em -0.15em -0.2em -0.15em);
+		}
+
+		.intro-letter {
+			animation: intro-rise 300ms var(--ease-out) calc(var(--i) * 25ms) backwards;
+		}
+
+		[data-scene-band] > * {
+			animation: intro-fade var(--dur-3) linear 250ms backwards;
+		}
+
+		[data-intro-cue] {
+			animation: intro-fade var(--dur-2) linear 700ms backwards;
+		}
+	}
+}
+
+@keyframes intro-rise {
+	from {
+		translate: 0 1.1em;
+	}
+}
+
+@keyframes intro-fade {
+	from {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html.js [data-scroll-cue-line] {
+		animation: draw-scroll-cue 1.6s linear infinite;
+	}
+}
+
+@keyframes draw-scroll-cue {
+	from {
+		transform: scaleY(0);
+		opacity: 1;
+	}
+	60%,
+	75% {
+		transform: scaleY(1);
+		opacity: 1;
+	}
+	to {
+		transform: scaleY(1);
+		opacity: 0;
+	}
+}
+
+/* View transitions (see onNavigate in src/routes/+layout.svelte).
+   The root snapshot (everything not separately named: main and the footer) crossfades in
+   --dur-page (160 ms). The header and mobile dock are named so they stay pinned: only the new snapshot
+   is shown, with no crossfade. Other named groups, used later for shared elements, move
+   with --dur-2 / --ease-out; the root group is excluded so its --dur-page is untouched. */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: var(--dur-page);
+	animation-timing-function: ease;
+}
+
+::view-transition-group(*) {
+	animation-duration: var(--dur-2);
+	animation-timing-function: var(--ease-out);
+}
+
+::view-transition-group(root) {
+	animation-duration: var(--dur-page);
+	animation-timing-function: ease;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-dock) {
+	display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-dock) {
+	animation: none;
+	opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
+
+/* Keep the header, dock and shared elements in the root snapshots during a theme switch. */
+html[data-theme-switch] * {
+	view-transition-name: none !important;
+}
+
+html[data-theme-switch]::view-transition-old(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+html[data-theme-switch]::view-transition-new(root) {
+	animation: theme-reveal 500ms var(--ease-in-out) both;
+	mix-blend-mode: normal;
+}
+
+@keyframes theme-reveal {
+	from {
+		clip-path: circle(0 at var(--theme-x) var(--theme-y));
+	}
+	to {
+		clip-path: circle(var(--theme-r) at var(--theme-x) var(--theme-y));
+	}
+}
+
+@supports (animation-timeline: scroll()) {
+	@media (prefers-reduced-motion: no-preference) {
+		html.js [data-read-progress] {
+			display: block;
+			/* Firefox needs a nonzero duration. The root scroll timeline still sets the progress. */
+			animation: read-progress 1ms linear both;
+			animation-timeline: scroll(root);
+		}
+	}
+}
+
+@keyframes read-progress {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
+/* Without JavaScript the loading placeholders (screenshot frames) never resolve, so they stay as still reserved
+   frames instead of pulsing forever. */
+html:not(.js) .animate-pulse {
+	animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	::before,
+	::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* Keyboard focus ring at full strength.
+   shadcn components and the site's own components all write `ring-ring/50`, which resolves to
+   `--tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent)`: the brand colour at half opacity,
+   only 1.64:1 against the light page. `ring-3` then paints a 3 px box-shadow in `--tw-ring-color`.
+   This rule sets that variable to the full `--ring` wherever a focus ring is showing, without touching the
+   ~30 files that carry the class. It is deliberately outside any `@layer`: unlayered rules beat every
+   layered one (utilities included), whatever the specificity. `--tw-ring-color` is registered with
+   `inherits: false`, so it only affects the element it is set on: the `ring-2 ring-background` avatar halo
+   and other non-focus rings keep their own colour, and no ring appears that the utilities did not already
+   draw (the colour is only consumed where a `ring-*` width is applied).
+   - `:focus-visible`: elements that show the ring themselves.
+   - `:has(...)`: stretched-link containers (project row, spotlight, timeline entry) and the search input group
+     show the ring on a parent when the inner control has keyboard focus.
+   Invalid fields keep their destructive ring colour. */
+:focus-visible:not([aria-invalid='true']),
+:has([data-main-link]:focus-visible),
+:has([data-slot='input-group-control']:focus-visible) {
+	--tw-ring-color: var(--ring);
+}
+
+:focus-visible {
+	outline-color: var(--ring);
+}
+
+/* The search palette's input group draws no focus ring (`shadow-none!` in the command input, whose data-slot also
+   replaces `input-group-control`, so the has() ring never matched), so keyboard focus was only a caret. It gets a
+   2 px outline in the full ring colour while the field has focus (an outline, since the box-shadow is forced off). */
+[data-slot='command-input-wrapper'] [data-slot='input-group']:has([data-slot='command-input']:focus-visible) {
+	outline: 2px solid var(--ring);
+}
+
+/* Shape rule (V02): corners that no class on the call site can reach. These are shadcn internals in ui/, which is not
+   edited, so each one is keyed on its data-slot and kept as narrow as possible. They sit in the utilities layer with
+   !important because the ui/ classes they replace (rounded-lg!) are important utilities: an unlayered rule would lose.
+   - The search palette's input group is hard-coded to rounded-lg! (12px) inside CommandInput; fields are 8px.
+   - The tooltip arrow is a 10px square rotated 45deg with rounded-[2px], which is off the scale. It is a pointer, not a
+     box, so it gets 0.
+   - The scroll area's thumb is a 7px-tall bar with rounded-full, a pill rather than a circle. 4px renders identically
+     (the radius is clamped to half the height) and is on the scale. */
+@layer utilities {
+	[data-slot='command-input-wrapper'] [data-slot='input-group'] {
+		border-radius: var(--radius-md) !important;
+	}
+
+	[data-slot='tooltip-content'] > div[data-side] {
+		border-radius: 0;
+	}
+
+	[data-slot='scroll-area-scrollbar'] [data-slot='scroll-area-thumb'] {
+		border-radius: var(--radius-sm);
+	}
+}
+
+/* Button press (§6.4): scale 0.98 over 100ms. The shadcn button presses by 1px (active:translate-y-px) with a 150ms
+   transition-all; the ui/ file is not edited, so the translation is cancelled here and the press scales instead. Menu
+   triggers (aria-haspopup) are not pressed by the ui/ rule either. Under reduced motion nothing moves. */
+@media (prefers-reduced-motion: no-preference) {
+	@layer utilities {
+		[data-slot='button'] {
+			transition-duration: 100ms;
+		}
+
+		[data-slot='button']:active:not([aria-haspopup]) {
+			--tw-translate-y: 0px !important;
+			scale: 0.98;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	@layer utilities {
+		[data-slot='button']:active:not([aria-haspopup]) {
+			--tw-translate-y: 0px !important;
+		}
+	}
+}
+
+/* Segmented control (V04; src/lib/components/segmented.ts). The sliding block is the container's ::before, clipped to
+   the active segment with the insets the attachment writes as custom properties, so its corners are the segment's own
+   radius on every frame. It only exists once measured (data-segmented-ready); until then the active segment has its
+   own fill, which this block turns transparent in the same frame. Only clip-path animates, and only after load. */
+[data-segmented-ready]::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background-color: var(--foreground);
+	clip-path: inset(var(--seg-t) var(--seg-r) var(--seg-b) var(--seg-l) round var(--seg-radius));
+}
+
+[data-segmented-ready][data-segmented-empty]::before {
+	opacity: 0;
+}
+
+[data-segmented-ready] > :is([aria-current='page'], [data-state='on']) {
+	background-color: transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	[data-segmented-animate]::before {
+		transition: clip-path var(--dur-2) var(--ease-out);
 	}
 }

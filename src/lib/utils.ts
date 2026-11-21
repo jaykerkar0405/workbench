@@ -26,6 +26,19 @@ export const formatDateRange = (timestamp: string, duration: number): string => 
 	return `${fmt(start, { month: 'short', day: 'numeric' })} – ${fmt(end, { month: 'short', day: 'numeric' })}, ${end.getFullYear()}`;
 };
 
+export const formatDuration = (hours: number): string => {
+	const pluralise = (n: number, unit: string): string => `${n} ${unit}${n === 1 ? '' : 's'}`;
+
+	if (hours < 72) {
+		return pluralise(hours, 'hour');
+	}
+
+	return pluralise(Math.round(hours / 24), 'day');
+};
+
+/** A valid CSS <custom-ident> for `view-transition-name`: dots, slashes etc. in ids become hyphens. */
+export const viewTransitionName = (kind: string, id: string): string => `${kind}-${id}`.replace(/[^A-Za-z0-9_-]/g, '-');
+
 export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
 
