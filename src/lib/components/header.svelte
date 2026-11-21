@@ -105,7 +105,7 @@
 				onclick={goTop}
 				class="relative flex h-9 items-center gap-2.5 justify-self-start rounded-sm focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
 			>
-				<EnhancedImage src={logo} alt="" class="size-8 rounded-sm" skeletonClass="rounded-sm" />
+				<EnhancedImage src={logo} alt="" class="size-8 rounded-sm border" skeletonClass="rounded-sm" />
 				<!-- Two spans with a real space, so the home scene can land each word of the hero name on its own word. The
 				tracking matches the hero name (-0.04em) so the swap at the end of the scene is invisible. -->
 				<span data-wordmark class="text-lg font-bold tracking-[-0.04em]"

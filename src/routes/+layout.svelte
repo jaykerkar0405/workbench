@@ -51,7 +51,7 @@
 	});
 </script>
 
-<ModeWatcher />
+<ModeWatcher themeColors={{ dark: '#000000', light: '#ffffff' }} />
 
 <div class="relative max-lg:pb-[calc(6rem+env(safe-area-inset-bottom))]">
 	<Header />
