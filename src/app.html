@@ -73,26 +73,6 @@
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 
-		<!-- No-JS only. The 404.html fallback shell's container holds just the boot script; any prerendered page has
-			elements in it and hides this. Self-contained: the stylesheet does not apply to a shell. -->
-		<!-- prettier-ignore -->
-		<noscript>
-			<style>
-				@font-face { font-family: 'Akt'; font-weight: 100 900; src: url('/fonts/akt.woff2') format('woff2'); }
-				div[style='display: contents']:has(> :not(script)) ~ noscript .no-js-404 { display: none; }
-				.no-js-404 { max-width: 40rem; margin: 0 auto; padding: 5rem 1.25rem; font: 1.125rem/1.6 'Akt', system-ui, sans-serif; color: oklch(0.18 0 0); }
-				@media (prefers-color-scheme: dark) {
-					html:not(:has(body > div[style='display: contents'] > :not(script))) {
-						--background: #000;
-						background: #000;
-						color-scheme: dark;
-					}
-					.no-js-404 { color: oklch(0.95 0 0); }
-				}
-			</style>
-			<p class="no-js-404">This page needs JavaScript, or the address does not exist. <a href="/" style="color: inherit">Go to the homepage</a>.</p>
-		</noscript>
-
 		<script>
 			if ('serviceWorker' in navigator) {
 				window.addEventListener('load', () => {

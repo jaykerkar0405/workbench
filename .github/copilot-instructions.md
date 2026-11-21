@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a **Svelte 5 + SvelteKit** portfolio site using **static adapter** for deployment. It supports Markdown content via **mdsvex** and uses **Tailwind CSS v4** for styling.
+This is a **Svelte 5 + SvelteKit** portfolio site using the **Vercel adapter** for deployment. It supports Markdown content via **mdsvex** and uses **Tailwind CSS v4** for styling.
 
 ## Tech Stack & Key Files
 
@@ -19,7 +19,7 @@ This is a **Svelte 5 + SvelteKit** portfolio site using **static adapter** for d
 
 - **File Extensions**: `.svelte` for components, `.svx` for Markdown content (mdsvex)
 - **Alias**: `$lib` maps to `src/lib/` - use for shared components, utilities, and assets
-- **Static Site**: Uses `@sveltejs/adapter-static` - all pages are pre-rendered at build time
+- **Deployment** uses `@sveltejs/adapter-vercel`. Known pages are prerendered at build time and the server handles unknown routes.
 
 ## Svelte 5 Patterns (Runes)
 
@@ -82,7 +82,7 @@ pnpm dlx shadcn-svelte@latest add <component>
 pnpm dev          # Start dev server
 pnpm lint         # Run Prettier + ESLint
 pnpm check        # TypeScript + Svelte type checking
-pnpm build        # Build static site
+pnpm build        # Build for Vercel
 pnpm format       # Auto-format with Prettier
 pnpm preview      # Preview production build
 ```
@@ -158,7 +158,7 @@ You are a Svelte expert tasked to build components and utilities for Svelte deve
 - `kit/load` - data fetching, api calls, database queries, ssr data
 - `kit/form-actions` - forms, user input, authentication, validation
 - `kit/page-options` - prerendering, ssr config, spa setup
-- `kit/adapter-static` - static site generation, github pages, blogs
+- `kit/adapter-vercel` - Vercel deployment and serverless routing
 - `kit/hooks` - authentication, logging, middleware, session management
 - `kit/errors` - error handling, custom error pages, 404 pages
 - `kit/$app-environment` - conditional logic, client/server detection
