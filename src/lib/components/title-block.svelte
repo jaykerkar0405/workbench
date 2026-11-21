@@ -29,9 +29,8 @@
 	} = $props();
 </script>
 
-<!-- One left-aligned column: breadcrumb, icon and title (with the badge on the title's last baseline), summary, actions. -->
-<header class={cn('flex flex-col', className)}>
-	<Breadcrumb.Root>
+<header class={cn('grid', actions && 'md:grid-cols-[minmax(0,1fr)_auto] md:gap-x-6', className)}>
+	<Breadcrumb.Root class="md:col-span-full">
 		<Breadcrumb.List class="gap-2 font-mono text-xs tracking-[0.06em] uppercase">
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href={parent.href} class="link-underline">{parent.label}</Breadcrumb.Link>
@@ -76,11 +75,14 @@
 	</div>
 
 	{#if summary}
-		<p class="mt-4 max-w-2xl text-lead">{summary}</p>
+		<p class="mt-4 max-w-2xl text-lead md:col-span-full">{summary}</p>
 	{/if}
 
 	{#if actions}
-		<div class="mt-6 flex flex-wrap items-center gap-3">
+		<!-- One title line sets the alignment even when the heading wraps. -->
+		<div
+			class="mt-6 flex flex-wrap items-center gap-3 md:col-start-2 md:row-start-2 md:mt-8 md:h-lh md:self-start md:justify-self-end md:text-page-title md:font-normal md:tracking-normal"
+		>
 			{@render actions()}
 		</div>
 	{/if}

@@ -141,6 +141,13 @@
 		titleTransitionName={viewTransitionName('project-title', project.id)}
 	>
 		{#snippet actions()}
+			{#if repoData}
+				<span class="label tabular-nums">
+					<span aria-hidden="true">★ {formatNumber(repoData.stargazers_count)}</span>
+					<span class="sr-only">{formatNumber(repoData.stargazers_count)} GitHub stars</span>
+				</span>
+			{/if}
+
 			{#if project.deployedLink}
 				<Button href={project.deployedLink} target="_blank" rel="noopener noreferrer" class="rounded-md">Live ↗</Button>
 			{/if}
@@ -153,13 +160,6 @@
 				</svg>
 				GitHub ↗
 			</Button>
-
-			{#if repoData}
-				<span class="label tabular-nums">
-					<span aria-hidden="true">★ {formatNumber(repoData.stargazers_count)}</span>
-					<span class="sr-only">{formatNumber(repoData.stargazers_count)} GitHub stars</span>
-				</span>
-			{/if}
 		{/snippet}
 	</TitleBlock>
 
