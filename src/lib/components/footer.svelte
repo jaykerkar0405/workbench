@@ -87,7 +87,7 @@
 			>
 				<div>
 					<p class="mb-4 label">Get in touch</p>
-					<h2 class="text-page-title text-balance">Let’s build something.</h2>
+					<h2 class="text-page-title">Let’s build something.</h2>
 				</div>
 
 				<div class="flex flex-wrap items-baseline gap-x-6 gap-y-3 lg:flex-nowrap">
