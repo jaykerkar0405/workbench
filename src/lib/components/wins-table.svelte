@@ -108,7 +108,7 @@
 		</p>
 
 		<div class="-mx-3 max-md:mx-0 md:overflow-x-auto">
-			<table class="w-full border-separate border-spacing-0 text-left whitespace-nowrap md:w-max">
+			<table class="w-full border-separate border-spacing-0 text-left whitespace-nowrap md:min-w-max">
 				<caption class="sr-only">Hackathon wins, newest first</caption>
 				<thead class={cn('text-muted-foreground max-md:sr-only', pending(1))}>
 					<tr>

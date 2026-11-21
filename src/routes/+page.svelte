@@ -312,6 +312,17 @@
 					<p class="mt-4 max-w-sm text-muted-foreground">
 						{winCount} of {hackathons.length} hackathons ended on a podium or a track prize.
 					</p>
+					<a
+						href="/hackathons"
+						class="group/wins mt-6 inline-flex items-baseline gap-1 rounded-sm link-underline text-sm font-medium transition-none outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+					>
+						All hackathons
+						<span
+							aria-hidden="true"
+							class="inline-block motion-safe:transition-transform motion-safe:duration-(--dur-1) motion-safe:ease-(--ease-out) motion-safe:group-hover/wins:translate-x-1 motion-safe:group-focus-visible/wins:translate-x-1"
+							>→</span
+						>
+					</a>
 				</div>
 
 				<WinsTable bind:this={winsTable} autoplay={!sceneSupported} class="lg:col-span-8" />

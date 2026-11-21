@@ -549,7 +549,7 @@
    The hero's track holds a sticky stage (the wins section, in flow, plus the hero laid over it) and a spacer; the scene
    plays over --scene of scrolling (70svh, 40svh below 640px), tied to the root scroll position (scroll(root)) and so
    reversible. Everything is on the root scroll timeline, with ranges as fractions of --scene: the name 0 to 1, the bands
-   0 to 0.35, the wins section 0.35 to 0.85, the header's bar 0.85 to 1, and the swap at exactly 1. Only opacity and transform
+   0 to 0.35, the wins section 0.55 to 0.95, the header's bar 0.9 to 1, and the swap at exactly 1. Only opacity and transform
    (translate, scale) animate, plus discrete steps of z-index and visibility that never show: the stage is above the header
    until the scene ends (so the name travels over it) and the header above the stage afterwards (so content scrolls under it; both stay under dialogs, which are z-50);
    a hidden band cannot be clicked.
@@ -630,7 +630,7 @@
 				z-index: 0;
 				animation: scene-wins linear both;
 				animation-timeline: scroll(root);
-				animation-range: calc(var(--scene) * 0.35) calc(var(--scene) * 0.85);
+				animation-range: calc(var(--scene) * 0.55) calc(var(--scene) * 0.95);
 			}
 
 			[data-site-header] {
@@ -643,7 +643,7 @@
 			[data-header-hairline] {
 				animation: scene-fade-in linear both;
 				animation-timeline: scroll(root);
-				animation-range: calc(var(--scene) * 0.85) var(--scene);
+				animation-range: calc(var(--scene) * 0.9) var(--scene);
 			}
 
 			[data-wordmark] {
