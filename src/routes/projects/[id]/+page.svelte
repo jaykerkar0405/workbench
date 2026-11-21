@@ -127,6 +127,58 @@
 			observer?.disconnect();
 		};
 	});
+
+	const railIndicator = (wrapper: HTMLDivElement) => {
+		const marker = wrapper.querySelector<HTMLElement>('[data-rail-marker]');
+		if (!marker) return;
+
+		let readyFrame = 0;
+		let cancelled = false;
+		const measure = () => {
+			const link = wrapper.querySelector<HTMLAnchorElement>('a[aria-current="true"]');
+			if (!link?.offsetHeight) {
+				marker.style.opacity = '0';
+				marker.removeAttribute('data-ready');
+				cancelAnimationFrame(readyFrame);
+				return;
+			}
+
+			marker.style.setProperty('--rail-y', `${link.offsetTop + 4}px`);
+			marker.style.setProperty('--rail-h', `${link.offsetHeight - 8}px`);
+			marker.style.opacity = '1';
+
+			// Paint the first measured position before enabling transitions.
+			if (!marker.hasAttribute('data-ready')) {
+				cancelAnimationFrame(readyFrame);
+				readyFrame = requestAnimationFrame(() => {
+					readyFrame = requestAnimationFrame(() => marker.setAttribute('data-ready', ''));
+				});
+			}
+		};
+
+		// A new size changes the geometry of the same item, so it should stay beside the link.
+		const snap = () => {
+			marker.removeAttribute('data-ready');
+			measure();
+		};
+
+		$effect(() => {
+			void currentId;
+			void sections;
+			measure();
+		});
+
+		window.addEventListener('resize', snap);
+		document.fonts.ready.then(() => {
+			if (!cancelled) snap();
+		});
+
+		return () => {
+			cancelled = true;
+			cancelAnimationFrame(readyFrame);
+			window.removeEventListener('resize', snap);
+		};
+	};
 </script>
 
 <Seo title="{project.title} | Projects | Jay Kerkar" description={project.shortDescription} />
@@ -200,22 +252,30 @@
 				>
 					<nav aria-label="On this page">
 						<p class="mb-3 label">On this page</p>
-						<ul class="flex flex-col">
-							{#each sections as section (section.id)}
-								<li>
-									<a
-										href={`#${section.id}`}
-										aria-current={currentId === section.id ? 'true' : undefined}
-										class={cn(
-											'relative block rounded-sm py-1.5 pl-4 text-sm text-pretty transition-colors duration-(--dur-1) ease-(--ease-out) outline-none before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50',
-											currentId === section.id ? 'text-foreground before:opacity-100' : 'text-muted-foreground'
-										)}
-									>
-										{section.text}
-									</a>
-								</li>
-							{/each}
-						</ul>
+						<div class="relative" {@attach railIndicator}>
+							<span
+								aria-hidden="true"
+								data-rail-marker
+								class="pointer-events-none absolute top-0 left-0 w-0.5 bg-brand opacity-0 motion-safe:data-[ready]:transition-[translate,height] motion-safe:data-[ready]:duration-(--dur-2) motion-safe:data-[ready]:ease-(--ease-out)"
+								style="height: var(--rail-h, 0px); translate: 0 var(--rail-y, 0px)"
+							></span>
+							<ul class="relative flex flex-col">
+								{#each sections as section (section.id)}
+									<li>
+										<a
+											href={`#${section.id}`}
+											aria-current={currentId === section.id ? 'true' : undefined}
+											class={cn(
+												'relative block rounded-sm py-1.5 pl-4 text-sm text-pretty transition-colors duration-(--dur-1) ease-(--ease-out) outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50',
+												currentId === section.id ? 'text-foreground' : 'text-muted-foreground'
+											)}
+										>
+											{section.text}
+										</a>
+									</li>
+								{/each}
+							</ul>
+						</div>
 					</nav>
 				</aside>
 			{/if}
