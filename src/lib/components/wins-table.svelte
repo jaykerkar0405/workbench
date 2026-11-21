@@ -3,17 +3,15 @@
 	prize has a rank or a label (newest first, joined to its project), a closing line and a final prompt with the cursor.
 	Everything is derived from the data. Each row is one link to the hackathon (a stretched link in the EVENT cell).
 
-	Printing: once, when the table is in view (or when `play()` is called, the hook for the scroll transition), the command
-	types in about 400ms and the rows print one every 45ms, opacity only. Every row is always in the layout, so the box
-	never changes size. The not-yet-printed parts are hidden only under `html.js` and motion-safe and from md up, so
-	without JavaScript, under reduced motion and on a phone the whole table is simply there.
+	The command types and the rows print once the terminal is in view and the scroll scene has finished. Unprinted rows
+	keep their space. Without JavaScript or with reduced motion, the complete transcript is visible immediately.
 -->
 <script lang="ts">
 	import { cn } from '$lib/utils';
 	import { orderedHackathons, projectFor } from '$lib/components/hackathon-order';
 	import Terminal from '$lib/components/terminal.svelte';
 
-	let { autoplay = true, class: className }: { autoplay?: boolean; class?: string } = $props();
+	let { sceneSpacer, class: className }: { sceneSpacer: HTMLElement | null; class?: string } = $props();
 
 	// Same labels as the prize badge (which keeps its own copy).
 	const rankLabels = { '1st': '1st place', '2nd': '2nd place', '3rd': '3rd place' } as const;
@@ -35,76 +33,78 @@
 	const closing = `${plural(rows.length, 'win', 'wins')} · ${plural(orderedHackathons.length, 'event', 'events')}`;
 
 	const command = 'wins --sort date';
-	const COMMAND_MS = 400;
-	const ROW_MS = 45;
+	const COMMAND_MS = 650;
+	const ROW_MS = 90;
 	// Steps after the command: the header row, each data row, the closing line, the final prompt.
 	const steps = rows.length + 3;
 
-	let root = $state<HTMLElement | null>(null);
-	let started = $state(false);
-	let typed = $state(command.length);
+	let typed = $state(0);
 	let printed = $state(0);
-	let timers: ReturnType<typeof setTimeout>[] = [];
-	let played = false;
 
-	const showAll = () => {
-		started = true;
-		typed = command.length;
-		printed = steps;
-	};
-
-	/** Starts the print (once). Called by the in-view trigger, or from outside with `autoplay={false}`. */
-	export function play() {
-		if (played) return;
-		played = true;
-		started = true;
-		typed = 0;
-		const per = COMMAND_MS / command.length;
-		for (let i = 1; i <= command.length; i += 1) timers.push(setTimeout(() => (typed = i), i * per));
-		for (let i = 1; i <= steps; i += 1) timers.push(setTimeout(() => (printed = i), COMMAND_MS + i * ROW_MS));
-	}
-
-	$effect(() => {
-		const el = root;
-		if (!el) return;
-
-		// Phones and reduced motion: everything at once.
-		if (matchMedia('(prefers-reduced-motion: reduce)').matches || !matchMedia('(min-width: 768px)').matches) {
-			showAll();
+	function observeTerminal(terminal: HTMLElement) {
+		if (typeof IntersectionObserver === 'undefined') {
+			typed = command.length;
+			printed = steps;
 			return;
 		}
-		if (!autoplay) return;
+
+		const motion = matchMedia('(prefers-reduced-motion: no-preference)');
+		const threshold = 0.25;
+		const timers: ReturnType<typeof setTimeout>[] = [];
+		let inView = false;
+		let played = false;
+
+		const playWhenVisible = () => {
+			if (played || !inView || !motion.matches) return;
+			// The sticky scene puts the terminal in the viewport before the Wins section is fully visible.
+			if (window.scrollY + 1 < (sceneSpacer?.getBoundingClientRect().height ?? 0)) return;
+
+			played = true;
+			stopWatching();
+			for (let i = 1; i <= command.length; i += 1) {
+				timers.push(setTimeout(() => (typed = i), (COMMAND_MS * i) / command.length));
+			}
+			for (let i = 1; i <= steps; i += 1) {
+				timers.push(setTimeout(() => (printed = i), COMMAND_MS + i * ROW_MS));
+			}
+		};
 
 		const observer = new IntersectionObserver(
 			(entries) => {
-				if (entries.some((entry) => entry.isIntersecting)) {
-					observer.disconnect();
-					play();
-				}
+				inView = (entries.at(-1)?.intersectionRatio ?? 0) >= threshold;
+				playWhenVisible();
 			},
-			{ threshold: 0.4 }
+			{ threshold }
 		);
-		observer.observe(el);
+
+		const stopWatching = () => {
+			observer.disconnect();
+			window.removeEventListener('scroll', playWhenVisible);
+			window.removeEventListener('resize', playWhenVisible);
+			motion.removeEventListener('change', playWhenVisible);
+		};
+		observer.observe(terminal);
+		window.addEventListener('scroll', playWhenVisible, { passive: true });
+		window.addEventListener('resize', playWhenVisible);
+		motion.addEventListener('change', playWhenVisible);
 
 		return () => {
-			observer.disconnect();
+			stopWatching();
 			for (const timer of timers) clearTimeout(timer);
-			timers = [];
 		};
-	});
+	}
 
-	// Hidden until printed, only with JavaScript, motion allowed, from md up.
-	const hide = 'motion-safe:md:in-[.js]:opacity-0';
+	const hide = 'motion-safe:in-[.js]:invisible';
 	const pending = (step: number) => (printed >= step ? undefined : hide);
 
 	const cell = 'py-0 pr-4 text-left align-top font-normal whitespace-nowrap md:first:pl-3 md:last:pr-3 xl:pr-6';
 </script>
 
-<div bind:this={root} class={className}>
+<div {@attach observeTerminal} class={className}>
 	<Terminal title="jay@workbench: ~" bodyClass="lg:max-xl:p-6">
-		<p class={cn('whitespace-nowrap', started ? undefined : hide)}>
+		<p class="whitespace-nowrap">
 			<span class="text-muted-foreground">$</span>
-			{command.slice(0, typed)}<span class="invisible">{command.slice(typed)}</span>
+			{command.slice(0, typed)}<span class={hide}>{command.slice(typed)}</span>
 		</p>
 
 		<div class="-mx-3 max-md:mx-0 md:overflow-x-auto">

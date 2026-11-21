@@ -101,7 +101,151 @@
 	});
 
 	let track = $state<HTMLElement | null>(null);
-	let winsTable = $state<{ play: () => void } | null>(null);
+	const sceneSpacer = $derived(track?.querySelector<HTMLElement>('[data-scene-spacer]') ?? null);
+
+	function assistHeroScroll(heroTrack: HTMLElement) {
+		const spacer = heroTrack.querySelector<HTMLElement>('[data-scene-spacer]');
+		if (!spacer || !('onscrollend' in document)) return;
+
+		const motion = matchMedia('(prefers-reduced-motion: no-preference)');
+		const listeners = new AbortController();
+		const passive = { passive: true, signal: listeners.signal };
+		const handoffProgress = 0.45;
+		const minimumGestureTravel = 48;
+		type Direction = -1 | 1;
+		let gesture: { start: number; direction: Direction } | null = null;
+		let lastScrollY = window.scrollY;
+		let touchY: number | null = null;
+		let assisting: Direction | null = null;
+		let startFrame = 0;
+
+		const cancel = () => {
+			gesture = null;
+			if (assisting === null) return;
+			assisting = null;
+			if (startFrame) {
+				cancelAnimationFrame(startFrame);
+				startFrame = 0;
+				return;
+			}
+			window.scrollTo({ top: window.scrollY, behavior: 'instant' });
+		};
+		const recordIntent = (delta: number) => {
+			if (!delta || !motion.matches) return;
+			const direction = delta > 0 ? 1 : -1;
+			if (assisting !== null) {
+				if (assisting !== direction) cancel();
+				return;
+			}
+			// A passive wheel or touch event can arrive after the browser has applied its first scroll delta.
+			if (gesture?.direction !== direction) gesture = { start: lastScrollY, direction };
+		};
+		const assistWhenReady = (y: number) => {
+			if (!gesture || touchY !== null || !motion.matches) return;
+			const { start, direction } = gesture;
+			const end = Math.ceil(spacer.getBoundingClientRect().height);
+			const forward = direction === 1;
+			const travel = forward ? y : end - y;
+			if (y <= 0 || y >= end || travel < end * handoffProgress || (y - start) * direction < minimumGestureTravel) {
+				return;
+			}
+
+			gesture = null;
+			assisting = direction;
+			// Continue on the next frame, after pending native scroll events for this frame have run.
+			startFrame = requestAnimationFrame(() => {
+				startFrame = 0;
+				if (window.scrollY <= 0 || window.scrollY >= end) {
+					assisting = null;
+					return;
+				}
+				window.scrollTo({ top: forward ? end : 0, behavior: 'smooth' });
+			});
+		};
+
+		window.addEventListener(
+			'wheel',
+			(event) => {
+				if (
+					event.defaultPrevented ||
+					event.ctrlKey ||
+					event.metaKey ||
+					event.shiftKey ||
+					Math.abs(event.deltaY) <= Math.abs(event.deltaX)
+				) {
+					cancel();
+					return;
+				}
+				recordIntent(event.deltaY);
+			},
+			passive
+		);
+		window.addEventListener(
+			'touchstart',
+			(event) => {
+				touchY = event.touches.length === 1 ? event.touches[0].clientY : null;
+				if (touchY === null) cancel();
+			},
+			passive
+		);
+		window.addEventListener(
+			'touchmove',
+			(event) => {
+				if (touchY === null || event.defaultPrevented || event.touches.length !== 1) return;
+				const y = event.touches[0].clientY;
+				recordIntent(touchY - y);
+				touchY = y;
+			},
+			passive
+		);
+		window.addEventListener(
+			'touchend',
+			(event) => {
+				if (event.touches.length) return;
+				touchY = null;
+				assistWhenReady(window.scrollY);
+			},
+			passive
+		);
+		window.addEventListener(
+			'touchcancel',
+			() => {
+				touchY = null;
+				cancel();
+			},
+			passive
+		);
+		window.addEventListener('pointerdown', cancel, passive);
+		window.addEventListener('keydown', cancel, passive);
+		motion.addEventListener('change', cancel, { signal: listeners.signal });
+		window.addEventListener(
+			'scroll',
+			() => {
+				const y = window.scrollY;
+				if (y === lastScrollY) return;
+				const direction = y > lastScrollY ? 1 : -1;
+				lastScrollY = y;
+				if (direction === gesture?.direction) assistWhenReady(y);
+				else if (gesture || (assisting !== null && direction !== assisting)) cancel();
+			},
+			passive
+		);
+
+		document.addEventListener(
+			'scrollend',
+			() => {
+				if (startFrame || touchY !== null) return;
+				gesture = null;
+				assisting = null;
+			},
+			passive
+		);
+
+		return () => {
+			listeners.abort();
+			cancel();
+		};
+	}
 
 	// JavaScript only supplies end values; the motion itself is CSS. After the fonts load (and on resize) each word of the
 	// name gets the translation and scale that put its baseline-left corner on the matching word of the header wordmark.
@@ -154,24 +298,6 @@
 		window.addEventListener('resize', measure);
 		return () => window.removeEventListener('resize', measure);
 	});
-
-	// The wins table prints when the scene completes. The sentinel sits at the scroll distance of the scene; it stops
-	// intersecting (above the viewport) when the scroll passes it. play() is idempotent, so scrolling back changes nothing.
-	$effect(() => {
-		if (!sceneSupported || !track || !winsTable) return;
-		const sentinel = track.querySelector('[data-scene-sentinel]');
-		if (!sentinel) return;
-		const observer = new IntersectionObserver((entries) => {
-			const e = entries[entries.length - 1];
-			if (e && !e.isIntersecting && e.boundingClientRect.top < 0) {
-				// Below 768px the table is shown at once (its own rule), so there is nothing to print.
-				if (matchMedia('(min-width: 768px)').matches) winsTable?.play();
-				observer.disconnect();
-			}
-		});
-		observer.observe(sentinel);
-		return () => observer.disconnect();
-	});
 </script>
 
 <Seo
@@ -189,25 +315,16 @@
 	>
 {/snippet}
 
-<!-- The hero at rest (V14): type and space only. A top band (status line, Mumbai time), a middle band (the sentence, the
-	actions, three derived facts) and the name on one line, sized so its ink spans columns 1 to 12. The hero is one screen
-	tall (min-height, so it grows instead of overlapping on a short viewport) and the name's baseline is 64px above the
-	bottom of the screen, or above the mobile dock's top edge below lg. Nothing animates here: V17 (the scroll transition)
-	and V18 (the load sequence) come later. -->
+<!-- Centre the intro, name and scroll cue as one group between the header and the bottom dock. -->
 <!-- The scene's markup (V17): a track, a sticky stage, and a spacer. Without the scene's CSS these are three plain blocks and
 	the page is V14's static hero followed by the wins section. See the scene block in layout.css. -->
-<div bind:this={track} data-scene-track>
+<div bind:this={track} {@attach assistHeroScroll} data-scene-track>
 	<div data-scene-stage>
-		<section
-			aria-label="Introduction"
-			class="flex min-h-[calc(100svh-var(--header-h))] [--clear:calc(4.5rem+env(safe-area-inset-bottom))] lg:[--clear:0px]"
-		>
+		<section aria-label="Introduction" class="flex min-h-[calc(100svh-var(--header-h))]">
 			<div
-				class="relative mx-auto flex w-full max-w-7xl flex-col px-5 pt-6 pb-[calc(var(--clear)+4rem)] md:px-10 md:pt-8"
+				class="mx-auto flex w-full max-w-7xl flex-col justify-center px-5 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-10 lg:py-8"
 			>
-				<div class="@container flex flex-1 flex-col">
-					<div class="min-h-6 flex-[2] md:min-h-10"></div>
-
+				<div class="@container flex flex-col">
 					<div data-scene-band class="flex flex-col gap-6">
 						<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
 							<p class="label">Mumbai, India · Full-stack · Web3</p>
@@ -282,34 +399,30 @@
 						</div>
 					</div>
 
-					<div class="min-h-12 flex-[3] md:min-h-16"></div>
-
-					<!-- Sized so the ink of the name spans the content box: font-size = content width / ratio, where ratio is the
-				ink width of "Jay Kerkar" in Akt 700 at -0.04em divided by its font size (see NAME_RATIO below). -->
 					<!-- The name is sized so its INK spans the content box: font-size = content width / ratio. Measured in Chromium with a
 				canvas at 1000px, Akt 700, letter-spacing -40px (= -0.04em): "Jay Kerkar" has ink 4323.7 wide, starting 15.6 right of the
 				pen origin (ratio 4.3237, left bearing 0.0156em). The negative left margin puts the ink, not the advance box, on the left edge; the right ink edge then
 				falls on the right edge by construction. Akt's metrics are ascent 0.95em and descent 0.25em, so at line-height 0.8 the
-				baseline is 0.05em above the box bottom, which -mb-[0.05em] cancels: the baseline is exactly the bottom padding
-				(64px) above the bottom of the hero. The name is one line at every width. -->
+				baseline is 0.05em above the box bottom. The bottom margin leaves 0.21em below the baseline for the tail of the y
+				before the scroll cue's own gap. The name is one line at every width. -->
 					<h1
 						aria-label="Jay Kerkar"
-						class="-mb-[0.05em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237]"
+						class="mt-12 mb-[0.16em] ml-[calc(var(--bl)*-1em)] text-[length:calc(100cqw/var(--ratio))] leading-[0.8] font-bold tracking-[-0.04em] whitespace-nowrap text-foreground [--bl:0.0156] [--ratio:4.3237] md:mt-16 lg:mt-24"
 					>
 						{@render nameWord('Jay', 0)}&#32;{@render nameWord('Kerkar', 3)}
 					</h1>
-				</div>
 
-				<p data-scene-cue aria-hidden="true" class="absolute bottom-[calc(var(--clear)+1.5rem)] label">
-					<span data-intro-cue class="items-center gap-2 motion-safe:in-[.js]:inline-flex">
-						Scroll<span aria-hidden="true" class="motion-safe:in-[.js]:hidden"> ↓</span>
-						<span
-							data-scroll-cue-line
-							aria-hidden="true"
-							class="hidden h-6 w-px origin-top bg-current motion-safe:in-[.js]:block"
-						></span>
-					</span>
-				</p>
+					<p data-scene-cue aria-hidden="true" class="mt-6 flex h-6 items-center label">
+						<span data-intro-cue class="items-center gap-2 motion-safe:in-[.js]:inline-flex">
+							Scroll<span aria-hidden="true" class="motion-safe:in-[.js]:hidden"> ↓</span>
+							<span
+								data-scroll-cue-line
+								aria-hidden="true"
+								class="hidden h-6 w-px origin-top bg-current motion-safe:in-[.js]:block"
+							></span>
+						</span>
+					</p>
+				</div>
 			</div>
 		</section>
 
@@ -335,12 +448,11 @@
 					</a>
 				</div>
 
-				<WinsTable bind:this={winsTable} autoplay={!sceneSupported} class="lg:col-span-8" />
+				<WinsTable {sceneSpacer} class="lg:col-span-8" />
 			</div>
 		</section>
 	</div>
 	<div data-scene-spacer aria-hidden="true"></div>
-	<div data-scene-sentinel aria-hidden="true"></div>
 </div>
 
 <!-- Doors: two panels, one link each, with a hairline above, below and between. No heading; the numbered sections resume after. -->
