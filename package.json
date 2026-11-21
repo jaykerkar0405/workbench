@@ -18,7 +18,7 @@
 		"@eslint/compat": "^2.1.1",
 		"@eslint/js": "^10.0.1",
 		"@internationalized/date": "^3.12.4",
-		"@lucide/svelte": "^1.43.0",
+		"@lucide/svelte": "^1.72.0",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/enhanced-img": "^0.11.0",
 		"@sveltejs/kit": "^2.70.3",
@@ -26,7 +26,7 @@
 		"@tailwindcss/typography": "^0.5.20",
 		"@tailwindcss/vite": "^4.3.3",
 		"@types/node": "^26.5.0",
-		"bits-ui": "^2.19.1",
+		"bits-ui": "^2.21.0",
 		"clsx": "^2.1.1",
 		"embla-carousel-svelte": "^8.6.0",
 		"eslint": "^10.10.0",
@@ -56,6 +56,8 @@
 		"lucide-svelte": "^1.0.1",
 		"marked": "^18.0.13",
 		"mode-watcher": "^1.1.0",
+		"node-addon-api": "^8.9.2",
+		"node-gyp": "^13.1.0",
 		"simple-icons": "^16.31.0"
 	}
 }
