@@ -42,7 +42,10 @@
 	};
 </script>
 
-<div class={cn('grid gap-2 md:gap-x-4 md:gap-y-3', gridClass, className)} {@attach reveal({ stagger: true })}>
+<div
+	class={cn('grid gap-2 [--reveal-radius:var(--radius-md)] md:gap-x-4 md:gap-y-3', gridClass, className)}
+	{@attach reveal({ stagger: true, mask: true })}
+>
 	{#each images.slice(0, shown) as photo, i (i)}
 		{@const more = hidden > 0 && i === shown - 1}
 		<button

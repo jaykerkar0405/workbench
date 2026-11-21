@@ -1,8 +1,9 @@
 import type { Attachment } from 'svelte/attachments';
 
-export type RevealOptions = { delay?: number; stagger?: boolean };
+export type RevealOptions = { delay?: number; stagger?: boolean; mask?: boolean };
 
 const TRANSITION_MS = 400;
+const MASK_TRANSITION_MS = 500;
 const STAGGER_STEP_MS = 30;
 const STAGGER_CAP = 6;
 const MARGIN_MS = 80;
@@ -11,13 +12,13 @@ const MARGIN_MS = 80;
 const ABOVE_PX = 1_000_000;
 
 /**
- * Fades an element (or, with `stagger`, its direct children) in and up the first time
- * it scrolls into view. Elements already in view, or already scrolled past, on the first
+ * Reveals an element (or, with `stagger`, its direct children) the first time it scrolls into view.
+ * The default is a fade and rise. Media can opt into a mask. Elements already in view or scrolled past on the first
  * observer callback are never hidden. Reveal attributes are removed once the transition
  * has finished so they don't fight later hover transitions. The CSS lives in layout.css.
  */
 export function reveal(options: RevealOptions = {}): Attachment<HTMLElement> {
-	const { delay, stagger = false } = options;
+	const { delay, stagger = false, mask = false } = options;
 
 	return (node) => {
 		if (typeof IntersectionObserver === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -29,6 +30,7 @@ export function reveal(options: RevealOptions = {}): Attachment<HTMLElement> {
 
 		const clear = () => {
 			node.removeAttribute('data-reveal');
+			node.removeAttribute('data-reveal-kind');
 			node.removeAttribute('data-revealed');
 			node.style.removeProperty('--reveal-delay');
 			if (!node.getAttribute('style')) node.removeAttribute('style');
@@ -47,6 +49,7 @@ export function reveal(options: RevealOptions = {}): Attachment<HTMLElement> {
 					}
 					hidden = true;
 					node.setAttribute('data-reveal', stagger ? 'stagger' : '');
+					if (mask) node.setAttribute('data-reveal-kind', 'mask');
 					if (delay !== undefined) node.style.setProperty('--reveal-delay', `${delay}ms`);
 					return;
 				}
@@ -54,7 +57,8 @@ export function reveal(options: RevealOptions = {}): Attachment<HTMLElement> {
 				if (entry.isIntersecting) {
 					observer.disconnect();
 					node.setAttribute('data-revealed', '');
-					const total = (delay ?? 0) + TRANSITION_MS + (stagger ? STAGGER_CAP * STAGGER_STEP_MS : 0) + MARGIN_MS;
+					const duration = mask ? MASK_TRANSITION_MS : TRANSITION_MS;
+					const total = (delay ?? 0) + duration + (stagger ? STAGGER_CAP * STAGGER_STEP_MS : 0) + MARGIN_MS;
 					timer = setTimeout(clear, total);
 				}
 			},

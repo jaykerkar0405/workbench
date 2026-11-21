@@ -471,7 +471,7 @@
 /* Scroll reveal (see src/lib/components/reveal.ts).
    The attachment sets data-reveal only after deciding the element is below the fold, and
    removes every reveal attribute once the transition ends. Scoped to html.js so nothing is
-   hidden without JavaScript. Only opacity and translate animate. */
+   hidden without JavaScript. Text uses opacity and translate, and masked media uses clip-path. */
 @media (prefers-reduced-motion: no-preference) {
 	html.js [data-reveal=''],
 	html.js [data-reveal='stagger'] > * {
@@ -506,6 +506,21 @@
 	}
 	html.js [data-reveal='stagger'] > :nth-child(n + 7) {
 		transition-delay: calc(var(--reveal-delay, 0ms) + 6 * 30ms);
+	}
+
+	html.js [data-reveal=''][data-reveal-kind='mask'],
+	html.js [data-reveal='stagger'][data-reveal-kind='mask'] > * {
+		opacity: 1;
+		translate: 0 0;
+		clip-path: inset(0 0 100% 0 round var(--reveal-radius, var(--radius-lg)));
+		transition-property: clip-path;
+		transition-duration: 500ms;
+		transition-timing-function: var(--ease-out);
+	}
+
+	html.js [data-reveal=''][data-reveal-kind='mask'][data-revealed],
+	html.js [data-reveal='stagger'][data-reveal-kind='mask'][data-revealed] > * {
+		clip-path: inset(0 0 0 0 round var(--reveal-radius, var(--radius-lg)));
 	}
 }
 

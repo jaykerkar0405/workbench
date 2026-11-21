@@ -11,6 +11,7 @@
 	import { viewTransitionName } from '$lib/utils';
 	import type { Project } from '$lib/projects/types';
 	import { getProjectIcon } from '$lib/assets/images';
+	import { reveal } from '$lib/components/reveal';
 	import { projectIndex } from '$lib/components/project-order';
 	import { projectScreenshots } from '$lib/components/project-screenshots';
 	import EnhancedImage from '$lib/components/enhanced-image.svelte';
@@ -38,7 +39,7 @@
 </script>
 
 <article class="group/panel grid gap-8 lg:grid-cols-12 lg:items-start lg:gap-x-6">
-	<div class="lg:col-span-8">
+	<div class="lg:col-span-8" {@attach reveal({ mask: true })}>
 		<MediaMat ratio={16 / 9} zoom>
 			<a {href} tabindex="-1" aria-hidden="true" class="absolute inset-0 block">
 				<!-- A size container, so the image is limited with cqh / cqw (a percentage max-height cannot resolve through
