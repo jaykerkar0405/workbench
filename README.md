@@ -106,7 +106,7 @@ Preview the production build:
 pnpm preview
 ```
 
-`pnpm preview` runs the SvelteKit server handler, so it differs from a static host. To see how the built files behave on one, serve the `build` directory with any static file server.
+`pnpm preview` runs the built SvelteKit app locally. Vercel routes requests using the adapter output in `.vercel/output`.
 
 ## Scripts
 
@@ -137,7 +137,7 @@ Tailwind v4 is configured in CSS, in [src/routes/layout.css](src/routes/layout.c
 
 ### SvelteKit
 
-SvelteKit is configured in [svelte.config.js](svelte.config.js) with the static adapter for pre-rendering. The adapter also emits a `404.html` fallback; it renders the error page in the browser for addresses that were not pre-rendered, if the host serves it for unknown URLs.
+SvelteKit uses the Vercel adapter configured in [svelte.config.js](svelte.config.js). Known pages are prerendered at build time. SvelteKit renders the 404 page on the server for unknown URLs.
 
 ### TypeScript
 
@@ -145,7 +145,7 @@ TypeScript configuration is in [tsconfig.json](tsconfig.json). Path aliases are 
 
 ## Deployment
 
-This project uses `@sveltejs/adapter-static` for static site generation. The built files in the `build` directory can be deployed to any static hosting service.
+Use the SvelteKit framework preset on Vercel and set `GITHUB_PAT` and `PUBLIC_SITE_URL` in the project environment. The adapter writes prerendered pages, assets, and the serverless handler to `.vercel/output`.
 
 ## License
 
