@@ -199,7 +199,7 @@
 >
 	<SearchIcon class="size-[1.15rem] lg:size-4" />
 	<span class="hidden font-normal text-muted-foreground lg:inline">Search</span>
-	<Kbd class="ml-auto hidden lg:inline-flex">{shortcut}</Kbd>
+	<Kbd class="ml-auto hidden w-10 lg:inline-flex">{shortcut}</Kbd>
 </Button>
 
 <Command.Dialog
@@ -253,8 +253,7 @@
 					<span class="min-w-0 flex-1 truncate">{project.title}</span>
 					<Command.Shortcut class={metaClass}>
 						{#if project.featured}
-							<span class="text-[color-mix(in_oklab,var(--brand)_90%,var(--foreground))] dark:text-brand">Featured</span
-							>
+							<span>Featured</span>
 						{/if}
 					</Command.Shortcut>
 				</Command.Item>

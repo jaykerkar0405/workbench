@@ -154,13 +154,13 @@
 						aria-label={`${item.label}, ${item.count}`}
 						class={cn(
 							segmentedItem,
-							'h-6.5 min-w-fit flex-1 gap-1.5 px-2 hover:bg-transparent data-[state=on]:hover:bg-foreground min-[480px]:gap-2 min-[480px]:px-3 lg:flex-none lg:px-4'
+							'h-6.5 min-w-fit flex-1 gap-1.5 px-2 hover:bg-transparent data-[state=on]:hover:bg-foreground max-[360px]:gap-1 max-[360px]:px-0! min-[480px]:gap-2 min-[480px]:px-3 lg:flex-none lg:px-4'
 						)}
 					>
 						<!-- Short labels under 480px; the accessible name above is always the long one with its count. -->
 						<span aria-hidden="true" class="min-[480px]:hidden">{item.short}</span>
 						<span aria-hidden="true" class="max-[479px]:hidden">{item.label}</span>
-						<span aria-hidden="true" class="font-mono text-xs tabular-nums opacity-70">{item.count}</span>
+						<span aria-hidden="true" class="font-mono text-xs tabular-nums">{item.count}</span>
 					</ToggleGroup.Item>
 				{/each}
 			</ToggleGroup.Root>

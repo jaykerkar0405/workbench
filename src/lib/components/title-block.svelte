@@ -29,7 +29,9 @@
 	} = $props();
 </script>
 
-<header class={cn('grid', actions && 'md:grid-cols-[minmax(0,1fr)_auto] md:gap-x-6', className)}>
+<header
+	class={cn('grid grid-cols-[minmax(0,1fr)]', actions && 'md:grid-cols-[minmax(0,1fr)_auto] md:gap-x-6', className)}
+>
 	<Breadcrumb.Root class="md:col-span-full">
 		<Breadcrumb.List class="gap-2 font-mono text-xs tracking-[0.06em] uppercase">
 			<Breadcrumb.Item>

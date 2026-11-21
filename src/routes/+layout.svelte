@@ -12,7 +12,7 @@
 			navigation.willUnload ||
 			typeof document.startViewTransition !== 'function' ||
 			window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-			navigation.from?.url.pathname === navigation.to?.url.pathname
+			navigation.from?.url?.pathname === navigation.to?.url?.pathname
 		) {
 			return;
 		}
@@ -42,8 +42,8 @@
 	afterNavigate((navigation) => {
 		if (
 			navigation.type === 'popstate' ||
-			navigation.to?.url.hash ||
-			navigation.from?.url.pathname === navigation.to?.url.pathname
+			navigation.to?.url?.hash ||
+			navigation.from?.url?.pathname === navigation.to?.url?.pathname
 		) {
 			return;
 		}
