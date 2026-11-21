@@ -814,6 +814,28 @@
 	}
 }
 
+@media (prefers-reduced-motion: no-preference) {
+	html.js [data-scroll-cue-line] {
+		animation: draw-scroll-cue 1.6s linear infinite;
+	}
+}
+
+@keyframes draw-scroll-cue {
+	from {
+		transform: scaleY(0);
+		opacity: 1;
+	}
+	60%,
+	75% {
+		transform: scaleY(1);
+		opacity: 1;
+	}
+	to {
+		transform: scaleY(1);
+		opacity: 0;
+	}
+}
+
 /* View transitions (see onNavigate in src/routes/+layout.svelte).
    The root snapshot (everything not separately named: main and the footer) crossfades in
    --dur-page (160 ms). The header and mobile dock are named so they stay pinned: only the new snapshot

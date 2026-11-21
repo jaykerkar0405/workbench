@@ -301,7 +301,14 @@
 				</div>
 
 				<p data-scene-cue aria-hidden="true" class="absolute bottom-[calc(var(--clear)+1.5rem)] label">
-					<span data-intro-cue>Scroll ↓</span>
+					<span data-intro-cue class="items-center gap-2 motion-safe:in-[.js]:inline-flex">
+						Scroll<span aria-hidden="true" class="motion-safe:in-[.js]:hidden"> ↓</span>
+						<span
+							data-scroll-cue-line
+							aria-hidden="true"
+							class="hidden h-6 w-px origin-top bg-current motion-safe:in-[.js]:block"
+						></span>
+					</span>
 				</p>
 			</div>
 		</section>
