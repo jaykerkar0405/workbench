@@ -48,7 +48,7 @@
 			<section aria-labelledby={`year-${group.year}`} class="lg:grid lg:grid-cols-12 lg:gap-x-6">
 				<!-- Below lg a sticky mono bar under the 56px header; from lg a solid numeral in the first two columns. -->
 				<div
-					class="sticky top-14 z-20 -mx-5 bg-background px-5 py-3 md:-mx-10 md:px-10 lg:top-24 lg:col-span-2 lg:row-start-1 lg:mx-0 lg:self-start lg:bg-transparent lg:p-0"
+					class="sticky top-14 z-20 -mx-5 bg-background px-5 py-3 md:-mx-10 md:px-10 lg:top-24 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-0 lg:self-start lg:bg-transparent lg:p-0"
 				>
 					<h2 id={`year-${group.year}`}>
 						<span class="label text-foreground tabular-nums lg:hidden">{group.year} · {yearLine(group.items)}</span>
@@ -63,13 +63,13 @@
 				<div class="relative mt-6 pl-7 lg:contents">
 					<div
 						aria-hidden="true"
-						class="absolute inset-y-0 left-[3px] w-px lg:relative lg:inset-auto lg:col-start-3 lg:row-start-1 lg:w-auto"
+						class="absolute inset-y-0 left-[3px] w-px lg:relative lg:inset-auto lg:col-start-2 lg:row-start-1 lg:w-auto"
 					>
 						<span data-timeline-spine class="absolute inset-y-0 left-0 w-px bg-border lg:right-[-12.5px] lg:left-auto"
 						></span>
 					</div>
 
-					<ol class="[--node-x:24.5px] lg:col-span-9 lg:col-start-4 lg:row-start-1 lg:[--node-x:12px]">
+					<ol class="[--node-x:24.5px] lg:col-span-10 lg:col-start-3 lg:row-start-1 lg:[--node-x:12px]">
 						{#each group.items as hackathon (hackathon.id)}
 							<li class="border-t py-6 first:border-t-0 first:pt-2 last:pb-2" {@attach reveal()}>
 								<TimelineEntry {hackathon} index={hackathonIndex(hackathon.id)} project={projectFor(hackathon)} />

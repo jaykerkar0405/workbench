@@ -24,8 +24,8 @@
 
 	// Known at render time (see hackathon-photos.ts), so they are in the prerendered HTML and nothing shifts.
 	const images = $derived(hackathonPhotos(hackathon.id));
-	const showPhotos = $derived(images.length > 0);
-	const builtIndex = $derived(showPhotos ? '02' : '01');
+	const firstSection = $derived(images.length > 0 ? 'photos' : 'built');
+	const builtIndex = $derived(firstSection === 'photos' ? '02' : '01');
 
 	let lightboxOpen = $state(false);
 	let lightboxIndex = $state(0);
@@ -97,10 +97,10 @@
 		]}
 	/>
 
-	{#if showPhotos}
-		<section class="mt-(--gap-section)" aria-label="Photos">
+	{#if firstSection === 'photos'}
+		<section class="mt-(--gap-title-content)" aria-label="Photos">
 			<div {@attach reveal()}>
-				<SectionHeading index="01" title="Photos">
+				<SectionHeading index="01" title="Photos" rule={false}>
 					<span class="label tabular-nums">{images.length} {images.length === 1 ? 'photo' : 'photos'}</span>
 				</SectionHeading>
 			</div>
@@ -119,9 +119,10 @@
 	{/if}
 
 	{#if project}
-		<section class="mt-(--gap-section)" aria-label="Built here">
+		{@const isFirst = firstSection === 'built'}
+		<section class={isFirst ? 'mt-(--gap-title-content)' : 'mt-(--gap-section)'} aria-label="Built here">
 			<div {@attach reveal()}>
-				<SectionHeading index={builtIndex} title="Built here" />
+				<SectionHeading index={builtIndex} title="Built here" rule={!isFirst} />
 			</div>
 
 			<div class="mt-(--gap-heading)">
