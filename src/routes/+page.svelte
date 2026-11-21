@@ -10,6 +10,7 @@
 	import { hackathonFor } from '$lib/components/project-order';
 	import { orderedHackathons } from '$lib/components/hackathon-order';
 	import SectionHeading from '$lib/components/section-heading.svelte';
+	import Stat from '$lib/components/stat.svelte';
 	import Door from '$lib/components/door.svelte';
 	import WinsTable from '$lib/components/wins-table.svelte';
 	import ResumeActions from '$lib/components/resume-actions.svelte';
@@ -202,91 +203,80 @@
 				class="relative mx-auto flex w-full max-w-7xl flex-col px-5 pt-6 pb-[calc(var(--clear)+4rem)] md:px-10 md:pt-8"
 			>
 				<div class="@container flex flex-1 flex-col">
-					<div data-scene-band class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-						<p class="label">Mumbai, India · Full-stack · Web3</p>
-						<MumbaiTime class="shrink-0 whitespace-nowrap" />
-					</div>
+					<div class="min-h-6 flex-[2] md:min-h-10"></div>
 
-					<div class="min-h-4 flex-[7] md:min-h-12"></div>
+					<div data-scene-band class="flex flex-col gap-6">
+						<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+							<p class="label">Mumbai, India · Full-stack · Web3</p>
+							<MumbaiTime class="ml-auto shrink-0 whitespace-nowrap" />
+						</div>
 
-					<div data-scene-band class="grid gap-x-6 gap-y-8 md:grid-cols-12">
-						<div class="md:col-span-6">
-							<!-- Each sentence is kept whole from xl up, so the line breaks after "Web3." there; below that it balances. -->
-							<p class="text-[1.75rem] leading-[1.3] text-balance text-foreground">
-								<span class="xl:whitespace-nowrap">{sentence[0]}</span>&#32;<span class="xl:whitespace-nowrap"
-									>{sentence[1]}</span
-								>
-							</p>
+						<div class="grid gap-x-6 gap-y-8 md:grid-cols-12 md:items-end">
+							<div class="md:col-span-7 lg:col-span-8">
+								<p class="text-[1.75rem] leading-[1.2] text-balance text-foreground xl:text-[2.25rem]">
+									<span class="xl:whitespace-nowrap">{sentence[0]}</span>&#32;<span class="xl:whitespace-nowrap"
+										>{sentence[1]}</span
+									>
+								</p>
 
-							<ul class="mt-6 grid w-fit grid-cols-[2ch_auto] gap-x-3 gap-y-1 label tabular-nums md:hidden">
+								<div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 md:mt-8">
+									<Button href="/projects" size="lg" class="group/cta rounded-md">
+										View projects
+										<span
+											aria-hidden="true"
+											class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/cta:translate-x-1 motion-safe:group-focus-visible/cta:translate-x-1"
+											>→</span
+										>
+									</Button>
+									<ResumeActions previewVariant="link" showDownload={false} />
+
+									<Tooltip.Provider>
+										<ul class="flex items-center gap-1">
+											{#each socials as social (social.name)}
+												<li>
+													<Tooltip.Root>
+														<Tooltip.Trigger>
+															{#snippet child({ props })}
+																<Button
+																	{...props}
+																	href={social.href}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	variant="ghost"
+																	size="icon-lg"
+																	class="rounded-md text-muted-foreground hover:text-foreground"
+																	aria-label="Jay Kerkar on {social.name}"
+																>
+																	<svg
+																		viewBox={social.icon.viewBox}
+																		fill="currentColor"
+																		class="size-5"
+																		aria-hidden="true"
+																	>
+																		{#each social.icon.paths as d (d)}
+																			<path {d} />
+																		{/each}
+																	</svg>
+																</Button>
+															{/snippet}
+														</Tooltip.Trigger>
+														<Tooltip.Content>{social.name}</Tooltip.Content>
+													</Tooltip.Root>
+												</li>
+											{/each}
+										</ul>
+									</Tooltip.Provider>
+								</div>
+							</div>
+
+							<ul aria-label="Portfolio statistics" class="grid grid-cols-3 border-t md:col-span-5 lg:col-span-4">
 								{#each facts as fact (fact.label)}
-									<li class="contents">
-										<span class="text-right text-foreground">{fact.value}</span>
-										<span>{fact.label}</span>
+									<li class="pt-3 not-first:border-l not-first:pl-4">
+										<Stat value={fact.value} label={fact.label} size="md" />
 									</li>
 								{/each}
 							</ul>
-
-							<div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 md:mt-8">
-								<Button href="/projects" size="lg" class="group/cta rounded-md">
-									View projects
-									<span
-										aria-hidden="true"
-										class="inline-block transition-transform duration-(--dur-1) ease-(--ease-out) motion-safe:group-hover/cta:translate-x-1 motion-safe:group-focus-visible/cta:translate-x-1"
-										>→</span
-									>
-								</Button>
-								<ResumeActions previewVariant="link" showDownload={false} />
-
-								<Tooltip.Provider>
-									<ul class="flex items-center gap-1">
-										{#each socials as social (social.name)}
-											<li>
-												<Tooltip.Root>
-													<Tooltip.Trigger>
-														{#snippet child({ props })}
-															<Button
-																{...props}
-																href={social.href}
-																target="_blank"
-																rel="noopener noreferrer"
-																variant="ghost"
-																size="icon-lg"
-																class="rounded-md text-muted-foreground hover:text-foreground"
-																aria-label="Jay Kerkar on {social.name}"
-															>
-																<svg
-																	viewBox={social.icon.viewBox}
-																	fill="currentColor"
-																	class="size-5"
-																	aria-hidden="true"
-																>
-																	{#each social.icon.paths as d (d)}
-																		<path {d} />
-																	{/each}
-																</svg>
-															</Button>
-														{/snippet}
-													</Tooltip.Trigger>
-													<Tooltip.Content>{social.name}</Tooltip.Content>
-												</Tooltip.Root>
-											</li>
-										{/each}
-									</ul>
-								</Tooltip.Provider>
-							</div>
 						</div>
-
-						<ul
-							class="hidden grid-cols-[2ch_auto] content-start gap-x-3 gap-y-1 label tabular-nums md:col-span-3 md:col-start-10 md:grid md:pt-2"
-						>
-							{#each facts as fact (fact.label)}
-								<li class="contents">
-									<span class="text-right text-foreground">{fact.value}</span>
-									<span>{fact.label}</span>
-								</li>
-							{/each}
-						</ul>
 					</div>
 
 					<div class="min-h-12 flex-[3] md:min-h-16"></div>
