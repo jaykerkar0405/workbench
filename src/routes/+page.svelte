@@ -5,6 +5,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Button } from '$lib/components/ui/button';
 	import { reveal } from '$lib/components/reveal';
+	import { getHackathonIcon, getProjectIcon } from '$lib/assets/images';
 	import { hackathons } from '$lib/hackathons';
 	import { projects } from '$lib/projects';
 	import { hackathonFor } from '$lib/components/project-order';
@@ -48,8 +49,10 @@
 	const latestProjects = [...projects]
 		.sort((a, b) => dateOf(b) - dateOf(a))
 		.slice(0, 3)
-		.map((p) => p.title);
-	const latestHackathons = orderedHackathons.slice(0, 3).map((h) => h.title);
+		.map((p) => ({ title: p.title, icon: getProjectIcon(p.id), fit: 'cover' as const }));
+	const latestHackathons = orderedHackathons
+		.slice(0, 3)
+		.map((h) => ({ title: h.title, icon: getHackathonIcon(h.id), fit: 'contain' as const }));
 
 	const toolkit = [
 		{ label: 'Languages', items: ['TypeScript', 'JavaScript', 'Python', 'Solidity'] },
