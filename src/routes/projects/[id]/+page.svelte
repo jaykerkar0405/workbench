@@ -196,7 +196,7 @@
 				on explicit columns, so a missing rail never moves it. -->
 			{#if sections.length >= 2}
 				<aside
-					class="flex flex-col gap-10 max-lg:hidden lg:sticky lg:top-24 lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:self-start xl:col-span-4 xl:col-start-7"
+					class="flex flex-col gap-10 max-lg:hidden lg:sticky lg:top-24 lg:col-span-3 lg:col-start-1 lg:row-start-1 lg:self-start"
 				>
 					<nav aria-label="On this page">
 						<p class="mb-3 label">On this page</p>
@@ -207,7 +207,7 @@
 										href={`#${section.id}`}
 										aria-current={currentId === section.id ? 'true' : undefined}
 										class={cn(
-											'relative block rounded-sm py-1.5 pl-4 text-sm transition-colors duration-(--dur-1) ease-(--ease-out) outline-none before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50',
+											'relative block rounded-sm py-1.5 pl-4 text-sm text-pretty transition-colors duration-(--dur-1) ease-(--ease-out) outline-none before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:bg-brand before:opacity-0 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50',
 											currentId === section.id ? 'text-foreground before:opacity-100' : 'text-muted-foreground'
 										)}
 									>
@@ -220,10 +220,7 @@
 				</aside>
 			{/if}
 
-			<div
-				bind:this={prose}
-				class="prose-log prose max-w-none min-w-0 lg:col-span-6 lg:col-start-1 lg:row-start-1 xl:col-span-5"
-			>
+			<div bind:this={prose} class="prose-log prose max-w-none min-w-0 lg:col-span-9 lg:col-start-4 lg:row-start-1">
 				<ExtendedDescription />
 			</div>
 		</div>

@@ -325,18 +325,25 @@
 	--tw-prose-pre-bg: var(--muted);
 	--tw-prose-th-borders: var(--border);
 	--tw-prose-td-borders: var(--border);
-	font-size: 1rem;
-	line-height: 1.7;
+	--prose-measure: 43rem;
+	font-size: 1.0625rem;
+	line-height: 1.75;
 }
 
-/* Text keeps a readable measure (about 68 characters at 16px) even when the column is wider. A rem value, because
-   ch depends on the font's 0 glyph and in Akt 70ch is as wide as the whole column. Code, tables and media are not capped. */
-.prose-log {
-	--prose-measure: 30rem;
-}
-
-.prose-log > :is(p, ul, ol, blockquote, h1, h2, h3, h4, hr) {
+.prose-log > :is(p, ul, ol, blockquote) {
 	max-width: var(--prose-measure);
+	overflow-wrap: anywhere;
+}
+
+/* Keep the existing measure where the contents rail is hidden. */
+@media (width < 64rem) {
+	.prose-log {
+		--prose-measure: 30rem;
+	}
+
+	.prose-log > :is(h1, h2, h3, h4, hr) {
+		max-width: var(--prose-measure);
+	}
 }
 
 .prose-log :is(h1, h2, h3, h4) {
