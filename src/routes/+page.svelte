@@ -349,7 +349,7 @@
 <!-- The headings below drop SectionHeading's own rule and top padding: the rows' hairlines already close the section above. -->
 <section aria-label="Toolkit" class={cn(container, 'py-(--gap-section)')}>
 	<div {@attach reveal()}>
-		<SectionHeading index="02" title="Toolkit" class="[&>[data-slot=separator]]:hidden [&>div]:pt-0" />
+		<SectionHeading index="02" title="Toolkit" rule={false} />
 	</div>
 
 	<dl class="mt-(--gap-heading) border-t" {@attach reveal({ stagger: true })}>
@@ -370,7 +370,7 @@
 
 <section id="about" aria-label="About" class={cn(container, 'pb-(--gap-section)')}>
 	<div {@attach reveal()}>
-		<SectionHeading index="03" title="About" class="[&>[data-slot=separator]]:hidden [&>div]:pt-0" />
+		<SectionHeading index="03" title="About" rule={false} />
 	</div>
 
 	<div class="mt-(--gap-heading) grid gap-12 lg:grid-cols-12 lg:gap-x-6">

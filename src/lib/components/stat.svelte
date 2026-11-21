@@ -7,6 +7,7 @@
 		label,
 		suffix = '',
 		decimals = 0,
+		size = 'lg',
 		class: className
 	}: {
 		value: number;
@@ -14,7 +15,13 @@
 		class?: string;
 		suffix?: string;
 		decimals?: number;
+		size?: 'lg' | 'md';
 	} = $props();
+
+	const numberClasses = {
+		lg: 'text-4xl font-bold tracking-tight tabular-nums md:text-5xl',
+		md: 'text-[2.5rem] leading-none font-bold tracking-tight tabular-nums'
+	};
 
 	// Fixed decimals with thousands separators (1,075). Numbers under 1000 read as before.
 	const text = $derived(
@@ -23,6 +30,6 @@
 </script>
 
 <div class={cn('flex flex-col gap-2', className)}>
-	<span class="text-4xl font-bold tracking-tight tabular-nums md:text-5xl">{text}</span>
+	<span class={numberClasses[size]}>{text}</span>
 	<span class="label">{label}</span>
 </div>

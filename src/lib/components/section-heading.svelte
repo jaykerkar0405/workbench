@@ -9,6 +9,7 @@
 		title,
 		children,
 		level = 2,
+		rule = true,
 		class: className
 	}: {
 		id?: string;
@@ -16,14 +17,17 @@
 		title: string;
 		class?: string;
 		level?: 2 | 3;
+		rule?: boolean;
 		children?: Snippet;
 	} = $props();
 </script>
 
 <div class={cn('w-full', className)}>
-	<Separator />
+	{#if rule}
+		<Separator />
+	{/if}
 
-	<div class="flex flex-wrap items-baseline gap-x-4 gap-y-2 pt-6 sm:flex-nowrap">
+	<div class={cn('flex flex-wrap items-baseline gap-x-4 gap-y-2', rule ? 'pt-6' : 'pt-0', 'sm:flex-nowrap')}>
 		<span class="shrink-0 label tabular-nums" aria-hidden="true">{index}</span>
 
 		<svelte:element this={level === 2 ? 'h2' : 'h3'} {id} class="min-w-0 text-section-title">
