@@ -169,10 +169,12 @@
 		items={[
 			{ label: 'Event', content: hackathon ? eventCell : undefined },
 			{ label: 'Dates', value: hackathon ? formatDateRange(hackathon.timestamp, hackathon.duration) : undefined },
-			{ label: 'Result', content: hasPrize ? resultCell : undefined },
+			{ label: 'Result', content: hasPrize ? resultCell : undefined }
+		]}
+		wideRows={[
+			{ label: 'Stack', content: project.techStack.length > 0 ? stackCell : undefined },
 			{ label: 'Team', content: project.teamMembers.length > 0 ? teamCell : undefined }
 		]}
-		wide={{ label: 'Stack', content: project.techStack.length > 0 ? stackCell : undefined }}
 	/>
 
 	{#if screenshots.length > 0 || project.videoLink}

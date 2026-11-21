@@ -4,17 +4,15 @@
 
 	type SpecItem = { label: string; value?: string; content?: Snippet };
 
-	// variant "facts" (project page): one row of short facts that share 12 columns equally, then an optional full-width
-	// `wide` row (the stack) under a hairline. Without it the original grid below is used, byte for byte.
 	let {
 		items,
-		wide,
+		wideRows = [],
 		columns = 4,
 		variant = 'grid',
 		class: className
 	}: {
 		class?: string;
-		wide?: SpecItem;
+		wideRows?: SpecItem[];
 		items: SpecItem[];
 		columns?: 1 | 2 | 3 | 4;
 		variant?: 'grid' | 'facts';
@@ -22,9 +20,16 @@
 
 	// An item with neither a value nor content is not rendered.
 	const shown = $derived(items.filter((item) => item.content || item.value));
+	const shownWideRows = $derived(wideRows.filter((item) => item.content || item.value));
 
-	// Full literal strings so Tailwind's compiler can see every class.
-	const spanClass = { 1: 'lg:col-span-12', 2: 'lg:col-span-6', 3: 'lg:col-span-4', 4: 'lg:col-span-3' } as const;
+	// Each fact starts on a three-column track. The last fact fills the remaining tracks.
+	const spanClass = [
+		[],
+		['lg:col-span-12'],
+		['lg:col-span-3', 'lg:col-span-9'],
+		['lg:col-span-3', 'lg:col-span-3', 'lg:col-span-6'],
+		['lg:col-span-3', 'lg:col-span-3', 'lg:col-span-3', 'lg:col-span-3']
+	];
 
 	// Full literal strings so Tailwind's compiler can see every class.
 	// Rules: every cell has a top rule except those in the first row; every cell that is not first
@@ -47,14 +52,13 @@
 {#if variant === 'facts'}
 	<dl class={cn('border-y', className)}>
 		{#if shown.length > 0}
-			<!-- Below lg: two columns (2 x 2, 2 + 1 or 1) with hairlines. From lg: the cells share 12 columns, each starts on a
-				column line, and the rule between two cells sits in the middle of the 24px gutter. -->
+			<!-- Below lg: two columns with hairlines. On desktop, each rule sits in the middle of the 24px gutter. -->
 			<div class="grid grid-cols-2 lg:grid-cols-12 lg:gap-x-6">
 				{#each shown as item, i (`${item.label}-${i}`)}
 					<div
 						class={cn(
 							'relative flex min-w-0 flex-col gap-2 py-5 lg:min-h-22 lg:py-4',
-							shown.length <= 4 && spanClass[shown.length as 1 | 2 | 3 | 4],
+							spanClass[shown.length]?.[i],
 							i >= 2 && 'border-t lg:border-t-0',
 							i % 2 === 1 ? 'border-l pl-6 lg:border-l-0 lg:pl-0' : 'pr-6 lg:pr-0',
 							i === shown.length - 1 && i % 2 === 0 && 'col-span-2',
@@ -75,18 +79,28 @@
 			</div>
 		{/if}
 
-		{#if wide && (wide.content || wide.value)}
-			<div class={cn('grid gap-x-6 gap-y-2 py-5 lg:grid-cols-12 lg:items-baseline', shown.length > 0 && 'border-t')}>
-				<dt class="label lg:col-span-2">{wide.label}</dt>
-				<dd class="min-w-0 text-base text-foreground lg:col-span-10">
-					{#if wide.content}
-						{@render wide.content()}
+		{#each shownWideRows as item, i (`${item.label}-${i}`)}
+			<div
+				class={cn(
+					'grid gap-x-6 gap-y-2 py-5 lg:grid-cols-12 lg:items-baseline',
+					(shown.length > 0 || i > 0) && 'border-t'
+				)}
+			>
+				<!-- Center the label's line box in the first 24px avatar row to align it with the name. -->
+				<dt
+					class="label lg:col-span-3 lg:has-[+dd_[data-slot=avatar]]:mt-[calc((1.5rem-1lh)/2)] lg:has-[+dd_[data-slot=avatar]]:self-start"
+				>
+					{item.label}
+				</dt>
+				<dd class="min-w-0 text-base text-foreground lg:col-span-9">
+					{#if item.content}
+						{@render item.content()}
 					{:else}
-						{wide.value}
+						{item.value}
 					{/if}
 				</dd>
 			</div>
-		{/if}
+		{/each}
 	</dl>
 {:else}
 	<dl class={cn('grid grid-cols-1 border-y', columns !== 1 && 'sm:grid-cols-2', gridClass[columns], className)}>
