@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ─────────────────────────────────────────────────────────────────────────────
-#  optimize-images  —  Portfolio asset optimizer
+#  optimize-images  —  Workbench asset optimizer
 #  Icons  → PNG  (lossless, max 512px)
 #  Images → JPG  (85q, max 1920px, color-safe)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ BYTES_IN=0 BYTES_OUT=0
 
 usage() {
 	cat <<EOF
-${BOLD}optimize-images${RESET} — Portfolio asset optimizer
+${BOLD}optimize-images${RESET} — Workbench asset optimizer
 
 ${BOLD}USAGE${RESET}
     ./optimize-images.sh [OPTIONS]
@@ -462,7 +462,7 @@ IM_VERSION=$(magick -version | grep -oP '\d+\.\d+\.\d+' | head -n1)
 # ─────────────────────────────────────────────────────────────────────────────
 
 echo ""
-echo -e "${BOLD}${CYAN}optimize-images${RESET}${BOLD}  portfolio asset optimizer${RESET}"
+echo -e "${BOLD}${CYAN}optimize-images${RESET}${BOLD}  workbench asset optimizer${RESET}"
 echo -e "${GREY}────────────────────────────────────────────────────────────${RESET}"
 echo -e "  ${GREY}${NF_GEAR} ImageMagick ${IM_VERSION}${RESET}"
 echo -e "  ${GREY}${NF_GEAR} JPG quality    ${JPG_QUALITY}q  (fallback ${JPG_FALLBACK_QUALITY}q)${RESET}"

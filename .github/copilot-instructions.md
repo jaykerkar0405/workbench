@@ -1,4 +1,4 @@
-# Copilot Instructions for Portfolio
+# Copilot Instructions for Workbench
 
 ## Project Overview
 
