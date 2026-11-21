@@ -41,7 +41,9 @@
 		window.scrollTo({ top: 0, behavior: prefersReducedMotion.current ? 'auto' : 'smooth' });
 	};
 
-	const toggleTheme = () => {
+	let themeTransition: ViewTransition | undefined;
+
+	const toggleTheme = (event: MouseEvent) => {
 		if (typeof document.startViewTransition !== 'function' || prefersReducedMotion.current) {
 			toggleMode();
 			return;
@@ -49,6 +51,16 @@
 
 		const root = document.documentElement;
 		const wasDark = root.classList.contains('dark');
+		const button = event.currentTarget as HTMLButtonElement;
+		const rect = button.getBoundingClientRect();
+		const x = rect.left + rect.width / 2;
+		const y = rect.top + rect.height / 2;
+		const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+
+		root.style.setProperty('--theme-x', `${x}px`);
+		root.style.setProperty('--theme-y', `${y}px`);
+		root.style.setProperty('--theme-r', `${radius}px`);
+		root.setAttribute('data-theme-switch', '');
 
 		const transition = document.startViewTransition(
 			() =>
@@ -69,9 +81,19 @@
 				})
 		);
 
+		themeTransition = transition;
 		transition.ready.catch(() => {});
 		transition.updateCallbackDone.catch(() => {});
-		transition.finished.catch(() => {});
+		transition.finished
+			.catch(() => {})
+			.finally(() => {
+				if (themeTransition !== transition) return;
+				themeTransition = undefined;
+				root.removeAttribute('data-theme-switch');
+				root.style.removeProperty('--theme-x');
+				root.style.removeProperty('--theme-y');
+				root.style.removeProperty('--theme-r');
+			});
 	};
 </script>
 
