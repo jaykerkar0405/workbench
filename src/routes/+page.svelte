@@ -374,16 +374,9 @@
 		<SectionHeading index="03" title="About" rule={false} />
 	</div>
 
-	<div class="mt-(--gap-heading) grid gap-12 lg:grid-cols-12 lg:gap-x-6">
-		<div class="lg:sticky lg:top-24 lg:col-span-4 lg:self-start">
-			<h3 class="label">Education</h3>
-			<p class="mt-4 text-lg">VES Institute of Technology</p>
-			<p class="mt-1 text-muted-foreground">Bachelor of Engineering - Information Technology</p>
-			<p class="mt-4 label tabular-nums">2023 – 2027 · CGPA {cgpa.toFixed(2)}</p>
-		</div>
-
-		<div class="flex flex-col lg:col-span-8">
-			<div class="flex max-w-[31rem] flex-col gap-6 text-lg leading-relaxed text-foreground" {@attach reveal()}>
+	<div class="mt-(--gap-heading) grid items-start gap-12 lg:grid-cols-12 lg:gap-x-6">
+		<div class="lg:col-span-7">
+			<div class="flex flex-col gap-6 text-lg leading-relaxed text-foreground" {@attach reveal()}>
 				<p>
 					I'm a hackathon-driven developer who has participated in multiple national and global hackathons, building
 					under real constraints and tight timelines.
@@ -395,19 +388,30 @@
 			</div>
 
 			<blockquote
-				class="my-8 max-w-[40ch] border-l-2 border-brand pl-6 text-[1.75rem] leading-tight font-medium text-balance"
+				class="mt-8 border-l-2 border-brand pl-6 text-[1.75rem] leading-tight font-medium text-balance"
 				{@attach reveal()}
 			>
-				I strongly value quality code over quantity - writing clean, maintainable systems that scale beyond demos.
+				I strongly value quality code over quantity – writing clean, maintainable systems that scale beyond demos.
 			</blockquote>
+		</div>
+
+		<div class="flex flex-col gap-12 lg:col-span-4 lg:col-start-9">
+			<div {@attach reveal()}>
+				<h3 class="label">Education</h3>
+				<div class="mt-4 border-t pt-4">
+					<p class="text-lg">VES Institute of Technology</p>
+					<p class="mt-1 text-muted-foreground">Bachelor of Engineering – Information Technology</p>
+					<p class="mt-4 label tabular-nums">2023 – 2027 · CGPA {cgpa.toFixed(2)}</p>
+				</div>
+			</div>
 
 			<div {@attach reveal()}>
-				<h3 class="mb-4 label">Learning now</h3>
-				<ol class="border-t">
+				<h3 class="label">Learning now</h3>
+				<ol class="mt-4 border-t">
 					{#each learning as item, i (item)}
-						<li class="flex items-baseline gap-5 py-4 not-last:border-b">
+						<li class="flex items-baseline gap-4 py-4 not-last:border-b">
 							<span aria-hidden="true" class="label tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-							<span class="text-lg">{item}</span>
+							<span class="text-base">{item}</span>
 						</li>
 					{/each}
 				</ol>
