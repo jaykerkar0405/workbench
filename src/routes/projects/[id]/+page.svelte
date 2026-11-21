@@ -183,6 +183,14 @@
 
 <Seo title="{project.title} | Projects | Jay Kerkar" description={project.shortDescription} />
 
+{#if ExtendedDescription}
+	<div
+		aria-hidden="true"
+		data-read-progress
+		class="pointer-events-none fixed inset-x-0 top-[calc(var(--header-h)-1px)] z-40 hidden h-px origin-left bg-brand"
+	></div>
+{/if}
+
 <div class="mx-auto max-w-7xl px-5 pt-(--gap-header-title) pb-[calc(var(--gap-section)-2rem)] md:px-10">
 	<TitleBlock
 		parent={{ label: 'Projects', href: '/projects' }}

@@ -855,6 +855,26 @@ html[data-theme-switch]::view-transition-new(root) {
 	}
 }
 
+@supports (animation-timeline: scroll()) {
+	@media (prefers-reduced-motion: no-preference) {
+		html.js [data-read-progress] {
+			display: block;
+			/* Firefox needs a nonzero duration. The root scroll timeline still sets the progress. */
+			animation: read-progress 1ms linear both;
+			animation-timeline: scroll(root);
+		}
+	}
+}
+
+@keyframes read-progress {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
 /* Without JavaScript the loading placeholders (screenshot frames) never resolve, so they stay as still reserved
    frames instead of pulsing forever. */
 html:not(.js) .animate-pulse {
